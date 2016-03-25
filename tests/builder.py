@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from copy import copy
+import pytz
 
+from copy import copy
 from datetime import datetime
 from uuid import uuid4
 
 from almanach.core.model import build_entity_from_dict, Instance, Volume, VolumeType
-import pytz
 
 
 class Builder(object):

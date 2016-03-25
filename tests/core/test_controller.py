@@ -13,9 +13,9 @@
 # limitations under the License.
 
 import unittest
-from datetime import datetime, timedelta
-
 import pytz
+
+from datetime import datetime, timedelta
 from dateutil import parser as date_parser
 from flexmock import flexmock, flexmock_teardown
 from nose.tools import assert_raises

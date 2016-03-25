@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from datetime import datetime, timedelta
 import dateutil.parser
 import pytz
+
+from datetime import datetime, timedelta
 
 DEFAULT_VOLUME_TYPE = "5dadd67f-e21e-4c13-b278-c07b73b21250"
 

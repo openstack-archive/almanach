@@ -13,13 +13,14 @@
 # limitations under the License.
 
 import unittest
+
 from kombu import Connection
+from kombu.tests import mocks
+from kombu.transport import pyamqp
 from flexmock import flexmock, flexmock_teardown
 
 from almanach import config
 from almanach.adapters.retry_adapter import RetryAdapter
-from kombu.tests import mocks
-from kombu.transport import pyamqp
 
 
 class BusAdapterTest(unittest.TestCase):

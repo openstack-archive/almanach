@@ -18,12 +18,13 @@ import mongomock
 from datetime import datetime
 from flexmock import flexmock, flexmock_teardown
 from hamcrest import assert_that, contains_inanyorder
+from pymongo import MongoClient
+
 from almanach.adapters.database_adapter import DatabaseAdapter
 from almanach.common.VolumeTypeNotFoundException import VolumeTypeNotFoundException
 from almanach.common.AlmanachException import AlmanachException
 from almanach import config
 from almanach.core.model import todict
-from pymongo import MongoClient
 from tests.builder import a, instance, volume, volume_type
 
 

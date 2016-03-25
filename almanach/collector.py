@@ -14,6 +14,7 @@
 
 import logging
 import sys
+
 from kombu import Connection
 
 from almanach import log_bootstrap

@@ -13,10 +13,9 @@
 # limitations under the License.
 
 import json
-from uuid import uuid4
-
 import flask
 
+from uuid import uuid4
 from unittest import TestCase
 from datetime import datetime
 from flexmock import flexmock, flexmock_teardown

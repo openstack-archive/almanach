@@ -15,3 +15,8 @@ Almanach is composed of two parts:
 
 - **Collector**: listen for OpenStack events and store the relevant information in the database.
 - **REST API**: Expose the information collected to external systems.
+
+License
+-------
+
+Almanach is distributed under Apache 2.0 LICENSE.

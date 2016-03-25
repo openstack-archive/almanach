@@ -14,6 +14,7 @@
 
 import json
 import logging
+
 from kombu import Exchange, Queue, Producer
 from almanach import config
 

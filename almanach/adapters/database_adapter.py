@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import logging
-
 import pymongo
 
 from pymongo.errors import ConfigurationError
