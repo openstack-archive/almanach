@@ -1,0 +1,9 @@
+setuptools==0.9.8
+coverage==3.6b1
+nose==1.2.1
+cov-core==1.7
+nose-cov==1.6
+nose-blockage==0.1.2
+flexmock==0.9.4
+mongomock==2.0.0
+PyHamcrest==1.8.1

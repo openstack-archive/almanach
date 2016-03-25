@@ -1,0 +1,10 @@
+.idea
+.tox
+*.iml
+*.pyc
+*.coverage
+*.egg*
+.vagrant
+.DS_Store
+AUTHORS
+ChangeLog

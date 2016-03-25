@@ -1,0 +1,14 @@
+language: python
+python:
+    - '2.7'
+install:
+    - pip install tox
+script: tox -r
+deploy:
+  provider: pypi
+  user: internaphosting
+  on:
+    tags: true
+    repo: internap/almanach
+  password:
+    secure: l8iby1dwEHsWl4Utas393CncC7dpVJeM9XUK8ruexdTXIkrOKfYmIQCYmbAeucD3AVoJj1YKHCMeyS9X48aV6u6X0J1lMze7DiDvGu0/mIGIRlW8vkX9oLzWY5U6KA5u4P7ENLBp4I7o3evob+4f1SW0XUjThOTpavRTPh4NcQ+tgTqOY6P+RKfdxXXeSlWgIQeYCyfvT50gKkf3M+VOryKl8ZeW4mBkstI3+MZQo2PT4xOhBjUHw0i/Exff3+dnQCZTYRGqN0UQAn1aqOxgtZ+PwxwDCRWMoSdmbJjUNrvCmnH/fKkpuQsax946PPOkfGvc8khE6fEZ/fER60AVHhbooNsSr8aOIXBeLxVAvdHOO53/QB5JRcHauTSeegBpThWtZ2tdJxeHyv8/07uEE8VdIQWMbqdA7wDEWUeYrjZ0jKC3pYjtIV4ztgC2U/DKL14OOK3NUzyQkCAeYgB5nefjBR18uasjyss/R7s6YUwP8EVGrZqjWRq42nlPSsD54TzI+9svcFpLS8uwWAX5+TVZaUZWA1YDfOFbp9B3NbPhr0af8cpwdqGVx+AI/EtWye2bCVht1RKiHYOEHBz8iZP5aE0vZt7XNz4DEVhvArWgZBhUOmRDz5HbBpx+3th+cmWC3VbvaSFqE1Cm0yZXfWlTFteYbDi3LBPDTdk3rF8=
