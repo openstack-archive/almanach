@@ -47,13 +47,20 @@ class BusAdapterTest(unittest.TestCase):
         version = notification.get("payload").get("image_meta").get("version")
         metadata = notification.get("payload").get("metadata")
 
-        (self.controller
-         .should_receive("create_instance")
-         .with_args(
-                instance_id, tenant_id, timestamp.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), instance_type, os_type,
-                distro, version, hostname, metadata
-            )
-         .once())
+        self.controller \
+            .should_receive("create_instance") \
+            .with_args(
+                instance_id,
+                tenant_id,
+                timestamp.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+                instance_type,
+                os_type,
+                distro,
+                version,
+                hostname,
+                metadata
+            ) \
+            .once()
 
         message = flexmock()
         message.should_receive("ack")
@@ -75,13 +82,13 @@ class BusAdapterTest(unittest.TestCase):
         version = notification.get("payload").get("image_meta").get("version")
         metadata = notification.get("payload").get("metadata")
 
-        (self.controller
-         .should_receive("create_instance")
-         .with_args(
+        self.controller \
+            .should_receive("create_instance") \
+            .with_args(
                 instance_id, tenant_id, timestamp.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), instance_type, os_type,
                 distro, version, hostname, metadata
-            )
-         .once())
+            ) \
+            .once()
 
         message = flexmock()
         (flexmock(message)
@@ -92,13 +99,13 @@ class BusAdapterTest(unittest.TestCase):
     def test_on_message_with_delete_instance(self):
         notification = messages.get_instance_delete_end_sample()
 
-        (self.controller
-         .should_receive("delete_instance")
-         .with_args(
+        self.controller \
+            .should_receive("delete_instance") \
+            .with_args(
                 notification['payload']['instance_id'],
                 notification['payload']['terminated_at']
-            )
-         .once())
+            ) \
+            .once()
 
         message = flexmock()
         (flexmock(message)
@@ -109,10 +116,16 @@ class BusAdapterTest(unittest.TestCase):
     def test_on_message_with_rebuild_instance(self):
         notification = messages.get_instance_rebuild_end_sample()
 
-        (flexmock(BusAdapter)
-         .should_receive("_instance_rebuilt")
-         .with_args(notification)
-         .once())
+        self.controller \
+            .should_receive("rebuild_instance") \
+            .with_args(
+                notification['payload']['instance_id'],
+                notification['payload']['image_meta']['distro'],
+                notification['payload']['image_meta']['version'],
+                notification['timestamp'],
+            ) \
+            .once()
+
         message = flexmock()
         (flexmock(message)
          .should_receive("ack"))
@@ -122,10 +135,15 @@ class BusAdapterTest(unittest.TestCase):
     def test_on_message_with_resize_instance(self):
         notification = messages.get_instance_resized_end_sample()
 
-        (flexmock(BusAdapter)
-         .should_receive("_instance_resized")
-         .with_args(notification)
-         .once())
+        self.controller \
+            .should_receive("resize_instance") \
+            .with_args(
+                notification['payload']['instance_id'],
+                notification['payload']['instance_type'],
+                notification['timestamp'],
+            )\
+            .once()
+
         message = flexmock()
         (flexmock(message)
          .should_receive("ack"))
@@ -135,10 +153,15 @@ class BusAdapterTest(unittest.TestCase):
     def test_on_message_with_resize_volume(self):
         notification = messages.get_volume_update_end_sample()
 
-        (flexmock(BusAdapter)
-         .should_receive("_volume_resized")
-         .with_args(notification)
-         .once())
+        self.controller \
+            .should_receive("resize_volume") \
+            .with_args(
+                notification['payload']['volume_id'],
+                notification['payload']['size'],
+                notification['timestamp'],
+            ) \
+            .once()
+
         message = flexmock()
         (flexmock(message)
          .should_receive("ack"))
@@ -147,9 +170,9 @@ class BusAdapterTest(unittest.TestCase):
 
     def test_rebuild(self):
         notification = messages.get_instance_rebuild_end_sample()
-        (self.controller
-         .should_receive("rebuild_instance")
-         .once())
+        self.controller \
+            .should_receive("rebuild_instance") \
+            .once()
         self.bus_adapter._instance_rebuilt(notification)
 
     def test_on_message_with_volume(self):
@@ -163,12 +186,13 @@ class BusAdapterTest(unittest.TestCase):
         notification = messages.get_volume_create_end_sample(volume_id=volume_id, tenant_id=tenant_id,
                                                              volume_type=volume_type, volume_size=volume_size,
                                                              creation_timestamp=timestamp_datetime, name=some_volume)
-        (self.controller
-         .should_receive("create_volume")
-         .with_args(volume_id, tenant_id, timestamp_datetime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), volume_type,
-                    volume_size, some_volume
-                    )
-         .once())
+        self.controller \
+            .should_receive("create_volume") \
+            .with_args(
+                volume_id, tenant_id, timestamp_datetime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), volume_type,
+                volume_size, some_volume
+            ) \
+            .once()
 
         message = flexmock()
         (flexmock(message)
@@ -183,10 +207,10 @@ class BusAdapterTest(unittest.TestCase):
         notification = messages.get_volume_type_create_sample(volume_type_id=volume_type_id,
                                                               volume_type_name=volume_type_name)
 
-        (self.controller
-         .should_receive("create_volume_type")
-         .with_args(volume_type_id, volume_type_name)
-         .once())
+        self.controller \
+            .should_receive("create_volume_type") \
+            .with_args(volume_type_id, volume_type_name) \
+            .once()
 
         message = flexmock()
         (flexmock(message)
@@ -197,9 +221,14 @@ class BusAdapterTest(unittest.TestCase):
     def test_on_message_with_delete_volume(self):
         notification = messages.get_volume_delete_end_sample()
 
-        (flexmock(BusAdapter)
-         .should_receive("_volume_deleted")
-         .once())
+        self.controller \
+            .should_receive("delete_volume") \
+            .with_args(
+                notification['payload']['volume_id'],
+                notification['timestamp'],
+            ) \
+            .once()
+
         message = flexmock()
         (flexmock(message)
          .should_receive("ack"))
@@ -242,10 +271,10 @@ class BusAdapterTest(unittest.TestCase):
             creation_timestamp=datetime(2014, 2, 14, 17, 18, 35, tzinfo=pytz.utc), attached_to="my-instance-id"
         )
 
-        (self.controller
-         .should_receive('attach_volume')
-         .with_args("my-volume-id", "2014-02-14T17:18:36.000000Z", ["my-instance-id"])
-         .once())
+        self.controller \
+            .should_receive('attach_volume') \
+            .with_args("my-volume-id", "2014-02-14T17:18:36.000000Z", ["my-instance-id"]) \
+            .once()
 
         self.bus_adapter._volume_attached(notification)
 
@@ -256,10 +285,10 @@ class BusAdapterTest(unittest.TestCase):
             attached_to=["I1"]
         )
 
-        (self.controller
-         .should_receive('attach_volume')
-         .with_args("my-volume-id", "2014-02-14T17:18:36.000000Z", ["I1"])
-         .once())
+        self.controller \
+            .should_receive('attach_volume') \
+            .with_args("my-volume-id", "2014-02-14T17:18:36.000000Z", ["I1"]) \
+            .once()
 
         self.bus_adapter._volume_attached(notification)
 
@@ -270,10 +299,10 @@ class BusAdapterTest(unittest.TestCase):
             attached_to=[]
         )
 
-        (self.controller
-         .should_receive('attach_volume')
-         .with_args("my-volume-id", "2014-02-14T17:18:36.000000Z", [])
-         .once())
+        self.controller \
+            .should_receive('attach_volume') \
+            .with_args("my-volume-id", "2014-02-14T17:18:36.000000Z", []) \
+            .once()
 
         self.bus_adapter._volume_attached(notification)
 
@@ -289,9 +318,9 @@ class BusAdapterTest(unittest.TestCase):
     def test_renamed_volume_with_volume_update_end(self):
         notification = messages.get_volume_update_end_sample()
 
-        (self.controller
-         .should_receive('rename_volume')
-         .once())
+        self.controller \
+            .should_receive('rename_volume') \
+            .once()
 
         self.bus_adapter._volume_renamed(notification)
 
