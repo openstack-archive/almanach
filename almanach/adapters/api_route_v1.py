@@ -134,6 +134,7 @@ def rebuild_instance(instance_id):
         instance_id=instance_id,
         distro=instance['distro'],
         version=instance['version'],
+        os_type=instance['os_type'],
         rebuild_date=instance['rebuild_date'],
     )
 

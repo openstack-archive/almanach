@@ -775,6 +775,7 @@ class ApiTest(TestCase):
         data = {
             'distro': 'A_DISTRIBUTION',
             'version': 'A_VERSION',
+            'os_type': 'AN_OS_TYPE',
             'rebuild_date': 'UPDATE_DATE',
         }
         self.controller.should_receive('rebuild_instance') \
@@ -782,6 +783,7 @@ class ApiTest(TestCase):
                 instance_id=instance_id,
                 distro=data.get('distro'),
                 version=data.get('version'),
+                os_type=data.get('os_type'),
                 rebuild_date=data.get('rebuild_date')) \
             .once()
 
@@ -817,6 +819,7 @@ class ApiTest(TestCase):
         data = {
             'distro': 'A_DISTRIBUTION',
             'version': 'A_VERSION',
+            'os_type': 'AN_OS_TYPE',
             'rebuild_date': 'A_BAD_UPDATE_DATE',
         }
 

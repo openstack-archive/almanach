@@ -556,8 +556,20 @@ class ControllerTest(unittest.TestCase):
          .should_receive("insert_entity")
          .once())
 
-        self.controller.rebuild_instance("an_instance_id", "some_distro", "some_version", "2015-10-21T16:25:00.000000Z")
-        self.controller.rebuild_instance("an_instance_id", i.os.distro, i.os.version, "2015-10-21T16:25:00.000000Z")
+        self.controller.rebuild_instance(
+            "an_instance_id",
+            "some_distro",
+            "some_version",
+            "some_type",
+            "2015-10-21T16:25:00.000000Z"
+        )
+        self.controller.rebuild_instance(
+            "an_instance_id",
+            i.os.distro,
+            i.os.version,
+            i.os.os_type,
+            "2015-10-21T16:25:00.000000Z"
+        )
 
     def test_rename_volume(self):
         fake_volume = a(volume().with_display_name('old_volume_name'))
