@@ -122,7 +122,6 @@ class BusAdapterTest(unittest.TestCase):
                 notification['payload']['instance_id'],
                 notification['payload']['image_meta']['distro'],
                 notification['payload']['image_meta']['version'],
-                notification['payload']['image_meta']['os_type'],
                 notification['timestamp'],
             ) \
             .once()
