@@ -178,7 +178,8 @@ class BusAdapter(ConsumerMixin):
         instance_id = payload.get("instance_id")
         distro = payload.get("image_meta").get("distro")
         version = payload.get("image_meta").get("version")
-        self.controller.rebuild_instance(instance_id, distro, version, date)
+        os_type = payload.get("image_meta").get("os_type")
+        self.controller.rebuild_instance(instance_id, distro, version, os_type, date)
 
     def _volume_type_create(self, notification):
         volume_types = notification.get("payload").get("volume_types")

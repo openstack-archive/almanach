@@ -86,16 +86,18 @@ class Controller(object):
             logging.error("Trying to resize an instance with id '%s' not in the database yet." % instance_id)
             raise e
 
-    def rebuild_instance(self, instance_id, distro, version, rebuild_date):
+    def rebuild_instance(self, instance_id, distro, version, os_type, rebuild_date):
         rebuild_date = self._validate_and_parse_date(rebuild_date)
         instance = self.database_adapter.get_active_entity(instance_id)
-        logging.info("instance %s rebuilded in project %s to os %s %s on %s" % (instance_id, instance.project_id,
-                                                                                distro, version, rebuild_date))
+        logging.info("instance %s rebuilded in project %s to os %s %s %s on %s" % (instance_id, instance.project_id,
+                                                                                   os_type, distro, version,
+                                                                                   rebuild_date))
         if instance.os.distro != distro or instance.os.version != version:
             self.database_adapter.close_active_entity(instance_id, rebuild_date)
 
             instance.os.distro = distro
             instance.os.version = version
+            instance.os.os_type = os_type
             instance.start = rebuild_date
             instance.end = None
             instance.last_event = rebuild_date
