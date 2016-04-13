@@ -72,20 +72,29 @@ class ApiTest(TestCase):
         assert_that(result[0], has_key('entity_id'))
         assert_that(result[0]['entity_id'], equal_to('123'))
 
-    def test_update_create_date_instance(self):
+    def test_update_instance_entity_with_a_new_start_date(self):
+        data = {
+            "start_date": "2014-01-01 00:00:00.0000",
+        }
+
         self.having_config('api_auth_token', 'some token value')
 
-        self.controller.should_receive('update_instance_create_date')\
-            .with_args("INSTANCE_ID", "2014-01-01 00:00:00.0000")\
-            .and_return(True)
+        self.controller.should_receive('update_active_instance_entity')\
+            .with_args(
+                instance_id="INSTANCE_ID",
+                start_date=data["start_date"],
+            ).and_return(a(instance().with_id('INSTANCE_ID')))
 
         code, result = self.api_update(
-            '/instance/INSTANCE_ID/create_date/2014-01-01 00:00:00.0000',
-            headers={'X-Auth-Token': 'some token value'}
+            '/entity/instance/INSTANCE_ID',
+            headers={'X-Auth-Token': 'some token value'},
+            data=data,
         )
 
         assert_that(code, equal_to(200))
-        assert_that(result, equal_to(True))
+        assert_that(result, has_key('entity_id'))
+        assert_that(result, has_key('start'))
+        assert_that(result, has_key('end'))
 
     def test_instances_with_wrong_authentication(self):
         self.having_config('api_auth_token', 'some token value')

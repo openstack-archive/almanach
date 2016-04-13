@@ -15,7 +15,6 @@
 import logging
 import pytz
 
-from datetime import datetime
 from datetime import timedelta
 from dateutil import parser as date_parser
 from pkg_resources import get_distribution
@@ -103,15 +102,16 @@ class Controller(object):
             instance.last_event = rebuild_date
             self.database_adapter.insert_entity(instance)
 
-    def update_instance_create_date(self, instance_id, create_date):
-        logging.info("instance %s create date updated for %s" % (instance_id, create_date))
+    def update_active_instance_entity(self, instance_id, start_date):
         try:
             instance = self.database_adapter.get_active_entity(instance_id)
-            instance.start = datetime.strptime(create_date[0:19], "%Y-%m-%d %H:%M:%S")
+            instance.start = self._validate_and_parse_date(start_date)
+
+            logging.info("Updating entity for instance '{0}' with a new start_date={1}".format(instance_id, start_date))
             self.database_adapter.update_active_entity(instance)
-            return True
+            return instance
         except KeyError as e:
-            logging.error("Trying to update an instance with id '%s' not in the database yet." % instance_id)
+            logging.error("Instance '{0}' is not in the database yet.".format(instance_id))
             raise e
 
     def create_volume(self, volume_id, project_id, start, volume_type, size, volume_name, attached_to=None):
