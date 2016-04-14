@@ -64,8 +64,8 @@ class ControllerTest(unittest.TestCase):
          .once())
 
         self.controller.create_instance(fake_instance.entity_id, fake_instance.project_id, fake_instance.start,
-                                         fake_instance.flavor, fake_instance.os.os_type, fake_instance.os.distro,
-                                         fake_instance.os.version, fake_instance.name, fake_instance.metadata)
+                                        fake_instance.flavor, fake_instance.os.os_type, fake_instance.os.distro,
+                                        fake_instance.os.version, fake_instance.name, fake_instance.metadata)
 
     def test_resize_instance(self):
         fake_instance = a(instance())
@@ -123,9 +123,9 @@ class ControllerTest(unittest.TestCase):
          .once())
 
         self.controller.create_instance(fake_instance.entity_id, fake_instance.project_id,
-                                         '2015-10-21T16:25:00.000000Z',
-                                         fake_instance.flavor, fake_instance.os.os_type, fake_instance.os.distro,
-                                         fake_instance.os.version, fake_instance.name, fake_instance.metadata)
+                                        '2015-10-21T16:25:00.000000Z',
+                                        fake_instance.flavor, fake_instance.os.os_type, fake_instance.os.distro,
+                                        fake_instance.os.version, fake_instance.name, fake_instance.metadata)
 
     def test_instance_created_but_find_garbage(self):
         fake_instance = a(instance().with_all_dates_in_string())
@@ -147,8 +147,8 @@ class ControllerTest(unittest.TestCase):
          .once())
 
         self.controller.create_instance(fake_instance.entity_id, fake_instance.project_id, fake_instance.start,
-                                         fake_instance.flavor, fake_instance.os.os_type, fake_instance.os.distro,
-                                         fake_instance.os.version, fake_instance.name, fake_instance.metadata)
+                                        fake_instance.flavor, fake_instance.os.os_type, fake_instance.os.distro,
+                                        fake_instance.os.version, fake_instance.name, fake_instance.metadata)
 
     def test_instance_deleted(self):
         (flexmock(self.database_adapter)
@@ -250,7 +250,8 @@ class ControllerTest(unittest.TestCase):
          .with_args("project_id", "start", "end")
          .and_return(["volume2", "volume3", "instance1"]))
 
-        self.assertEqual(self.controller.list_entities("project_id", "start", "end"), ["volume2", "volume3", "instance1"])
+        self.assertEqual(self.controller.list_entities(
+            "project_id", "start", "end"), ["volume2", "volume3", "instance1"])
 
     def test_create_volume(self):
         some_volume_type = a(volume_type().with_volume_type_name("some_volume_type_name"))
@@ -280,22 +281,22 @@ class ControllerTest(unittest.TestCase):
          .once())
 
         self.controller.create_volume(some_volume.entity_id, some_volume.project_id, some_volume.start,
-                                       some_volume_type.volume_type_id, some_volume.size, some_volume.name,
-                                       some_volume.attached_to)
+                                      some_volume_type.volume_type_id, some_volume.size, some_volume.name,
+                                      some_volume.attached_to)
 
     def test_create_volume_raises_bad_date_format(self):
         some_volume = a(volume())
 
         assert_raises(
-                DateFormatException,
-                self.controller.create_volume,
-                some_volume.entity_id,
-                some_volume.project_id,
-                'bad_date_format',
-                some_volume.volume_type,
-                some_volume.size,
-                some_volume.name,
-                some_volume.attached_to
+            DateFormatException,
+            self.controller.create_volume,
+            some_volume.entity_id,
+            some_volume.project_id,
+            'bad_date_format',
+            some_volume.volume_type,
+            some_volume.size,
+            some_volume.name,
+            some_volume.attached_to
         )
 
     def test_create_volume_insert_none_volume_type_as_type(self):
@@ -324,8 +325,8 @@ class ControllerTest(unittest.TestCase):
          .once())
 
         self.controller.create_volume(some_volume.entity_id, some_volume.project_id, some_volume.start,
-                                       some_volume_type.volume_type_id, some_volume.size, some_volume.name,
-                                       some_volume.attached_to)
+                                      some_volume_type.volume_type_id, some_volume.size, some_volume.name,
+                                      some_volume.attached_to)
 
     def test_create_volume_with_invalid_volume_type(self):
         some_volume_type = a(volume_type())
@@ -350,8 +351,8 @@ class ControllerTest(unittest.TestCase):
 
         with self.assertRaises(KeyError):
             self.controller.create_volume(some_volume.entity_id, some_volume.project_id, some_volume.start,
-                                           some_volume_type.volume_type_id, some_volume.size, some_volume.name,
-                                           some_volume.attached_to)
+                                          some_volume_type.volume_type_id, some_volume.size, some_volume.name,
+                                          some_volume.attached_to)
 
     def test_create_volume_but_its_an_old_event(self):
         some_volume = a(volume().with_last_event(pytz.utc.localize(datetime(2015, 10, 21, 16, 29, 0))))
@@ -362,7 +363,7 @@ class ControllerTest(unittest.TestCase):
          .once())
 
         self.controller.create_volume(some_volume.entity_id, some_volume.project_id, '2015-10-21T16:25:00.000000Z',
-                                       some_volume.volume_type, some_volume.size, some_volume.name, some_volume.attached_to)
+                                      some_volume.volume_type, some_volume.size, some_volume.name, some_volume.attached_to)
 
     def test_volume_updated(self):
         fake_volume = a(volume())
@@ -406,9 +407,9 @@ class ControllerTest(unittest.TestCase):
          .with_args(fake_volume))
 
         self.controller.attach_volume(
-                fake_volume.entity_id,
-                date.strftime("%Y-%m-%dT%H:%M:%S.%f"),
-                ["new_attached_to"]
+            fake_volume.entity_id,
+            date.strftime("%Y-%m-%dT%H:%M:%S.%f"),
+            ["new_attached_to"]
         )
         self.assertEqual(fake_volume.attached_to, ["new_attached_to"])
 
@@ -430,9 +431,9 @@ class ControllerTest(unittest.TestCase):
          .with_args(fake_volume))
 
         self.controller.attach_volume(
-                fake_volume.entity_id,
-                date.strftime("%Y-%m-%dT%H:%M:%S.%f"),
-                ["existing_attached_to", "new_attached_to"]
+            fake_volume.entity_id,
+            date.strftime("%Y-%m-%dT%H:%M:%S.%f"),
+            ["existing_attached_to", "new_attached_to"]
         )
         self.assertEqual(fake_volume.attached_to, ["existing_attached_to", "new_attached_to"])
 
@@ -468,9 +469,9 @@ class ControllerTest(unittest.TestCase):
          .once())
 
         self.controller.attach_volume(
-                fake_volume.entity_id,
-                date.strftime("%Y-%m-%dT%H:%M:%S.%f"),
-                ["new_attached_to"]
+            fake_volume.entity_id,
+            date.strftime("%Y-%m-%dT%H:%M:%S.%f"),
+            ["new_attached_to"]
         )
 
     def test_volume_detach_with_two_attachments(self):
@@ -631,4 +632,3 @@ class ControllerTest(unittest.TestCase):
          .once())
 
         self.assertEqual(len(self.controller.list_volume_types()), 2)
-

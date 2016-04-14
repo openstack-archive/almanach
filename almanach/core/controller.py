@@ -25,6 +25,7 @@ from almanach import config
 
 
 class Controller(object):
+
     def __init__(self, database_adapter):
         self.database_adapter = database_adapter
         self.metadata_whitelist = config.device_metadata_whitelist()

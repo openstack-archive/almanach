@@ -55,6 +55,7 @@ def ensureindex(db):
 
 
 class DatabaseAdapter(object):
+
     def __init__(self):
         self.db = None
 

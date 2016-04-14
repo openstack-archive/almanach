@@ -98,11 +98,14 @@ def rabbitmq_retry_return_exchange():
 def rabbitmq_retry_queue():
     return get("RABBITMQ", "retry.queue", default=None)
 
+
 def rabbitmq_dead_queue():
     return get("RABBITMQ", "dead.queue", default=None)
 
+
 def rabbitmq_dead_exchange():
     return get("RABBITMQ", "dead.exchange", default=None)
+
 
 def rabbitmq_time_to_live():
     return int(get("RABBITMQ", "retry.time.to.live", default=None))

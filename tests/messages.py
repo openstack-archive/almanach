@@ -272,7 +272,7 @@ def _get_instance_payload(event_type, instance_id=None, tenant_id=None, hostname
 
 
 def _get_volume_icehouse_payload(event_type, volume_id=None, tenant_id=None, display_name=None, volume_type=None,
-                        volume_size=None, timestamp=None, created_at=None, launched_at=None, status=None, attached_to=None):
+                                 volume_size=None, timestamp=None, created_at=None, launched_at=None, status=None, attached_to=None):
     volume_id = volume_id or "64a0ca7f-5f5a-4dc5-a1e1-e04e89eb95ed"
     tenant_id = tenant_id or "46eeb8e44298460899cf4b3554bfe11f"
     display_name = display_name or "mytenant-0001-myvolume"
@@ -312,7 +312,7 @@ def _get_volume_icehouse_payload(event_type, volume_id=None, tenant_id=None, dis
 
 
 def _get_volume_kilo_payload(event_type, volume_id=None, tenant_id=None, display_name=None, volume_type=None,
-                                timestamp=None, attached_to=None, volume_size=1):
+                             timestamp=None, attached_to=None, volume_size=1):
     volume_id = volume_id or "64a0ca7f-5f5a-4dc5-a1e1-e04e89eb95ed"
     tenant_id = tenant_id or "46eeb8e44298460899cf4b3554bfe11f"
     display_name = display_name or "mytenant-0001-myvolume"

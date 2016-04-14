@@ -20,6 +20,7 @@ from almanach import config
 
 
 class RetryAdapter:
+
     def __init__(self, connection):
         self.connection = connection
         retry_exchange = self._configure_retry_exchanges(self.connection)
@@ -87,7 +88,8 @@ class RetryAdapter:
             return dead_exchange
 
         def error_callback(exception, interval):
-            logging.error('Failed to declare dead queue and exchange, retrying in %d seconds. %r' % (interval, exception))
+            logging.error('Failed to declare dead queue and exchange, retrying in %d seconds. %r' %
+                          (interval, exception))
 
         declare_dead_queue = connection.ensure(connection, declare_dead_queue, errback=error_callback,
                                                interval_start=0, interval_step=5, interval_max=30)

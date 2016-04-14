@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 class DateFormatException(Exception):
+
     def __init__(self, message=None):
         if not message:
             message = "The provided date has an invalid format. Format should be of yyyy-mm-ddThh:mm:ss.msZ, " \
