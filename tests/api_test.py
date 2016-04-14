@@ -22,8 +22,8 @@ from flexmock import flexmock, flexmock_teardown
 from hamcrest import assert_that, has_key, equal_to, has_length, has_entry, has_entries
 
 from almanach import config
-from almanach.common.DateFormatException import DateFormatException
-from almanach.common.AlmanachException import AlmanachException
+from almanach.common.date_format_exception import DateFormatException
+from almanach.common.almanach_exception import AlmanachException
 from almanach.adapters import api_route_v1 as api_route
 
 from tests.builder import a, instance, volume_type

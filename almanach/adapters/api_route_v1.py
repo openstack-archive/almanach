@@ -22,7 +22,7 @@ from flask import Blueprint, Response, request
 from werkzeug.wrappers import BaseResponse
 
 from almanach import config
-from almanach.common.DateFormatException import DateFormatException
+from almanach.common.date_format_exception import DateFormatException
 
 api = Blueprint("api", __name__)
 controller = None

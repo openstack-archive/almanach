@@ -16,7 +16,7 @@ import ConfigParser
 import pkg_resources
 import os.path as Path
 
-from almanach.common.AlmanachException import AlmanachException
+from almanach.common.almanach_exception import AlmanachException
 
 configuration = ConfigParser.RawConfigParser()
 

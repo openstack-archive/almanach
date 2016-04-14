@@ -21,8 +21,8 @@ from hamcrest import assert_that, contains_inanyorder
 from pymongo import MongoClient
 
 from almanach.adapters.database_adapter import DatabaseAdapter
-from almanach.common.VolumeTypeNotFoundException import VolumeTypeNotFoundException
-from almanach.common.AlmanachException import AlmanachException
+from almanach.common.volume_type_not_found_exception import VolumeTypeNotFoundException
+from almanach.common.almanach_exception import AlmanachException
 from almanach import config
 from almanach.core.model import todict
 from tests.builder import a, instance, volume, volume_type

@@ -21,7 +21,7 @@ from flexmock import flexmock, flexmock_teardown
 from nose.tools import assert_raises
 
 from almanach import config
-from almanach.common.DateFormatException import DateFormatException
+from almanach.common.date_format_exception import DateFormatException
 from almanach.core.controller import Controller
 from almanach.core.model import Instance, Volume
 from tests.builder import a, instance, volume, volume_type

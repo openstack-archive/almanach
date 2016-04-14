@@ -17,8 +17,8 @@ import pymongo
 
 from pymongo.errors import ConfigurationError
 from almanach import config
-from almanach.common.AlmanachException import AlmanachException
-from almanach.common.VolumeTypeNotFoundException import VolumeTypeNotFoundException
+from almanach.common.almanach_exception import AlmanachException
+from almanach.common.volume_type_not_found_exception import VolumeTypeNotFoundException
 from almanach.core.model import build_entity_from_dict, VolumeType
 from pymongomodem.utils import decode_output, encode_input
 
