@@ -12,5 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-class AlmanachException(Exception):
-    pass
+
+class DateFormatException(Exception):
+
+    def __init__(self, message=None):
+        if not message:
+            message = "The provided date has an invalid format. Format should be of yyyy-mm-ddThh:mm:ss.msZ, " \
+                      "ex: 2015-01-31T18:24:34.1523Z"
+
+        super(DateFormatException, self).__init__(message)

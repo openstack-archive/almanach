@@ -24,6 +24,7 @@ from almanach.adapters.retry_adapter import RetryAdapter
 
 
 class BusAdapterTest(unittest.TestCase):
+
     def setUp(self):
         self.setup_connection_mock()
         self.setup_config_mock()

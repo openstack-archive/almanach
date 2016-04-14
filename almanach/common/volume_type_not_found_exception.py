@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-class DateFormatException(Exception):
-    def __init__(self, message=None):
-        if not message:
-            message = "The provided date has an invalid format. Format should be of yyyy-mm-ddThh:mm:ss.msZ, " \
-                      "ex: 2015-01-31T18:24:34.1523Z"
 
-        super(DateFormatException, self).__init__(message)
+class VolumeTypeNotFoundException(Exception):
+
+    def __init__(self, volume_type_id, message=None):
+        if not message:
+            message = "Unable to find volume_type id '{volume_type_id}'".format(volume_type_id=volume_type_id)
+
+        super(VolumeTypeNotFoundException, self).__init__(message)

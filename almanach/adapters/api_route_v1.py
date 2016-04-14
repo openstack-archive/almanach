@@ -22,7 +22,7 @@ from flask import Blueprint, Response, request
 from werkzeug.wrappers import BaseResponse
 
 from almanach import config
-from almanach.common.DateFormatException import DateFormatException
+from almanach.common.date_format_exception import DateFormatException
 
 api = Blueprint("api", __name__)
 controller = None
@@ -81,15 +81,15 @@ def create_instance(project_id):
     instance = json.loads(request.data)
     logging.info("Creating instance for tenant %s with data %s", project_id, instance)
     controller.create_instance(
-            tenant_id=project_id,
-            instance_id=instance['id'],
-            create_date=instance['created_at'],
-            flavor=instance['flavor'],
-            os_type=instance['os_type'],
-            distro=instance['os_distro'],
-            version=instance['os_version'],
-            name=instance['name'],
-            metadata={}
+        tenant_id=project_id,
+        instance_id=instance['id'],
+        create_date=instance['created_at'],
+        flavor=instance['flavor'],
+        os_type=instance['os_type'],
+        distro=instance['os_distro'],
+        version=instance['os_version'],
+        name=instance['name'],
+        metadata={}
     )
 
     return Response(status=201)
@@ -102,8 +102,8 @@ def delete_instance(instance_id):
     data = json.loads(request.data)
     logging.info("Deleting instance with id %s with data %s", instance_id, data)
     controller.delete_instance(
-            instance_id=instance_id,
-            delete_date=data['date']
+        instance_id=instance_id,
+        delete_date=data['date']
     )
 
     return Response(status=202)
@@ -116,9 +116,9 @@ def resize_instance(instance_id):
     instance = json.loads(request.data)
     logging.info("Resizing instance with id %s with data %s", instance_id, instance)
     controller.resize_instance(
-            instance_id=instance_id,
-            resize_date=instance['date'],
-            flavor=instance['flavor']
+        instance_id=instance_id,
+        resize_date=instance['date'],
+        flavor=instance['flavor']
     )
 
     return Response(status=200)
@@ -157,13 +157,13 @@ def create_volume(project_id):
     volume = json.loads(request.data)
     logging.info("Creating volume for tenant %s with data %s", project_id, volume)
     controller.create_volume(
-            project_id=project_id,
-            volume_id=volume['volume_id'],
-            start=volume['start'],
-            volume_type=volume['volume_type'],
-            size=volume['size'],
-            volume_name=volume['volume_name'],
-            attached_to=volume['attached_to']
+        project_id=project_id,
+        volume_id=volume['volume_id'],
+        start=volume['start'],
+        volume_type=volume['volume_type'],
+        size=volume['size'],
+        volume_name=volume['volume_name'],
+        attached_to=volume['attached_to']
     )
 
     return Response(status=201)
@@ -176,8 +176,8 @@ def delete_volume(volume_id):
     data = json.loads(request.data)
     logging.info("Deleting volume with id %s with data %s", volume_id, data)
     controller.delete_volume(
-            volume_id=volume_id,
-            delete_date=data['date']
+        volume_id=volume_id,
+        delete_date=data['date']
     )
 
     return Response(status=202)
@@ -190,9 +190,9 @@ def resize_volume(volume_id):
     volume = json.loads(request.data)
     logging.info("Resizing volume with id %s with data %s", volume_id, volume)
     controller.resize_volume(
-            volume_id=volume_id,
-            size=volume['size'],
-            update_date=volume['date']
+        volume_id=volume_id,
+        size=volume['size'],
+        update_date=volume['date']
     )
 
     return Response(status=200)
@@ -205,9 +205,9 @@ def attach_volume(volume_id):
     volume = json.loads(request.data)
     logging.info("Attaching volume with id %s with data %s", volume_id, volume)
     controller.attach_volume(
-            volume_id=volume_id,
-            date=volume['date'],
-            attachments=volume['attachments']
+        volume_id=volume_id,
+        date=volume['date'],
+        attachments=volume['attachments']
     )
 
     return Response(status=200)
@@ -220,9 +220,9 @@ def detach_volume(volume_id):
     volume = json.loads(request.data)
     logging.info("Detaching volume with id %s with data %s", volume_id, volume)
     controller.detach_volume(
-            volume_id=volume_id,
-            date=volume['date'],
-            attachments=volume['attachments']
+        volume_id=volume_id,
+        date=volume['date'],
+        attachments=volume['attachments']
     )
 
     return Response(status=200)
@@ -278,8 +278,8 @@ def create_volume_type():
     volume_type = json.loads(request.data)
     logging.info("Creating volume type with data '%s'", volume_type)
     controller.create_volume_type(
-            volume_type_id=volume_type['type_id'],
-            volume_type_name=volume_type['type_name']
+        volume_type_id=volume_type['type_id'],
+        volume_type_name=volume_type['type_name']
     )
     return Response(status=201)
 

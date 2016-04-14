@@ -19,12 +19,13 @@ from datetime import timedelta
 from dateutil import parser as date_parser
 from pkg_resources import get_distribution
 
-from almanach.common.DateFormatException import DateFormatException
+from almanach.common.date_format_exception import DateFormatException
 from almanach.core.model import Instance, Volume, VolumeType
 from almanach import config
 
 
 class Controller(object):
+
     def __init__(self, database_adapter):
         self.database_adapter = database_adapter
         self.metadata_whitelist = config.device_metadata_whitelist()

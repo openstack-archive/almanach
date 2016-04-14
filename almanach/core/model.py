@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 class Entity(object):
+
     def __init__(self, entity_id, project_id, start, end, last_event, name, entity_type):
         self.entity_id = entity_id
         self.project_id = project_id
@@ -52,6 +54,7 @@ class Instance(Entity):
 
 
 class OS(object):
+
     def __init__(self, os_type, distro, version):
         self.os_type = os_type
         self.distro = distro
@@ -80,6 +83,7 @@ class Volume(Entity):
 
 
 class VolumeType(object):
+
     def __init__(self, volume_type_id, volume_type_name):
         self.volume_type_id = volume_type_id
         self.volume_type_name = volume_type_name

@@ -26,6 +26,7 @@ from almanach.core.controller import Controller
 
 
 class AlmanachCollector(object):
+
     def __init__(self):
         log_bootstrap.configure()
         config.read(sys.argv)

@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-class VolumeTypeNotFoundException(Exception):
-    def __init__(self, volume_type_id, message=None):
-        if not message:
-            message = "Unable to find volume_type id '{volume_type_id}'".format(volume_type_id=volume_type_id)
 
-        super(VolumeTypeNotFoundException, self).__init__(message)
+class AlmanachException(Exception):
+    pass

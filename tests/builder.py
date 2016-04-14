@@ -22,11 +22,13 @@ from almanach.core.model import build_entity_from_dict, Instance, Volume, Volume
 
 
 class Builder(object):
+
     def __init__(self, dict_object):
         self.dict_object = dict_object
 
 
 class EntityBuilder(Builder):
+
     def build(self):
         return build_entity_from_dict(self.dict_object)
 
@@ -73,6 +75,7 @@ class EntityBuilder(Builder):
 
 
 class VolumeBuilder(EntityBuilder):
+
     def with_attached_to(self, attached_to):
         self.dict_object["attached_to"] = attached_to
         return self
@@ -91,6 +94,7 @@ class VolumeBuilder(EntityBuilder):
 
 
 class VolumeTypeBuilder(Builder):
+
     def build(self):
         return VolumeType(**self.dict_object)
 

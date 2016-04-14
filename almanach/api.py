@@ -25,6 +25,7 @@ from almanach.core.controller import Controller
 
 
 class AlmanachApi(Application):
+
     def __init__(self):
         super(AlmanachApi, self).__init__()
 

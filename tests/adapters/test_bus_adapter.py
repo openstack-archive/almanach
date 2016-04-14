@@ -23,6 +23,7 @@ from almanach.adapters.bus_adapter import BusAdapter
 
 
 class BusAdapterTest(unittest.TestCase):
+
     def setUp(self):
         self.controller = flexmock()
         self.retry = flexmock()

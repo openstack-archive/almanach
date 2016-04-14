@@ -21,14 +21,15 @@ from hamcrest import assert_that, contains_inanyorder
 from pymongo import MongoClient
 
 from almanach.adapters.database_adapter import DatabaseAdapter
-from almanach.common.VolumeTypeNotFoundException import VolumeTypeNotFoundException
-from almanach.common.AlmanachException import AlmanachException
+from almanach.common.volume_type_not_found_exception import VolumeTypeNotFoundException
+from almanach.common.almanach_exception import AlmanachException
 from almanach import config
 from almanach.core.model import todict
 from tests.builder import a, instance, volume, volume_type
 
 
 class DatabaseAdapterTest(unittest.TestCase):
+
     def setUp(self):
         config.read(config_file="resources/config/test.cfg")
         mongo_connection = mongomock.Connection()
@@ -103,18 +104,23 @@ class DatabaseAdapterTest(unittest.TestCase):
 
     def test_list_instances(self):
         fake_instances = [
-            a(instance().with_id("id1").with_start(2014, 1, 1, 7, 0, 0).with_end(2014, 1, 1, 8, 0, 0).with_project_id("project_id").with_metadata({})),
-            a(instance().with_id("id2").with_start(2014, 1, 1, 1, 0, 0).with_no_end().with_project_id("project_id").with_metadata({})),
-            a(instance().with_id("id3").with_start(2014, 1, 1, 8, 0, 0).with_no_end().with_project_id("project_id").with_metadata({})),
+            a(instance().with_id("id1").with_start(2014, 1, 1, 7, 0, 0).with_end(
+                2014, 1, 1, 8, 0, 0).with_project_id("project_id").with_metadata({})),
+            a(instance().with_id("id2").with_start(2014, 1, 1, 1, 0,
+                                                   0).with_no_end().with_project_id("project_id").with_metadata({})),
+            a(instance().with_id("id3").with_start(2014, 1, 1, 8, 0,
+                                                   0).with_no_end().with_project_id("project_id").with_metadata({})),
         ]
         fake_volumes = [
-            a(volume().with_id("id1").with_start(2014, 1, 1, 7, 0, 0).with_end(2014, 1, 1, 8, 0, 0).with_project_id("project_id")),
+            a(volume().with_id("id1").with_start(2014, 1, 1, 7, 0, 0).with_end(
+                2014, 1, 1, 8, 0, 0).with_project_id("project_id")),
             a(volume().with_id("id2").with_start(2014, 1, 1, 1, 0, 0).with_no_end().with_project_id("project_id")),
             a(volume().with_id("id3").with_start(2014, 1, 1, 8, 0, 0).with_no_end().with_project_id("project_id")),
         ]
         [self.db.entity.insert(todict(fake_entity)) for fake_entity in fake_instances + fake_volumes]
 
-        entities = self.adapter.list_entities("project_id", datetime(2014, 1, 1, 0, 0, 0), datetime(2014, 1, 1, 12, 0, 0), "instance")
+        entities = self.adapter.list_entities("project_id", datetime(
+            2014, 1, 1, 0, 0, 0), datetime(2014, 1, 1, 12, 0, 0), "instance")
         assert_that(entities, contains_inanyorder(*fake_instances))
 
     def test_list_instances_with_decode_output(self):
@@ -148,28 +154,37 @@ class DatabaseAdapterTest(unittest.TestCase):
               .with_no_end()
               .with_project_id("project_id")
               .with_metadata({"a_metadata.to_sanitize": "this.sanitize"})),
-            ]
+        ]
 
         [self.db.entity.insert(todict(fake_entity)) for fake_entity in fake_instances]
 
-        entities = self.adapter.list_entities("project_id", datetime(2014, 1, 1, 0, 0, 0), datetime(2014, 1, 1, 12, 0, 0), "instance")
+        entities = self.adapter.list_entities("project_id", datetime(
+            2014, 1, 1, 0, 0, 0), datetime(2014, 1, 1, 12, 0, 0), "instance")
         assert_that(entities, contains_inanyorder(*expected_instances))
         self.assert_entities_metadata_have_been_sanitize(entities)
 
     def test_list_entities_in_period(self):
         fake_entities_in_period = [
-            a(instance().with_id("in_the_period").with_start(2014, 1, 1, 7, 0, 0).with_end(2014, 1, 1, 8, 0, 0).with_project_id("project_id")),
-            a(instance().with_id("running_has_started_before").with_start(2014, 1, 1, 1, 0, 0).with_no_end().with_project_id("project_id")),
-            a(instance().with_id("running_has_started_during").with_start(2014, 1, 1, 8, 0, 0).with_no_end().with_project_id("project_id")),
+            a(instance().with_id("in_the_period").with_start(2014, 1, 1, 7, 0,
+                                                             0).with_end(2014, 1, 1, 8, 0, 0).with_project_id("project_id")),
+            a(instance().with_id("running_has_started_before").with_start(
+                2014, 1, 1, 1, 0, 0).with_no_end().with_project_id("project_id")),
+            a(instance().with_id("running_has_started_during").with_start(
+                2014, 1, 1, 8, 0, 0).with_no_end().with_project_id("project_id")),
         ]
         fake_entities_out_period = [
-            a(instance().with_id("before_the_period").with_start(2014, 1, 1, 0, 0, 0).with_end(2014, 1, 1, 1, 0, 0).with_project_id("project_id")),
-            a(instance().with_id("after_the_period").with_start(2014, 1, 1, 10, 0, 0).with_end(2014, 1, 1, 11, 0, 0).with_project_id("project_id")),
-            a(instance().with_id("running_has_started_after").with_start(2014, 1, 1, 10, 0, 0).with_no_end().with_project_id("project_id")),
+            a(instance().with_id("before_the_period").with_start(2014, 1, 1, 0,
+                                                                 0, 0).with_end(2014, 1, 1, 1, 0, 0).with_project_id("project_id")),
+            a(instance().with_id("after_the_period").with_start(2014, 1, 1, 10,
+                                                                0, 0).with_end(2014, 1, 1, 11, 0, 0).with_project_id("project_id")),
+            a(instance().with_id("running_has_started_after").with_start(
+                2014, 1, 1, 10, 0, 0).with_no_end().with_project_id("project_id")),
         ]
-        [self.db.entity.insert(todict(fake_entity)) for fake_entity in fake_entities_in_period + fake_entities_out_period]
+        [self.db.entity.insert(todict(fake_entity))
+         for fake_entity in fake_entities_in_period + fake_entities_out_period]
 
-        entities = self.adapter.list_entities("project_id", datetime(2014, 1, 1, 6, 0, 0), datetime(2014, 1, 1, 9, 0, 0))
+        entities = self.adapter.list_entities("project_id", datetime(
+            2014, 1, 1, 6, 0, 0), datetime(2014, 1, 1, 9, 0, 0))
         assert_that(entities, contains_inanyorder(*fake_entities_in_period))
 
     def test_update_entity(self):
@@ -190,7 +205,8 @@ class DatabaseAdapterTest(unittest.TestCase):
 
         self.adapter.update_active_entity(fake_entity)
 
-        self.assertEqual(self.db.entity.find_one({"entity_id": fake_entity.entity_id})["os"]["distro"], fake_entity.os.distro)
+        self.assertEqual(self.db.entity.find_one({"entity_id": fake_entity.entity_id})[
+                         "os"]["distro"], fake_entity.os.distro)
 
     def test_insert_volume(self):
         count = self.db.entity.count()
@@ -259,4 +275,3 @@ class DatabaseAdapterTest(unittest.TestCase):
             for key in entity.metadata:
                 self.assertTrue(key.find("^") == -1,
                                 "The metadata key %s contains carret" % (key))
-
