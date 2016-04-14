@@ -246,13 +246,13 @@ def list_entity(project_id):
     return controller.list_entities(project_id, start, end)
 
 
-# Temporary for AgileV1 migration
-@api.route("/instance/<instance_id>/create_date/<create_date>", methods=["PUT"])
+@api.route("/entity/instance/<instance_id>", methods=["PUT"])
 @authenticated
 @to_json
-def update_instance_create_date(instance_id, create_date):
-    logging.info("Update create date for instance %s to %s", instance_id, create_date)
-    return controller.update_instance_create_date(instance_id, create_date)
+def update_instance_entity(instance_id):
+    data = json.loads(request.data)
+    logging.info("Updating instance entity with id %s with data %s", instance_id, data)
+    return controller.update_active_instance_entity(instance_id=instance_id, **data)
 
 
 @api.route("/volume_types", methods=["GET"])

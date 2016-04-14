@@ -91,10 +91,10 @@ class ControllerTest(unittest.TestCase):
 
         self.controller.resize_instance(fake_instance.entity_id, "newly_flavor", dates_str)
 
-    def test_instance_create_date_updated(self):
+    def test_update_active_instance_entity_with_a_new_start_date(self):
         fake_instance1 = a(instance())
         fake_instance2 = fake_instance1
-        fake_instance2.start = "2015-10-05 12:04:00.0000Z"
+        fake_instance2.start = "2015-10-21T16:25:00.000000Z"
 
         (flexmock(self.database_adapter)
          .should_receive("get_active_entity")
@@ -107,7 +107,10 @@ class ControllerTest(unittest.TestCase):
          .with_args(fake_instance2)
          .once())
 
-        self.controller.update_instance_create_date(fake_instance1.entity_id, "2015-10-05 12:04:00.0000Z")
+        self.controller.update_active_instance_entity(
+            instance_id=fake_instance1.entity_id,
+            start_date="2015-10-21T16:25:00.000000Z",
+        )
 
     def test_instance_created_but_its_an_old_event(self):
         fake_instance = a(instance()
