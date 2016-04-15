@@ -14,7 +14,6 @@
 
 
 class Entity(object):
-
     def __init__(self, entity_id, project_id, start, end, last_event, name, entity_type):
         self.entity_id = entity_id
         self.project_id = project_id
@@ -28,13 +27,13 @@ class Entity(object):
         return todict(self)
 
     def __eq__(self, other):
-        return (other.entity_id == self.entity_id
-                and other.project_id == self.project_id
-                and other.start == self.start
-                and other.end == self.end
-                and other.last_event == self.last_event
-                and other.name == self.name
-                and other.entity_type == self.entity_type)
+        return (other.entity_id == self.entity_id and
+                other.project_id == self.project_id and
+                other.start == self.start and
+                other.end == self.end and
+                other.last_event == self.last_event and
+                other.name == self.name and
+                other.entity_type == self.entity_type)
 
 
 class Instance(Entity):
@@ -47,43 +46,42 @@ class Instance(Entity):
         self.os = OS(**os)
 
     def __eq__(self, other):
-        return (super(Instance, self).__eq__(other)
-                and other.flavor == self.flavor
-                and other.os == self.os
-                and other.metadata == self.metadata)
+        return (super(Instance, self).__eq__(other) and
+                other.flavor == self.flavor and
+                other.os == self.os and
+                other.metadata == self.metadata)
 
 
 class OS(object):
-
     def __init__(self, os_type, distro, version):
         self.os_type = os_type
         self.distro = distro
         self.version = version
 
     def __eq__(self, other):
-        return (other.os_type == self.os_type
-                and other.distro == self.distro
-                and other.version == self.version)
+        return (other.os_type == self.os_type and
+                other.distro == self.distro and
+                other.version == self.version)
 
 
 class Volume(Entity):
     TYPE = "volume"
 
-    def __init__(self, entity_id, project_id, start, end, volume_type, size, last_event, name, attached_to=None, entity_type=TYPE):
+    def __init__(self, entity_id, project_id, start, end, volume_type, size, last_event, name, attached_to=None,
+                 entity_type=TYPE):
         super(Volume, self).__init__(entity_id, project_id, start, end, last_event, name, entity_type)
         self.volume_type = volume_type
         self.size = size
         self.attached_to = attached_to or []
 
     def __eq__(self, other):
-        return (super(Volume, self).__eq__(other)
-                and other.volume_type == self.volume_type
-                and other.size == self.size
-                and other.attached_to == self.attached_to)
+        return (super(Volume, self).__eq__(other) and
+                other.volume_type == self.volume_type and
+                other.size == self.size and
+                other.attached_to == self.attached_to)
 
 
 class VolumeType(object):
-
     def __init__(self, volume_type_id, volume_type_name):
         self.volume_type_id = volume_type_id
         self.volume_type_name = volume_type_name

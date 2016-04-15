@@ -7,3 +7,4 @@ nose-blockage==0.1.2
 flexmock==0.9.4
 mongomock==2.0.0
 PyHamcrest==1.8.1
+flake8==2.5.4

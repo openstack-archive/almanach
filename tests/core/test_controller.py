@@ -13,13 +13,12 @@
 # limitations under the License.
 
 import unittest
-import pytz
-
 from datetime import datetime, timedelta
+
+import pytz
 from dateutil import parser as date_parser
 from flexmock import flexmock, flexmock_teardown
 from nose.tools import assert_raises
-
 from almanach import config
 from almanach.common.date_format_exception import DateFormatException
 from almanach.core.controller import Controller
@@ -28,7 +27,6 @@ from tests.builder import a, instance, volume, volume_type
 
 
 class ControllerTest(unittest.TestCase):
-
     def setUp(self):
         self.database_adapter = flexmock()
 
@@ -363,7 +361,8 @@ class ControllerTest(unittest.TestCase):
          .once())
 
         self.controller.create_volume(some_volume.entity_id, some_volume.project_id, '2015-10-21T16:25:00.000000Z',
-                                      some_volume.volume_type, some_volume.size, some_volume.name, some_volume.attached_to)
+                                      some_volume.volume_type, some_volume.size, some_volume.name,
+                                      some_volume.attached_to)
 
     def test_volume_updated(self):
         fake_volume = a(volume())

@@ -15,8 +15,6 @@
 import logging
 import pkg_resources
 
-from logging import config
-
 
 def get_config_file():
     logging_conf = pkg_resources.resource_filename("almanach", "resources/config/logging.cfg")

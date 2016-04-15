@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from datetime import datetime, timedelta
+
 import dateutil.parser
 import pytz
-
-from datetime import datetime, timedelta
 
 DEFAULT_VOLUME_TYPE = "5dadd67f-e21e-4c13-b278-c07b73b21250"
 
@@ -31,7 +31,9 @@ def get_instance_create_end_sample(instance_id=None, tenant_id=None, flavor_name
         "os_distro": os_distro or "CentOS",
         "os_version": os_version or "6.4",
         "created_at": creation_timestamp if creation_timestamp else datetime(2014, 2, 14, 16, 29, 58, tzinfo=pytz.utc),
-        "launched_at": creation_timestamp + timedelta(seconds=1) if creation_timestamp else datetime(2014, 2, 14, 16, 30, 02, tzinfo=pytz.utc),
+        "launched_at": creation_timestamp + timedelta(seconds=1) if creation_timestamp else datetime(2014, 2, 14, 16,
+                                                                                                     30, 02,
+                                                                                                     tzinfo=pytz.utc),
         "terminated_at": None,
         "deleted_at": None,
         "state": "active",
@@ -52,8 +54,11 @@ def get_instance_delete_end_sample(instance_id=None, tenant_id=None, flavor_name
         "os_distro": os_distro or "centos",
         "os_version": os_version or "6.4",
         "created_at": creation_timestamp if creation_timestamp else datetime(2014, 2, 14, 16, 29, 58, tzinfo=pytz.utc),
-        "launched_at": creation_timestamp + timedelta(seconds=1) if creation_timestamp else datetime(2014, 2, 14, 16, 30, 02, tzinfo=pytz.utc),
-        "terminated_at": deletion_timestamp if deletion_timestamp else datetime(2014, 2, 18, 12, 5, 23, tzinfo=pytz.utc),
+        "launched_at": creation_timestamp + timedelta(seconds=1) if creation_timestamp else datetime(2014, 2, 14, 16,
+                                                                                                     30, 02,
+                                                                                                     tzinfo=pytz.utc),
+        "terminated_at": deletion_timestamp if deletion_timestamp else datetime(2014, 2, 18, 12, 5, 23,
+                                                                                tzinfo=pytz.utc),
         "deleted_at": deletion_timestamp if deletion_timestamp else datetime(2014, 2, 18, 12, 5, 23, tzinfo=pytz.utc),
         "state": "deleted"
     }
@@ -70,7 +75,9 @@ def get_volume_create_end_sample(volume_id=None, tenant_id=None, volume_type=Non
         "volume_type": volume_type or DEFAULT_VOLUME_TYPE,
         "volume_size": volume_size or 50,
         "created_at": creation_timestamp if creation_timestamp else datetime(2014, 2, 14, 17, 18, 35, tzinfo=pytz.utc),
-        "launched_at": creation_timestamp + timedelta(seconds=1) if creation_timestamp else datetime(2014, 2, 14, 17, 18, 40, tzinfo=pytz.utc),
+        "launched_at": creation_timestamp + timedelta(seconds=1) if creation_timestamp else datetime(2014, 2, 14, 17,
+                                                                                                     18, 40,
+                                                                                                     tzinfo=pytz.utc),
         "status": "available"
     }
     kwargs["timestamp"] = kwargs["launched_at"] + timedelta(microseconds=200000)
@@ -103,8 +110,11 @@ def get_volume_attach_icehouse_end_sample(volume_id=None, tenant_id=None, volume
         "volume_size": volume_size or 50,
         "attached_to": attached_to or "e7d44dea-21c1-452c-b50c-cbab0d07d7d3",
         "created_at": creation_timestamp if creation_timestamp else datetime(2014, 2, 14, 17, 18, 35, tzinfo=pytz.utc),
-        "launched_at": creation_timestamp + timedelta(seconds=1) if creation_timestamp else datetime(2014, 2, 14, 17, 18, 40, tzinfo=pytz.utc),
-        "timestamp": creation_timestamp + timedelta(seconds=1) if creation_timestamp else datetime(2014, 2, 14, 17, 18, 40, tzinfo=pytz.utc),
+        "launched_at": creation_timestamp + timedelta(seconds=1) if creation_timestamp else datetime(2014, 2, 14, 17,
+                                                                                                     18, 40,
+                                                                                                     tzinfo=pytz.utc),
+        "timestamp": creation_timestamp + timedelta(seconds=1) if creation_timestamp else datetime(2014, 2, 14, 17, 18,
+                                                                                                   40, tzinfo=pytz.utc),
     }
     return _get_volume_icehouse_payload("volume.attach.end", **kwargs)
 
@@ -118,7 +128,8 @@ def get_volume_attach_kilo_end_sample(volume_id=None, tenant_id=None, volume_typ
         "volume_type": volume_type or DEFAULT_VOLUME_TYPE,
         "volume_size": volume_size or 50,
         "attached_to": attached_to,
-        "timestamp": timestamp + timedelta(seconds=1) if timestamp else datetime(2014, 2, 14, 17, 18, 40, tzinfo=pytz.utc),
+        "timestamp": timestamp + timedelta(seconds=1) if timestamp else datetime(2014, 2, 14, 17, 18, 40,
+                                                                                 tzinfo=pytz.utc),
     }
     return _get_volume_kilo_payload("volume.attach.end", **kwargs)
 
@@ -132,7 +143,8 @@ def get_volume_detach_kilo_end_sample(volume_id=None, tenant_id=None, volume_typ
         "volume_type": volume_type or DEFAULT_VOLUME_TYPE,
         "volume_size": volume_size or 50,
         "attached_to": attached_to,
-        "timestamp": timestamp + timedelta(seconds=1) if timestamp else datetime(2014, 2, 14, 17, 18, 40, tzinfo=pytz.utc),
+        "timestamp": timestamp + timedelta(seconds=1) if timestamp else datetime(2014, 2, 14, 17, 18, 40,
+                                                                                 tzinfo=pytz.utc),
     }
     return _get_volume_kilo_payload("volume.detach.end", **kwargs)
 
@@ -147,7 +159,9 @@ def get_volume_detach_end_sample(volume_id=None, tenant_id=None, volume_type=Non
         "volume_size": volume_size or 50,
         "attached_to": None,
         "created_at": creation_timestamp if creation_timestamp else datetime(2014, 2, 14, 17, 18, 35, tzinfo=pytz.utc),
-        "launched_at": creation_timestamp + timedelta(seconds=1) if creation_timestamp else datetime(2014, 2, 14, 17, 18, 40, tzinfo=pytz.utc),
+        "launched_at": creation_timestamp + timedelta(seconds=1) if creation_timestamp else datetime(2014, 2, 14, 17,
+                                                                                                     18, 40,
+                                                                                                     tzinfo=pytz.utc),
         "timestamp": deletion_timestamp if deletion_timestamp else datetime(2014, 2, 23, 8, 1, 58, tzinfo=pytz.utc),
         "status": "detach"
     }
@@ -164,7 +178,9 @@ def get_volume_rename_end_sample(volume_id=None, tenant_id=None, volume_type=Non
         "volume_size": volume_size or 50,
         "attached_to": None,
         "created_at": creation_timestamp if creation_timestamp else datetime(2014, 2, 14, 17, 18, 35, tzinfo=pytz.utc),
-        "launched_at": creation_timestamp + timedelta(seconds=1) if creation_timestamp else datetime(2014, 2, 14, 17, 18, 40, tzinfo=pytz.utc),
+        "launched_at": creation_timestamp + timedelta(seconds=1) if creation_timestamp else datetime(2014, 2, 14, 17,
+                                                                                                     18, 40,
+                                                                                                     tzinfo=pytz.utc),
         "timestamp": deletion_timestamp if deletion_timestamp else datetime(2014, 2, 23, 8, 1, 58, tzinfo=pytz.utc),
         "status": "detach"
     }
@@ -181,7 +197,9 @@ def get_volume_exists_sample(volume_id=None, tenant_id=None, volume_type=None, v
         "volume_size": volume_size or 50,
         "attached_to": None,
         "created_at": creation_timestamp if creation_timestamp else datetime(2014, 2, 14, 17, 18, 35, tzinfo=pytz.utc),
-        "launched_at": creation_timestamp + timedelta(seconds=1) if creation_timestamp else datetime(2014, 2, 14, 17, 18, 40, tzinfo=pytz.utc),
+        "launched_at": creation_timestamp + timedelta(seconds=1) if creation_timestamp else datetime(2014, 2, 14, 17,
+                                                                                                     18, 40,
+                                                                                                     tzinfo=pytz.utc),
         "timestamp": deletion_timestamp if deletion_timestamp else datetime(2014, 2, 23, 8, 1, 58, tzinfo=pytz.utc),
         "status": "detach"
     }
@@ -195,7 +213,8 @@ def _format_date(datetime_obj):
 def _get_instance_payload(event_type, instance_id=None, tenant_id=None, hostname=None, display_name=None,
                           instance_type=None,
                           instance_flavor_id=None, timestamp=None, created_at=None, launched_at=None,
-                          deleted_at=None, terminated_at=None, state=None, os_type=None, os_distro=None, os_version=None, metadata={}):
+                          deleted_at=None, terminated_at=None, state=None, os_type=None, os_distro=None,
+                          os_version=None, metadata={}):
     instance_id = instance_id or "e7d44dea-21c1-452c-b50c-cbab0d07d7d3"
     os_type = os_type or "linux"
     os_distro = os_distro or "centos"
@@ -272,7 +291,8 @@ def _get_instance_payload(event_type, instance_id=None, tenant_id=None, hostname
 
 
 def _get_volume_icehouse_payload(event_type, volume_id=None, tenant_id=None, display_name=None, volume_type=None,
-                                 volume_size=None, timestamp=None, created_at=None, launched_at=None, status=None, attached_to=None):
+                                 volume_size=None, timestamp=None, created_at=None, launched_at=None, status=None,
+                                 attached_to=None):
     volume_id = volume_id or "64a0ca7f-5f5a-4dc5-a1e1-e04e89eb95ed"
     tenant_id = tenant_id or "46eeb8e44298460899cf4b3554bfe11f"
     display_name = display_name or "mytenant-0001-myvolume"

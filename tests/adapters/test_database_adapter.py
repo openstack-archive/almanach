@@ -13,13 +13,12 @@
 # limitations under the License.
 
 import unittest
-import mongomock
-
 from datetime import datetime
+
+import mongomock
 from flexmock import flexmock, flexmock_teardown
 from hamcrest import assert_that, contains_inanyorder
 from pymongo import MongoClient
-
 from almanach.adapters.database_adapter import DatabaseAdapter
 from almanach.common.volume_type_not_found_exception import VolumeTypeNotFoundException
 from almanach.common.almanach_exception import AlmanachException
@@ -29,7 +28,6 @@ from tests.builder import a, instance, volume, volume_type
 
 
 class DatabaseAdapterTest(unittest.TestCase):
-
     def setUp(self):
         config.read(config_file="resources/config/test.cfg")
         mongo_connection = mongomock.Connection()
@@ -166,7 +164,8 @@ class DatabaseAdapterTest(unittest.TestCase):
     def test_list_entities_in_period(self):
         fake_entities_in_period = [
             a(instance().with_id("in_the_period").with_start(2014, 1, 1, 7, 0,
-                                                             0).with_end(2014, 1, 1, 8, 0, 0).with_project_id("project_id")),
+                                                             0).with_end(2014, 1, 1, 8, 0, 0).with_project_id(
+                "project_id")),
             a(instance().with_id("running_has_started_before").with_start(
                 2014, 1, 1, 1, 0, 0).with_no_end().with_project_id("project_id")),
             a(instance().with_id("running_has_started_during").with_start(
@@ -174,9 +173,11 @@ class DatabaseAdapterTest(unittest.TestCase):
         ]
         fake_entities_out_period = [
             a(instance().with_id("before_the_period").with_start(2014, 1, 1, 0,
-                                                                 0, 0).with_end(2014, 1, 1, 1, 0, 0).with_project_id("project_id")),
+                                                                 0, 0).with_end(2014, 1, 1, 1, 0, 0).with_project_id(
+                "project_id")),
             a(instance().with_id("after_the_period").with_start(2014, 1, 1, 10,
-                                                                0, 0).with_end(2014, 1, 1, 11, 0, 0).with_project_id("project_id")),
+                                                                0, 0).with_end(2014, 1, 1, 11, 0, 0).with_project_id(
+                "project_id")),
             a(instance().with_id("running_has_started_after").with_start(
                 2014, 1, 1, 10, 0, 0).with_no_end().with_project_id("project_id")),
         ]
@@ -206,7 +207,7 @@ class DatabaseAdapterTest(unittest.TestCase):
         self.adapter.update_active_entity(fake_entity)
 
         self.assertEqual(self.db.entity.find_one({"entity_id": fake_entity.entity_id})[
-                         "os"]["distro"], fake_entity.os.distro)
+                             "os"]["distro"], fake_entity.os.distro)
 
     def test_insert_volume(self):
         count = self.db.entity.count()
