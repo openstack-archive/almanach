@@ -1,6 +1,5 @@
 Flask==0.10.1
 PyYAML==3.11
-gunicorn==19.1.0
 jsonpickle==0.7.1
 pymongo==2.7.2
 kombu>=3.0.30
