@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import ConfigParser
+import os
 import os.path as os_path
 
 from almanach.common.almanach_exception import AlmanachException
@@ -29,6 +30,11 @@ def read(filename):
 
 
 def get(section, option, default=None):
+    value = os.environ.get(section + "_" + option.upper())
+
+    if value:
+        return value
+
     try:
         return configuration.get(section, option)
     except:
