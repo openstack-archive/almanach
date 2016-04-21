@@ -23,6 +23,35 @@ Requirements
 - MongoDB
 - Python 2.7
 
+Command line usage
+------------------
+
+Usage:
+
+```bash
+usage: almanach [-h] [--logging LOGGING] {api,collector} config_file
+```
+
+Start the API daemon:
+
+```bash
+almanach api /path/to/almanach.cfg
+```
+
+Start the collector:
+
+```bash
+almanach collector /path/to/almanach.cfg
+```
+
+Custom logging configuration:
+
+```bash
+almanach collector /path/to/almanach.cfg --logging /path/to/logging.cfg
+```
+
+The syntax of the logging configuration file is available in the official [Python documentation](https://docs.python.org/2/library/logging.config.html). 
+
 Database entities
 -----------------
 

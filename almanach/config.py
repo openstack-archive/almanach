@@ -13,26 +13,18 @@
 # limitations under the License.
 
 import ConfigParser
-import pkg_resources
-import os.path as Path
+import os.path as os_path
 
 from almanach.common.almanach_exception import AlmanachException
 
 configuration = ConfigParser.RawConfigParser()
 
 
-def read(args=[], config_file="resources/config/almanach.cfg"):
-    filename = pkg_resources.resource_filename("almanach", config_file)
+def read(filename):
+    if not os_path.isfile(filename):
+        raise AlmanachException("Config file '{0}' not found".format(filename))
 
-    for param in args:
-        if param.startswith("config_file="):
-            filename = param.split("=")[-1]
-            break
-
-    if not Path.isfile(filename):
-        raise AlmanachException("config file '{0}' not found".format(filename))
-
-    print "loading configuration file {0}".format(filename)
+    print("Loading configuration file {0}".format(filename))
     configuration.read(filename)
 
 
@@ -112,7 +104,7 @@ def rabbitmq_time_to_live():
 
 
 def _read_file(filename):
-    file = open(filename, "r")
-    content = file.read()
-    file.close()
+    f = open(filename, "r")
+    content = f.read()
+    f.close()
     return content

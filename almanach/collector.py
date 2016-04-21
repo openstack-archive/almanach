@@ -13,11 +13,9 @@
 # limitations under the License.
 
 import logging
-import sys
 
 from kombu import Connection
 
-from almanach import log_bootstrap
 from almanach import config
 from almanach.adapters.bus_adapter import BusAdapter
 from almanach.adapters.database_adapter import DatabaseAdapter
@@ -28,24 +26,11 @@ from almanach.core.controller import Controller
 class AlmanachCollector(object):
 
     def __init__(self):
-        log_bootstrap.configure()
-        config.read(sys.argv)
         self._controller = Controller(DatabaseAdapter())
         _connection = Connection(config.rabbitmq_url(), heartbeat=540)
         retry_adapter = RetryAdapter(_connection)
-
         self._busAdapter = BusAdapter(self._controller, _connection, retry_adapter)
 
     def run(self):
-        logging.info("starting bus adapter")
+        logging.info("Listening for incoming events")
         self._busAdapter.run()
-        logging.info("shutting down")
-
-
-def run():
-    almanach_collector = AlmanachCollector()
-    almanach_collector.run()
-
-
-if __name__ == "__main__":
-    run()

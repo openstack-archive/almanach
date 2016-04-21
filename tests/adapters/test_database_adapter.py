@@ -12,13 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pkg_resources
 import unittest
-from datetime import datetime
-
 import mongomock
+
+from datetime import datetime
 from flexmock import flexmock, flexmock_teardown
 from hamcrest import assert_that, contains_inanyorder
 from pymongo import MongoClient
+
 from almanach.adapters.database_adapter import DatabaseAdapter
 from almanach.common.volume_type_not_found_exception import VolumeTypeNotFoundException
 from almanach.common.almanach_exception import AlmanachException
@@ -29,7 +31,7 @@ from tests.builder import a, instance, volume, volume_type
 
 class DatabaseAdapterTest(unittest.TestCase):
     def setUp(self):
-        config.read(config_file="resources/config/test.cfg")
+        config.read(pkg_resources.resource_filename("almanach", "resources/config/test.cfg"))
         mongo_connection = mongomock.Connection()
 
         self.adapter = DatabaseAdapter()
