@@ -52,6 +52,16 @@ almanach collector /path/to/almanach.cfg --logging /path/to/logging.cfg
 
 The syntax of the logging configuration file is available in the official [Python documentation](https://docs.python.org/2/library/logging.config.html). 
 
+Environment variables
+---------------------
+
+You can override the configuration parameters by using environment variables:
+
+```bash
+export RABBITMQ_URL="amqp://openstack:openstack@hostname:5672"
+almanach collector /path/to/almanach.cfg
+```
+
 Database entities
 -----------------
 
