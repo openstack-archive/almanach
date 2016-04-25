@@ -13,25 +13,18 @@
 # limitations under the License.
 
 from flask import Flask
-from gunicorn.app.base import Application
 
 from almanach.adapters import api_route_v1 as api_route
 from almanach.adapters.database_adapter import DatabaseAdapter
 from almanach.core.controller import Controller
 
 
-class AlmanachApi(Application):
+class AlmanachApi(object):
 
-    def __init__(self):
-        super(AlmanachApi, self).__init__()
-
-    def init(self, parser, opts, args):
-        self._controller = Controller(DatabaseAdapter())
-
-    def load(self):
-        api_route.controller = self._controller
+    def run(self):
+        api_route.controller = Controller(DatabaseAdapter())
 
         app = Flask("almanach")
         app.register_blueprint(api_route.api)
 
-        return app
+        return app.run(port=8000)
