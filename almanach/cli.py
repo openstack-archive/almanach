@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import argparse
-import logging
+import logging.config as logging_config
 
 from almanach import config
 from almanach.api import AlmanachApi
@@ -25,19 +25,20 @@ def run():
     parser.add_argument("service", help="Service to execute: 'api' or 'collector'", choices=["api", "collector"])
     parser.add_argument("config_file", help="Config file path")
     parser.add_argument("--logging", help="Logger configuration")
+    parser.add_argument("--port", help="API HTTP port (default is 8000)", default=8000)
     args = parser.parse_args()
 
     config.read(args.config_file)
 
     if args.service == "api":
         almanach_api = AlmanachApi()
-        almanach_api.run()
+        almanach_api.run(port=args.port)
     else:
         almanach_collector = AlmanachCollector()
         almanach_collector.run()
 
     if args.logging:
-        logging.config.fileConfig(args.logging, disable_existing_loggers=False)
+        logging_config.fileConfig(args.logging, disable_existing_loggers=False)
 
 
 if __name__ == "__main__":

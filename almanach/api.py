@@ -21,10 +21,10 @@ from almanach.core.controller import Controller
 
 class AlmanachApi(object):
 
-    def run(self):
+    def run(self, port):
         api_route.controller = Controller(DatabaseAdapter())
 
         app = Flask("almanach")
         app.register_blueprint(api_route.api)
 
-        return app.run(port=8000)
+        return app.run(port=port)
