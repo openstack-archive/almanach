@@ -18,6 +18,7 @@ import pytz
 from datetime import datetime
 from flexmock import flexmock, flexmock_teardown
 
+from almanach.common.almanach_entity_not_found_exception import AlmanachEntityNotFoundException
 from tests import messages
 from almanach.adapters.bus_adapter import BusAdapter
 
@@ -334,12 +335,21 @@ class BusAdapterTest(unittest.TestCase):
 
     def test_failing_notification_get_retry(self):
         notification = messages.get_instance_rebuild_end_sample()
-        self.controller.should_receive('instance_rebuilded').and_raise(Exception("trololololo"))
-        self.retry.should_receive('publish_to_dead_letter').once()
-
         message = flexmock()
-        (flexmock(message)
-         .should_receive("ack"))
+
+        (flexmock(message).should_receive("ack"))
+        self.controller.should_receive('instance_rebuilded').and_raise(Exception("Foobar"))
+        self.retry.should_receive('publish_to_dead_letter').with_args(message).once()
+
+        self.bus_adapter.on_message(notification, message)
+
+    def test_that_entity_not_found_exceptions_goes_to_retry_queue(self):
+        notification = messages.get_instance_delete_end_sample(instance_id="My instance id")
+        message = flexmock()
+
+        (flexmock(message).should_receive("ack"))
+        self.controller.should_receive('delete_instance').and_raise(AlmanachEntityNotFoundException("Entity not found"))
+        self.retry.should_receive('publish_to_dead_letter').with_args(message).once()
 
         self.bus_adapter.on_message(notification, message)
 

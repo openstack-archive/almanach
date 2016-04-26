@@ -49,6 +49,14 @@ class DatabaseAdapterTest(unittest.TestCase):
         self.assertEqual(self.db.entity.count(), 1)
         self.assert_mongo_collection_contains("entity", fake_instance)
 
+    def test_has_active_entity_not_found(self):
+        self.assertFalse(self.adapter.has_active_entity("my_entity_id"))
+
+    def test_has_active_entity_found(self):
+        fake_instance = a(instance().with_id("my_entity_id"))
+        self.adapter.insert_entity(fake_instance)
+        self.assertTrue(self.adapter.has_active_entity("my_entity_id"))
+
     def test_get_instance_entity(self):
         fake_entity = a(instance().with_metadata({}))
 
