@@ -19,6 +19,7 @@ from datetime import timedelta
 from dateutil import parser as date_parser
 from pkg_resources import get_distribution
 
+from almanach.common.almanach_entity_not_found_exception import AlmanachEntityNotFoundException
 from almanach.common.date_format_exception import DateFormatException
 from almanach.core.model import Instance, Volume, VolumeType
 from almanach import config
@@ -66,6 +67,9 @@ class Controller(object):
         self.database_adapter.insert_entity(entity)
 
     def delete_instance(self, instance_id, delete_date):
+        if not self.database_adapter.has_active_entity(instance_id):
+            raise AlmanachEntityNotFoundException("InstanceId: {0} Not Found".format(instance_id))
+
         delete_date = self._validate_and_parse_date(delete_date)
         logging.info("instance %s deleted on %s" % (instance_id, delete_date))
         self.database_adapter.close_active_entity(instance_id, delete_date)

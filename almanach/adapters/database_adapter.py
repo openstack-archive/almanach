@@ -79,6 +79,10 @@ class DatabaseAdapter(object):
         return self.db.entity.find({"entity_id": entity_id}).count()
 
     @database
+    def has_active_entity(self, entity_id):
+        return self.db.entity.find({"entity_id": entity_id, "end": None}).count() == 1
+
+    @database
     def list_entities(self, project_id, start, end, entity_type=None):
         args = {"project_id": project_id, "start": {"$lte": end}, "$or": [{"end": None}, {"end": {"$gte": start}}]}
         if entity_type:

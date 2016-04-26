@@ -1,0 +1,2 @@
+class AlmanachEntityNotFoundException(Exception):
+    pass

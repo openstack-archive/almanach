@@ -20,6 +20,7 @@ from dateutil import parser as date_parser
 from flexmock import flexmock, flexmock_teardown
 from nose.tools import assert_raises
 from almanach import config
+from almanach.common.almanach_entity_not_found_exception import AlmanachEntityNotFoundException
 from almanach.common.date_format_exception import DateFormatException
 from almanach.core.controller import Controller
 from almanach.core.model import Instance, Volume
@@ -150,11 +151,27 @@ class ControllerTest(unittest.TestCase):
 
     def test_instance_deleted(self):
         (flexmock(self.database_adapter)
+         .should_receive("has_active_entity")
+         .with_args("id1")
+         .and_return(True)
+         .once())
+
+        (flexmock(self.database_adapter)
          .should_receive("close_active_entity")
          .with_args("id1", date_parser.parse("2015-10-21T16:25:00.000000Z"))
          .once())
 
         self.controller.delete_instance("id1", "2015-10-21T16:25:00.000000Z")
+
+    def test_instance_deleted_when_entity_not_found(self):
+        (flexmock(self.database_adapter)
+         .should_receive("has_active_entity")
+         .with_args("id1")
+         .and_return(False)
+         .once())
+
+        with self.assertRaises(AlmanachEntityNotFoundException):
+            self.controller.delete_instance("id1", "2015-10-21T16:25:00.000000Z")
 
     def test_volume_deleted(self):
         fake_volume = a(volume())
