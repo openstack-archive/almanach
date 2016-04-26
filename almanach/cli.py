@@ -13,6 +13,8 @@
 # limitations under the License.
 
 import argparse
+import sys
+import logging
 import logging.config as logging_config
 
 from almanach import config
@@ -30,15 +32,19 @@ def run():
 
     config.read(args.config_file)
 
+    if args.logging:
+        print("Loading logger configuration from {0}".format(args.logging))
+        logging_config.fileConfig(args.logging, disable_existing_loggers=False)
+    else:
+        logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+        logging.debug("Logging to stdout")
+
     if args.service == "api":
         almanach_api = AlmanachApi()
         almanach_api.run(port=args.port)
     else:
         almanach_collector = AlmanachCollector()
         almanach_collector.run()
-
-    if args.logging:
-        logging_config.fileConfig(args.logging, disable_existing_loggers=False)
 
 
 if __name__ == "__main__":
