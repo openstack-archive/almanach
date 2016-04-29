@@ -62,6 +62,30 @@ export RABBITMQ_URL="amqp://openstack:openstack@hostname:5672"
 almanach collector /path/to/almanach.cfg
 ```
 
+RabbitMQ configuration
+----------------------
+
+Each OpenStack services (Nova, Cinder, Neutron) need to be configured to send notifications to the Almanach queue.
+
+For example with Nova, add the topic "almanach" in the config file `/etc/nova.conf`:
+
+```bash
+notification_topics=almanach
+```
+
+
+Database configuration
+----------------------
+
+Almanach requires a specific user to connect to the database.
+To create a new user, open a new MongoDB shell:
+
+```javascript
+m = new Mongo()
+m.getDB("almanach").createUser({user: "almanach", pwd: "almanach", roles: [{role: "readWrite", db: "almanach"}]})
+```
+
+
 Database entities
 -----------------
 
