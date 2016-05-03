@@ -18,6 +18,7 @@ import jsonpickle
 
 from datetime import datetime
 from functools import wraps
+from almanach.common.validation_exception import InvalidAttributeException
 from flask import Blueprint, Response, request
 from werkzeug.wrappers import BaseResponse
 
@@ -49,6 +50,9 @@ def to_json(api_call):
             message = "The request you have made must have data. None was given."
             logging.warning(message)
             return encode({"error": message}), 400, {"Content-Type": "application/json"}
+        except InvalidAttributeException as e:
+            logging.warning(e.get_error_message())
+            return encode({"error": e.get_error_message()}), 400, {"Content-Type": "application/json"}
         except Exception as e:
             logging.exception(e)
             return Response(encode({"error": e.message}), 500, {"Content-Type": "application/json"})

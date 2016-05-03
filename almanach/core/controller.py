@@ -22,11 +22,11 @@ from pkg_resources import get_distribution
 from almanach.common.almanach_entity_not_found_exception import AlmanachEntityNotFoundException
 from almanach.common.date_format_exception import DateFormatException
 from almanach.core.model import Instance, Volume, VolumeType
+from almanach.validators.instance_validator import InstanceValidator
 from almanach import config
 
 
 class Controller(object):
-
     def __init__(self, database_adapter):
         self.database_adapter = database_adapter
         self.metadata_whitelist = config.device_metadata_whitelist()
@@ -107,12 +107,11 @@ class Controller(object):
             instance.last_event = rebuild_date
             self.database_adapter.insert_entity(instance)
 
-    def update_active_instance_entity(self, instance_id, start_date):
+    def update_active_instance_entity(self, instance_id, **kwargs):
         try:
+            InstanceValidator().validate_update(kwargs)
             instance = self.database_adapter.get_active_entity(instance_id)
-            instance.start = self._validate_and_parse_date(start_date)
-
-            logging.info("Updating entity for instance '{0}' with a new start_date={1}".format(instance_id, start_date))
+            self._update_instance_object(instance, **kwargs)
             self.database_adapter.update_active_entity(instance)
             return instance
         except KeyError as e:
@@ -154,6 +153,20 @@ class Controller(object):
         except KeyError as e:
             logging.error("Trying to detach a volume with id '%s' not in the database yet." % volume_id)
             raise e
+
+    def _update_instance_object(self, instance, **kwargs):
+        for attribute, key in dict(start="start_date", end="end_date").items():
+            value = kwargs.get(key)
+            if value:
+                setattr(instance, attribute, self._validate_and_parse_date(value))
+                logging.info("Updating entity for instance '{0}' with {1}={2}".format(instance.entity_id, key, value))
+
+        for attribute in ["name", "flavor", "os", "metadata"]:
+            value = kwargs.get(attribute)
+            if value:
+                setattr(instance, attribute, value)
+                logging.info(
+                    "Updating entity for instance '{0}' with {1}={2}".format(instance.entity_id, attribute, value))
 
     def _volume_attach_instance(self, volume_id, date, attachments):
         volume = self.database_adapter.get_active_entity(volume_id)

@@ -12,19 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
+import logging
 import unittest
-from datetime import datetime, timedelta
-
 import pytz
-from dateutil import parser as date_parser
+
+from copy import copy
+from datetime import datetime, timedelta
+from dateutil.parser import parse
+from hamcrest import raises, calling, assert_that
 from flexmock import flexmock, flexmock_teardown
 from nose.tools import assert_raises
+from tests.builder import a, instance, volume, volume_type
+
 from almanach import config
 from almanach.common.almanach_entity_not_found_exception import AlmanachEntityNotFoundException
 from almanach.common.date_format_exception import DateFormatException
+from almanach.common.validation_exception import InvalidAttributeException
 from almanach.core.controller import Controller
 from almanach.core.model import Instance, Volume
-from tests.builder import a, instance, volume, volume_type
+
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 
 class ControllerTest(unittest.TestCase):
@@ -70,6 +78,9 @@ class ControllerTest(unittest.TestCase):
         fake_instance = a(instance())
 
         dates_str = "2015-10-21T16:25:00.000000Z"
+        fake_instance.start = parse(dates_str)
+        fake_instance.end = None
+        fake_instance.last_event = parse(dates_str)
 
         (flexmock(self.database_adapter)
          .should_receive("get_active_entity")
@@ -78,11 +89,9 @@ class ControllerTest(unittest.TestCase):
          .once())
         (flexmock(self.database_adapter)
          .should_receive("close_active_entity")
-         .with_args(fake_instance.entity_id, date_parser.parse(dates_str))
+         .with_args(fake_instance.entity_id, parse(dates_str))
          .once())
-        fake_instance.start = dates_str
-        fake_instance.end = None
-        fake_instance.last_event = dates_str
+
         (flexmock(self.database_adapter)
          .should_receive("insert_entity")
          .with_args(fake_instance)
@@ -90,26 +99,89 @@ class ControllerTest(unittest.TestCase):
 
         self.controller.resize_instance(fake_instance.entity_id, "newly_flavor", dates_str)
 
+    def test_update_active_instance_entity_with_a_new_flavor(self):
+        flavor = u"my flavor name"
+        fake_instance1 = a(instance())
+        fake_instance2 = copy(fake_instance1)
+        self._expect_get_active_entity_and_update(fake_instance1, fake_instance2, flavor=flavor)
+
+        self.controller.update_active_instance_entity(
+            instance_id=fake_instance1.entity_id,
+            flavor=flavor,
+        )
+
+    def test_update_active_instance_entity_with_a_new_name(self):
+        name = u"my instance name"
+        fake_instance1 = a(instance())
+        fake_instance2 = copy(fake_instance1)
+        self._expect_get_active_entity_and_update(fake_instance1, fake_instance2, name=name)
+
+        self.controller.update_active_instance_entity(
+            instance_id=fake_instance1.entity_id,
+            name=name,
+        )
+
+    def test_update_active_instance_entity_with_a_new_os(self):
+        os = {
+            "os_type": u"linux",
+            "version": u"7",
+            "distro": u"centos"
+        }
+        fake_instance1 = a(instance())
+        fake_instance2 = copy(fake_instance1)
+        self._expect_get_active_entity_and_update(fake_instance1, fake_instance2, os=os)
+
+        self.controller.update_active_instance_entity(
+            instance_id=fake_instance1.entity_id,
+            os=os,
+        )
+
+    def test_update_active_instance_entity_with_a_new_metadata(self):
+        metadata = {
+            "key": "value"
+        }
+        fake_instance1 = a(instance())
+        fake_instance2 = copy(fake_instance1)
+        self._expect_get_active_entity_and_update(fake_instance1, fake_instance2, metadata=metadata)
+
+        self.controller.update_active_instance_entity(
+            instance_id=fake_instance1.entity_id,
+            metadata=metadata,
+        )
+
     def test_update_active_instance_entity_with_a_new_start_date(self):
         fake_instance1 = a(instance())
-        fake_instance2 = fake_instance1
-        fake_instance2.start = "2015-10-21T16:25:00.000000Z"
-
-        (flexmock(self.database_adapter)
-         .should_receive("get_active_entity")
-         .with_args(fake_instance1.entity_id)
-         .and_return(fake_instance1)
-         .once())
-
-        (flexmock(self.database_adapter)
-         .should_receive("update_active_entity")
-         .with_args(fake_instance2)
-         .once())
+        fake_instance2 = copy(fake_instance1)
+        self._expect_get_active_entity_and_update(fake_instance1, fake_instance2, start="2015-10-21T16:25:00.000000Z")
 
         self.controller.update_active_instance_entity(
             instance_id=fake_instance1.entity_id,
             start_date="2015-10-21T16:25:00.000000Z",
         )
+
+    def test_update_active_instance_entity_with_a_new_end_date(self):
+        fake_instance1 = a(instance())
+        fake_instance2 = copy(fake_instance1)
+        self._expect_get_active_entity_and_update(fake_instance1, fake_instance2, end="2015-10-21T16:25:00.000000Z")
+
+        self.controller.update_active_instance_entity(
+            instance_id=fake_instance1.entity_id,
+            end_date="2015-10-21T16:25:00.000000Z",
+        )
+
+    def test_instance_updated_wrong_attributes_raises_exception(self):
+        fake_instance1 = a(instance())
+
+        (flexmock(self.database_adapter)
+         .should_receive("get_active_entity")
+         .with_args(fake_instance1.entity_id)
+         .and_return(fake_instance1)
+         .never())
+
+        assert_that(
+            calling(self.controller.update_active_instance_entity).with_args(instance_id=fake_instance1.entity_id,
+                                                                             wrong_attribute="this is wrong"),
+            raises(InvalidAttributeException))
 
     def test_instance_created_but_its_an_old_event(self):
         fake_instance = a(instance()
@@ -158,7 +230,7 @@ class ControllerTest(unittest.TestCase):
 
         (flexmock(self.database_adapter)
          .should_receive("close_active_entity")
-         .with_args("id1", date_parser.parse("2015-10-21T16:25:00.000000Z"))
+         .with_args("id1", parse("2015-10-21T16:25:00.000000Z"))
          .once())
 
         self.controller.delete_instance("id1", "2015-10-21T16:25:00.000000Z")
@@ -384,6 +456,10 @@ class ControllerTest(unittest.TestCase):
     def test_volume_updated(self):
         fake_volume = a(volume())
         dates_str = "2015-10-21T16:25:00.000000Z"
+        fake_volume.size = "new_size"
+        fake_volume.start = parse(dates_str)
+        fake_volume.end = None
+        fake_volume.last_event = parse(dates_str)
 
         (flexmock(self.database_adapter)
          .should_receive("get_active_entity")
@@ -392,12 +468,9 @@ class ControllerTest(unittest.TestCase):
          .once())
         (flexmock(self.database_adapter)
          .should_receive("close_active_entity")
-         .with_args(fake_volume.entity_id, date_parser.parse(dates_str))
+         .with_args(fake_volume.entity_id, parse(dates_str))
          .once())
-        fake_volume.size = "new_size"
-        fake_volume.start = dates_str
-        fake_volume.end = None
-        fake_volume.last_event = dates_str
+
         (flexmock(self.database_adapter)
          .should_receive("insert_entity")
          .with_args(fake_volume)
@@ -648,3 +721,20 @@ class ControllerTest(unittest.TestCase):
          .once())
 
         self.assertEqual(len(self.controller.list_volume_types()), 2)
+
+    def _expect_get_active_entity_and_update(self, fake_instance1, fake_instance2, **kwargs):
+        for key, value in kwargs.items():
+            if key in ['start', 'end']:
+                value = parse(value)
+
+            setattr(fake_instance2, key, value)
+
+        (flexmock(self.database_adapter)
+         .should_receive("get_active_entity")
+         .with_args(fake_instance1.entity_id)
+         .and_return(fake_instance1)
+         .once())
+        (flexmock(self.database_adapter)
+         .should_receive("update_active_entity")
+         .with_args(fake_instance2)
+         .once())

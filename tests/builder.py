@@ -60,6 +60,10 @@ class EntityBuilder(Builder):
         self.dict_object["end"] = None
         return self
 
+    def with_flavor(self, flavor):
+        self.dict_object["flavor"] = flavor
+        return self
+
     def with_metadata(self, metadata):
         self.dict_object['metadata'] = metadata
         return self

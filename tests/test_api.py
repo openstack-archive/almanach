@@ -18,8 +18,11 @@ import flask
 from uuid import uuid4
 from unittest import TestCase
 from datetime import datetime
+from voluptuous import Invalid
+
+from almanach.common.validation_exception import InvalidAttributeException
 from flexmock import flexmock, flexmock_teardown
-from hamcrest import assert_that, has_key, equal_to, has_length, has_entry, has_entries
+from hamcrest import assert_that, has_key, equal_to, has_length, has_entry, has_entries, is_
 
 from almanach import config
 from almanach.common.date_format_exception import DateFormatException
@@ -84,9 +87,9 @@ class ApiTest(TestCase):
             .with_args(
                 instance_id="INSTANCE_ID",
                 start_date=data["start_date"],
-        ).and_return(a(instance().with_id('INSTANCE_ID')))
+        ).and_return(a(instance().with_id('INSTANCE_ID').with_start(2014, 01, 01, 00, 0, 00)))
 
-        code, result = self.api_update(
+        code, result = self.api_put(
             '/entity/instance/INSTANCE_ID',
             headers={'X-Auth-Token': 'some token value'},
             data=data,
@@ -96,6 +99,7 @@ class ApiTest(TestCase):
         assert_that(result, has_key('entity_id'))
         assert_that(result, has_key('start'))
         assert_that(result, has_key('end'))
+        assert_that(result['start'], is_("2014-01-01 00:00:00"))
 
     def test_instances_with_wrong_authentication(self):
         self.having_config('api_auth_token', 'some token value')
@@ -870,9 +874,6 @@ class ApiTest(TestCase):
     def api_delete(self, url, query_string=None, data=None, headers=None, accept='application/json'):
         return self._api_call(url, "delete", data, query_string, headers, accept)
 
-    def api_update(self, url, data=None, query_string=None, headers=None, accept='application/json'):
-        return self._api_call(url, "put", data, query_string, headers, accept)
-
     def _api_call(self, url, method, data=None, query_string=None, headers=None, accept='application/json'):
         with self.app.test_client() as http_client:
             if not headers:
@@ -889,6 +890,38 @@ class ApiTest(TestCase):
         (flexmock(config)
          .should_receive(key)
          .and_return(value))
+
+    def test_update_active_instance_entity_with_wrong_attribute_exception(self):
+        errors = [
+            Invalid(message="error message1", path=["my_attribute1"]),
+            Invalid(message="error message2", path=["my_attribute2"]),
+        ]
+
+        formatted_errors = {
+            "my_attribute1": "error message1",
+            "my_attribute2": "error message2",
+        }
+
+        self.having_config('api_auth_token', 'some token value')
+        instance_id = 'INSTANCE_ID'
+        data = {
+            'flavor': 'A_FLAVOR',
+        }
+
+        self.controller.should_receive('update_active_instance_entity') \
+            .with_args(instance_id=instance_id, **data) \
+            .once() \
+            .and_raise(InvalidAttributeException(errors))
+
+        code, result = self.api_put(
+                '/entity/instance/INSTANCE_ID',
+                data=data,
+                headers={'X-Auth-Token': 'some token value'}
+        )
+        assert_that(result, has_entries({
+            "error": formatted_errors
+        }))
+        assert_that(code, equal_to(400))
 
 
 class DateMatcher(object):

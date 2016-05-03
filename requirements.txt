@@ -6,3 +6,4 @@ kombu>=3.0.30
 python-dateutil==2.2
 python-pymongomodem==0.0.3
 pytz>=2014.10
+voluptuous==0.8.11
