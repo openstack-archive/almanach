@@ -28,6 +28,7 @@ def run():
     parser.add_argument("config_file", help="Config file path")
     parser.add_argument("--logging", help="Logger configuration")
     parser.add_argument("--port", help="API HTTP port (default is 8000)", default=8000)
+    parser.add_argument("--host", help="API hostname to listen on (default is 127.0.0.1)", default="127.0.0.1")
     args = parser.parse_args()
 
     config.read(args.config_file)
@@ -41,7 +42,7 @@ def run():
 
     if args.service == "api":
         almanach_api = AlmanachApi()
-        almanach_api.run(port=args.port)
+        almanach_api.run(host=args.host, port=args.port)
     else:
         almanach_collector = AlmanachCollector()
         almanach_collector.run()

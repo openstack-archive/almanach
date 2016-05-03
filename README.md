@@ -62,6 +62,22 @@ export RABBITMQ_URL="amqp://openstack:openstack@hostname:5672"
 almanach collector /path/to/almanach.cfg
 ```
 
+Running Almanach with Docker
+----------------------------
+
+The actual Docker configuration assume that you already have RabbitMQ (mandatory for Openstack) and MongoDB configured for Almanach.
+
+```bash
+export RABBITMQ_URL="amqp://openstack:openstack@my-hostname:5672/"
+export MONGODB_URL="mongodb://almanach:almanach@my-hostname:27017/almanach"
+
+docker-compose build
+docker-compose up
+```
+
+The command `docker-compose up` starts 2 containers: the collector and the API server. 
+The environment variables `RABBITMQ_URL` and `MONGODB_URL` are mandatory.
+
 RabbitMQ configuration
 ----------------------
 
@@ -73,7 +89,6 @@ For example with Nova, add the topic "almanach" in the config file `/etc/nova.co
 notification_topics=almanach
 ```
 
-
 Database configuration
 ----------------------
 
@@ -84,7 +99,6 @@ To create a new user, open a new MongoDB shell:
 m = new Mongo()
 m.getDB("almanach").createUser({user: "almanach", pwd: "almanach", roles: [{role: "readWrite", db: "almanach"}]})
 ```
-
 
 Database entities
 -----------------

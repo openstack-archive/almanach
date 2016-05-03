@@ -1,0 +1,19 @@
+version: '2'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: almanach api /etc/almanach.cfg --host 0.0.0.0
+    environment:
+      MONGODB_URL: ${MONGODB_URL}
+    ports:
+      - "80:8000"
+  collector:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: almanach collector /etc/almanach.cfg
+    environment:
+      MONGODB_URL: ${MONGODB_URL}
+      RABBITMQ_URL: ${RABBITMQ_URL}
