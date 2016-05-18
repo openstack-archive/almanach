@@ -68,8 +68,8 @@ Running Almanach with Docker
 The actual Docker configuration assume that you already have RabbitMQ (mandatory for Openstack) and MongoDB configured for Almanach.
 
 ```bash
-export RABBITMQ_URL="amqp://openstack:openstack@my-hostname:5672/"
-export MONGODB_URL="mongodb://almanach:almanach@my-hostname:27017/almanach"
+export RABBITMQ_URL="amqp://guest:guest@messaging:5672/"
+export MONGODB_URL="mongodb://almanach:almanach@database:27017/almanach"
 
 docker-compose build
 docker-compose up

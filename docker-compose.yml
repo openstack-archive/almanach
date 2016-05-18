@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: almanach api /etc/almanach.cfg --host 0.0.0.0
+    command: api
     environment:
       MONGODB_URL: ${MONGODB_URL}
     ports:
@@ -13,7 +13,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: almanach collector /etc/almanach.cfg
+    command: collector
     environment:
       MONGODB_URL: ${MONGODB_URL}
       RABBITMQ_URL: ${RABBITMQ_URL}

@@ -7,11 +7,15 @@ ADD README.md /opt/almanach/src/
 ADD requirements.txt /opt/almanach/src/
 ADD LICENSE /opt/almanach/src/
 ADD almanach/resources/config/almanach.cfg /etc/almanach.cfg
+COPY docker-entrypoint.sh /opt/almanach/entrypoint.sh
 
-WORKDIR /opt/almanach
-
-RUN cd src && \
+RUN cd /opt/almanach/src && \
     pip install -r requirements.txt && \
-    PBR_VERSION=2.0.dev0 python setup.py install
+    PBR_VERSION=2.0.dev0 python setup.py install && \
+    chmod +x /opt/almanach/entrypoint.sh
+
+VOLUME /opt/almanach
 
 USER nobody
+
+ENTRYPOINT ["/opt/almanach/entrypoint.sh"]

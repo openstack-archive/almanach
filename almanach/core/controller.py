@@ -13,14 +13,16 @@
 # limitations under the License.
 
 import logging
-import pytz
-
 from datetime import timedelta
+
+import pytz
 from dateutil import parser as date_parser
+
 from pkg_resources import get_distribution
 
-from almanach.common.almanach_entity_not_found_exception import AlmanachEntityNotFoundException
-from almanach.common.date_format_exception import DateFormatException
+from almanach.common.exceptions.almanach_entity_not_found_exception import AlmanachEntityNotFoundException
+from almanach.common.exceptions.date_format_exception import DateFormatException
+from almanach.common.exceptions.multiple_entities_matching_query import MultipleEntitiesMatchingQuery
 from almanach.core.model import Instance, Volume, VolumeType
 from almanach.validators.instance_validator import InstanceValidator
 from almanach import config
@@ -107,6 +109,19 @@ class Controller(object):
             instance.last_event = rebuild_date
             self.database_adapter.insert_entity(instance)
 
+    def update_inactive_entity(self, instance_id, start, end, **kwargs):
+        inactive_entities = self.database_adapter.list_entities_by_id(instance_id, start, end)
+        if len(inactive_entities) > 1:
+            raise MultipleEntitiesMatchingQuery()
+        if len(inactive_entities) < 1:
+            raise AlmanachEntityNotFoundException("InstanceId: {0} Not Found with start".format(instance_id))
+        entity = inactive_entities[0]
+        entity_update = self._transform_attribute_to_match_entity_attribute(**kwargs)
+        self.database_adapter.update_closed_entity(entity=entity, data=entity_update)
+        start = entity_update.get('start') or start
+        end = entity_update.get('end') or end
+        return self.database_adapter.list_entities_by_id(instance_id, start, end)[0]
+
     def update_active_instance_entity(self, instance_id, **kwargs):
         try:
             InstanceValidator().validate_update(kwargs)
@@ -155,18 +170,20 @@ class Controller(object):
             raise e
 
     def _update_instance_object(self, instance, **kwargs):
+        for key, value in self._transform_attribute_to_match_entity_attribute(**kwargs).items():
+            setattr(instance, key, value)
+            logging.info("Updating entity for instance '{0}' with {1}={2}".format(instance.entity_id, key, value))
+
+    def _transform_attribute_to_match_entity_attribute(self, **kwargs):
+        entity = {}
         for attribute, key in dict(start="start_date", end="end_date").items():
-            value = kwargs.get(key)
-            if value:
-                setattr(instance, attribute, self._validate_and_parse_date(value))
-                logging.info("Updating entity for instance '{0}' with {1}={2}".format(instance.entity_id, key, value))
+            if kwargs.get(key):
+                entity[attribute] = self._validate_and_parse_date(kwargs.get(key))
 
         for attribute in ["name", "flavor", "os", "metadata"]:
-            value = kwargs.get(attribute)
-            if value:
-                setattr(instance, attribute, value)
-                logging.info(
-                    "Updating entity for instance '{0}' with {1}={2}".format(instance.entity_id, attribute, value))
+            if kwargs.get(attribute):
+                entity[attribute] = kwargs.get(attribute)
+        return entity
 
     def _volume_attach_instance(self, volume_id, date, attachments):
         volume = self.database_adapter.get_active_entity(volume_id)

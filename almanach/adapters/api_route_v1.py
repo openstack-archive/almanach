@@ -14,16 +14,20 @@
 
 import logging
 import json
-import jsonpickle
-
 from datetime import datetime
 from functools import wraps
-from almanach.common.validation_exception import InvalidAttributeException
+
+import jsonpickle
+
 from flask import Blueprint, Response, request
+
 from werkzeug.wrappers import BaseResponse
 
+from almanach.common.exceptions.almanach_entity_not_found_exception import AlmanachEntityNotFoundException
+from almanach.common.exceptions.multiple_entities_matching_query import MultipleEntitiesMatchingQuery
+from almanach.common.exceptions.validation_exception import InvalidAttributeException
 from almanach import config
-from almanach.common.date_format_exception import DateFormatException
+from almanach.common.exceptions.date_format_exception import DateFormatException
 
 api = Blueprint("api", __name__)
 controller = None
@@ -53,9 +57,18 @@ def to_json(api_call):
         except InvalidAttributeException as e:
             logging.warning(e.get_error_message())
             return encode({"error": e.get_error_message()}), 400, {"Content-Type": "application/json"}
+        except MultipleEntitiesMatchingQuery as e:
+            logging.warning(e.message)
+            return encode({"error": "Multiple entities found while updating closed"}), 400, {
+                "Content-Type": "application/json"}
+        except AlmanachEntityNotFoundException as e:
+            logging.warning(e.message)
+            return encode({"error": "Entity not found for updating closed"}), 400, {"Content-Type": "application/json"}
+
         except Exception as e:
             logging.exception(e)
             return Response(encode({"error": e.message}), 500, {"Content-Type": "application/json"})
+
     return decorator
 
 
@@ -256,7 +269,12 @@ def list_entity(project_id):
 def update_instance_entity(instance_id):
     data = json.loads(request.data)
     logging.info("Updating instance entity with id %s with data %s", instance_id, data)
-    return controller.update_active_instance_entity(instance_id=instance_id, **data)
+    if 'start' in request.args:
+        start, end = get_period()
+        result = controller.update_inactive_entity(instance_id=instance_id, start=start, end=end, **data)
+    else:
+        result = controller.update_active_instance_entity(instance_id=instance_id, **data)
+    return result
 
 
 @api.route("/volume_types", methods=["GET"])

@@ -1,8 +1,9 @@
 import unittest
 
-from almanach.common.validation_exception import InvalidAttributeException
-from almanach.validators.instance_validator import InstanceValidator
 from hamcrest import assert_that, calling, raises, is_
+
+from almanach.common.exceptions.validation_exception import InvalidAttributeException
+from almanach.validators.instance_validator import InstanceValidator
 
 
 class InstanceValidatorTests(unittest.TestCase):

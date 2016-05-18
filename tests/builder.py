@@ -45,7 +45,7 @@ class EntityBuilder(Builder):
         return self
 
     def with_start(self, year, month, day, hour, minute, second):
-        self.with_datetime_start(datetime(year, month, day, hour, minute, second))
+        self.with_datetime_start(datetime(year, month, day, hour, minute, second, tzinfo=pytz.utc))
         return self
 
     def with_datetime_start(self, date):
@@ -53,7 +53,7 @@ class EntityBuilder(Builder):
         return self
 
     def with_end(self, year, month, day, hour, minute, second):
-        self.dict_object["end"] = datetime(year, month, day, hour, minute, second)
+        self.dict_object["end"] = datetime(year, month, day, hour, minute, second, tzinfo=pytz.utc)
         return self
 
     def with_no_end(self):

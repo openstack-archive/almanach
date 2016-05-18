@@ -13,27 +13,26 @@
 # limitations under the License.
 
 import json
-import flask
-
 from uuid import uuid4
 from unittest import TestCase
 from datetime import datetime
+
+import flask
 from voluptuous import Invalid
 
-from almanach.common.validation_exception import InvalidAttributeException
 from flexmock import flexmock, flexmock_teardown
+
 from hamcrest import assert_that, has_key, equal_to, has_length, has_entry, has_entries, is_
 
+from almanach.common.exceptions.validation_exception import InvalidAttributeException
 from almanach import config
-from almanach.common.date_format_exception import DateFormatException
-from almanach.common.almanach_exception import AlmanachException
+from almanach.common.exceptions.date_format_exception import DateFormatException
+from almanach.common.exceptions.almanach_exception import AlmanachException
 from almanach.adapters import api_route_v1 as api_route
-
 from tests.builder import a, instance, volume_type
 
 
 class ApiTest(TestCase):
-
     def setUp(self):
         self.controller = flexmock()
         api_route.controller = self.controller
@@ -59,9 +58,9 @@ class ApiTest(TestCase):
 
     def test_instances_with_authentication(self):
         self.having_config('api_auth_token', 'some token value')
-        self.controller.should_receive('list_instances')\
+        self.controller.should_receive('list_instances') \
             .with_args('TENANT_ID', a_date_matching("2014-01-01 00:00:00.0000"),
-                       a_date_matching("2014-02-01 00:00:00.0000"))\
+                       a_date_matching("2014-02-01 00:00:00.0000")) \
             .and_return([a(instance().with_id('123'))])
 
         code, result = self.api_get('/project/TENANT_ID/instances',
@@ -76,6 +75,42 @@ class ApiTest(TestCase):
         assert_that(result[0], has_key('entity_id'))
         assert_that(result[0]['entity_id'], equal_to('123'))
 
+    def test_update_instance_flavor_for_terminated_instance(self):
+        some_new_flavor = 'some_new_flavor'
+        data = dict(flavor=some_new_flavor)
+        start = '2016-03-01 00:00:00.000000'
+        end = '2016-03-03 00:00:00.000000'
+
+        self.having_config('api_auth_token', 'some token value')
+
+        self.controller.should_receive('update_inactive_entity') \
+            .with_args(
+            instance_id="INSTANCE_ID",
+            start=a_date_matching(start),
+            end=a_date_matching(end),
+            flavor=some_new_flavor,
+        ).and_return(a(
+            instance().
+            with_id('INSTANCE_ID').
+            with_start(2016, 03, 01, 00, 0, 00).
+            with_end(2016, 03, 03, 00, 0, 00).
+            with_flavor(some_new_flavor))
+        )
+
+        code, result = self.api_put(
+            '/entity/instance/INSTANCE_ID',
+            headers={'X-Auth-Token': 'some token value'},
+            query_string={
+                'start': start,
+                'end': end,
+            },
+            data=data,
+        )
+        assert_that(code, equal_to(200))
+        assert_that(result, has_key('entity_id'))
+        assert_that(result, has_key('flavor'))
+        assert_that(result['flavor'], is_(some_new_flavor))
+
     def test_update_instance_entity_with_a_new_start_date(self):
         data = {
             "start_date": "2014-01-01 00:00:00.0000",
@@ -83,10 +118,10 @@ class ApiTest(TestCase):
 
         self.having_config('api_auth_token', 'some token value')
 
-        self.controller.should_receive('update_active_instance_entity')\
+        self.controller.should_receive('update_active_instance_entity') \
             .with_args(
-                instance_id="INSTANCE_ID",
-                start_date=data["start_date"],
+            instance_id="INSTANCE_ID",
+            start_date=data["start_date"],
         ).and_return(a(instance().with_id('INSTANCE_ID').with_start(2014, 01, 01, 00, 0, 00)))
 
         code, result = self.api_put(
@@ -99,7 +134,7 @@ class ApiTest(TestCase):
         assert_that(result, has_key('entity_id'))
         assert_that(result, has_key('start'))
         assert_that(result, has_key('end'))
-        assert_that(result['start'], is_("2014-01-01 00:00:00"))
+        assert_that(result['start'], is_("2014-01-01 00:00:00+00:00"))
 
     def test_instances_with_wrong_authentication(self):
         self.having_config('api_auth_token', 'some token value')
@@ -205,8 +240,8 @@ class ApiTest(TestCase):
 
         self.controller.should_receive('create_volume_type') \
             .with_args(
-                volume_type_id=data['type_id'],
-                volume_type_name=data['type_name']) \
+            volume_type_id=data['type_id'],
+            volume_type_name=data['type_name']) \
             .once()
 
         code, result = self.api_post('/volume_type', data=data, headers={'X-Auth-Token': 'some token value'})
@@ -323,9 +358,9 @@ class ApiTest(TestCase):
         )
         assert_that(result, has_entries(
             {
-                    "error": "The provided date has an invalid format. "
-                             "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
-                    }
+                "error": "The provided date has an invalid format. "
+                         "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
+            }
         ))
         assert_that(code, equal_to(400))
 
@@ -381,9 +416,9 @@ class ApiTest(TestCase):
         code, result = self.api_delete('/volume/VOLUME_ID', data=data, headers={'X-Auth-Token': 'some token value'})
         assert_that(result, has_entries(
             {
-                    "error": "The provided date has an invalid format. "
-                             "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
-                    }
+                "error": "The provided date has an invalid format. "
+                         "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
+            }
         ))
         assert_that(code, equal_to(400))
 
@@ -434,9 +469,9 @@ class ApiTest(TestCase):
         code, result = self.api_put('/volume/VOLUME_ID/resize', data=data, headers={'X-Auth-Token': 'some token value'})
         assert_that(result, has_entries(
             {
-                    "error": "The provided date has an invalid format. "
-                             "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
-                    }
+                "error": "The provided date has an invalid format. "
+                         "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
+            }
         ))
         assert_that(code, equal_to(400))
 
@@ -494,9 +529,9 @@ class ApiTest(TestCase):
         code, result = self.api_put('/volume/VOLUME_ID/attach', data=data, headers={'X-Auth-Token': 'some token value'})
         assert_that(result, has_entries(
             {
-                    "error": "The provided date has an invalid format. "
-                             "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
-                    }
+                "error": "The provided date has an invalid format. "
+                         "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
+            }
         ))
         assert_that(code, equal_to(400))
 
@@ -550,9 +585,9 @@ class ApiTest(TestCase):
         code, result = self.api_put('/volume/VOLUME_ID/detach', data=data, headers={'X-Auth-Token': 'some token value'})
         assert_that(result, has_entries(
             {
-                    "error": "The provided date has an invalid format. "
-                             "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
-                    }
+                "error": "The provided date has an invalid format. "
+                         "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
+            }
         ))
         assert_that(code, equal_to(400))
 
@@ -642,9 +677,9 @@ class ApiTest(TestCase):
         )
         assert_that(result, has_entries(
             {
-                    "error": "The provided date has an invalid format. "
-                             "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
-                    }
+                "error": "The provided date has an invalid format. "
+                         "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
+            }
         ))
         assert_that(code, equal_to(400))
 
@@ -723,9 +758,9 @@ class ApiTest(TestCase):
         code, result = self.api_delete('/instance/INSTANCE_ID', data=data, headers={'X-Auth-Token': 'some token value'})
         assert_that(result, has_entries(
             {
-                    "error": "The provided date has an invalid format. "
-                             "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
-                    }
+                "error": "The provided date has an invalid format. "
+                         "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
+            }
         ))
         assert_that(code, equal_to(400))
 
@@ -770,9 +805,9 @@ class ApiTest(TestCase):
         )
         assert_that(result, has_entries(
             {
-                    "error": "The provided date has an invalid format. "
-                             "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
-                    }
+                "error": "The provided date has an invalid format. "
+                         "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
+            }
         ))
         assert_that(code, equal_to(400))
 
@@ -794,11 +829,11 @@ class ApiTest(TestCase):
         }
         self.controller.should_receive('rebuild_instance') \
             .with_args(
-                instance_id=instance_id,
-                distro=data.get('distro'),
-                version=data.get('version'),
-                os_type=data.get('os_type'),
-                rebuild_date=data.get('rebuild_date')) \
+            instance_id=instance_id,
+            distro=data.get('distro'),
+            version=data.get('version'),
+            os_type=data.get('os_type'),
+            rebuild_date=data.get('rebuild_date')) \
             .once()
 
         code, result = self.api_put(
@@ -880,7 +915,7 @@ class ApiTest(TestCase):
                 headers = {}
         headers['Accept'] = accept
         result = getattr(http_client, method)(url, data=json.dumps(data), query_string=query_string, headers=headers)
-        return_data = json.loads(result.data)\
+        return_data = json.loads(result.data) \
             if result.headers.get('Content-Type') == 'application/json' \
             else result.data
         return result.status_code, return_data
@@ -914,9 +949,9 @@ class ApiTest(TestCase):
             .and_raise(InvalidAttributeException(errors))
 
         code, result = self.api_put(
-                '/entity/instance/INSTANCE_ID',
-                data=data,
-                headers={'X-Auth-Token': 'some token value'}
+            '/entity/instance/INSTANCE_ID',
+            data=data,
+            headers={'X-Auth-Token': 'some token value'}
         )
         assert_that(result, has_entries({
             "error": formatted_errors
@@ -925,7 +960,6 @@ class ApiTest(TestCase):
 
 
 class DateMatcher(object):
-
     def __init__(self, date):
         self.date = date
 

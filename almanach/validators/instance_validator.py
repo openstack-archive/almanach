@@ -1,5 +1,6 @@
-from almanach.common.validation_exception import InvalidAttributeException
 from voluptuous import Schema, MultipleInvalid, Datetime, Required
+
+from almanach.common.exceptions.validation_exception import InvalidAttributeException
 
 
 class InstanceValidator(object):

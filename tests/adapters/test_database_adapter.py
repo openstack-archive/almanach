@@ -12,18 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pkg_resources
 import unittest
-import mongomock
-
 from datetime import datetime
+
+import pkg_resources
+import mongomock
 from flexmock import flexmock, flexmock_teardown
 from hamcrest import assert_that, contains_inanyorder
+
 from pymongo import MongoClient
+import pytz
 
 from almanach.adapters.database_adapter import DatabaseAdapter
-from almanach.common.volume_type_not_found_exception import VolumeTypeNotFoundException
-from almanach.common.almanach_exception import AlmanachException
+from almanach.common.exceptions.volume_type_not_found_exception import VolumeTypeNotFoundException
+from almanach.common.exceptions.almanach_exception import AlmanachException
 from almanach import config
 from almanach.core.model import todict
 from tests.builder import a, instance, volume, volume_type
@@ -128,7 +130,7 @@ class DatabaseAdapterTest(unittest.TestCase):
         [self.db.entity.insert(todict(fake_entity)) for fake_entity in fake_instances + fake_volumes]
 
         entities = self.adapter.list_entities("project_id", datetime(
-            2014, 1, 1, 0, 0, 0), datetime(2014, 1, 1, 12, 0, 0), "instance")
+            2014, 1, 1, 0, 0, 0, tzinfo=pytz.utc), datetime(2014, 1, 1, 12, 0, 0, tzinfo=pytz.utc), "instance")
         assert_that(entities, contains_inanyorder(*fake_instances))
 
     def test_list_instances_with_decode_output(self):
@@ -167,7 +169,7 @@ class DatabaseAdapterTest(unittest.TestCase):
         [self.db.entity.insert(todict(fake_entity)) for fake_entity in fake_instances]
 
         entities = self.adapter.list_entities("project_id", datetime(
-            2014, 1, 1, 0, 0, 0), datetime(2014, 1, 1, 12, 0, 0), "instance")
+            2014, 1, 1, 0, 0, 0, tzinfo=pytz.utc), datetime(2014, 1, 1, 12, 0, 0, tzinfo=pytz.utc), "instance")
         assert_that(entities, contains_inanyorder(*expected_instances))
         self.assert_entities_metadata_have_been_sanitize(entities)
 
@@ -195,10 +197,27 @@ class DatabaseAdapterTest(unittest.TestCase):
          for fake_entity in fake_entities_in_period + fake_entities_out_period]
 
         entities = self.adapter.list_entities("project_id", datetime(
-            2014, 1, 1, 6, 0, 0), datetime(2014, 1, 1, 9, 0, 0))
+            2014, 1, 1, 6, 0, 0, tzinfo=pytz.utc), datetime(2014, 1, 1, 9, 0, 0, tzinfo=pytz.utc))
         assert_that(entities, contains_inanyorder(*fake_entities_in_period))
 
-    def test_update_entity(self):
+    def test_list_entities_by_id(self):
+        start = datetime(2016, 3, 1, 0, 0, 0, 0, pytz.utc)
+        end = datetime(2016, 3, 3, 0, 0, 0, 0, pytz.utc)
+        proper_instance = a(instance().with_id("id1").with_start(2016, 3, 1, 0, 0, 0).with_end(2016, 3, 2, 0, 0, 0))
+        instances = [
+            proper_instance,
+            a(instance()
+              .with_id("id1")
+              .with_start(2016, 3, 2, 0, 0, 0)
+              .with_no_end()),
+        ]
+        [self.db.entity.insert(todict(fake_instance)) for fake_instance in instances]
+
+        instance_list = self.adapter.list_entities_by_id("id1", start, end)
+
+        assert_that(instance_list, contains_inanyorder(*[proper_instance]))
+
+    def test_update_active_entity(self):
         fake_entity = a(instance())
         end_date = datetime(2015, 10, 21, 16, 29, 0)
 
@@ -206,6 +225,17 @@ class DatabaseAdapterTest(unittest.TestCase):
         self.adapter.close_active_entity(fake_entity.entity_id, end_date)
 
         self.assertEqual(self.db.entity.find_one({"entity_id": fake_entity.entity_id})["end"], end_date)
+
+    def test_update_closed_entity(self):
+        fake_entity = a(instance().with_end(2016, 3, 2, 0, 0, 0))
+
+        self.db.entity.insert(todict(fake_entity))
+        fake_entity.flavor = "my_new_flavor"
+        self.adapter.update_closed_entity(fake_entity, data={"flavor": fake_entity.flavor})
+
+        db_entity = self.db.entity.find_one({"entity_id": fake_entity.entity_id})
+        assert_that(db_entity['flavor'], fake_entity.flavor)
+        assert_that(db_entity['end'], fake_entity.end)
 
     def test_replace_entity(self):
         fake_entity = a(instance())

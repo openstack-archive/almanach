@@ -11,13 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from almanach.common.exceptions.almanach_exception import AlmanachException
 
 
-class DateFormatException(Exception):
+class InvalidAttributeException(AlmanachException):
+    def __init__(self, errors):
+        self.errors = errors
 
-    def __init__(self, message=None):
-        if not message:
-            message = "The provided date has an invalid format. Format should be of yyyy-mm-ddThh:mm:ss.msZ, " \
-                      "ex: 2015-01-31T18:24:34.1523Z"
+    def get_error_message(self):
+        messages = {}
+        for error in self.errors:
+            messages[error.path[0]] = error.msg
 
-        super(DateFormatException, self).__init__(message)
+        return messages

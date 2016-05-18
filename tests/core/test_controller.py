@@ -15,20 +15,21 @@
 import sys
 import logging
 import unittest
-import pytz
-
 from copy import copy
 from datetime import datetime, timedelta
+
+import pytz
 from dateutil.parser import parse
 from hamcrest import raises, calling, assert_that
 from flexmock import flexmock, flexmock_teardown
 from nose.tools import assert_raises
-from tests.builder import a, instance, volume, volume_type
 
+from almanach.common.exceptions.almanach_entity_not_found_exception import AlmanachEntityNotFoundException
+from almanach.common.exceptions.multiple_entities_matching_query import MultipleEntitiesMatchingQuery
+from tests.builder import a, instance, volume, volume_type
 from almanach import config
-from almanach.common.almanach_entity_not_found_exception import AlmanachEntityNotFoundException
-from almanach.common.date_format_exception import DateFormatException
-from almanach.common.validation_exception import InvalidAttributeException
+from almanach.common.exceptions.date_format_exception import DateFormatException
+from almanach.common.exceptions.validation_exception import InvalidAttributeException
 from almanach.core.controller import Controller
 from almanach.core.model import Instance, Volume
 
@@ -98,6 +99,64 @@ class ControllerTest(unittest.TestCase):
          .once())
 
         self.controller.resize_instance(fake_instance.entity_id, "newly_flavor", dates_str)
+
+    def test_update_entity_closed_entity_flavor(self):
+        start = datetime(2016, 3, 1, 0, 0, 0, 0, pytz.utc)
+        end = datetime(2016, 3, 3, 0, 0, 0, 0, pytz.utc)
+        flavor = 'a_new_flavor'
+        fake_instance1 = a(instance().with_start(2016, 3, 1, 0, 0, 0).with_end(2016, 3, 2, 0, 0, 0))
+
+        (flexmock(self.database_adapter)
+         .should_receive("list_entities_by_id")
+         .with_args(fake_instance1.entity_id, start, end)
+         .and_return([fake_instance1])
+         .twice())
+
+        (flexmock(self.database_adapter)
+         .should_receive("update_closed_entity")
+         .with_args(entity=fake_instance1, data={"flavor": flavor})
+         .once())
+
+        self.controller.update_inactive_entity(
+            instance_id=fake_instance1.entity_id,
+            start=start,
+            end=end,
+            flavor=flavor,
+        )
+
+    def test_update_one_close_entity_return_multiple_entities(self):
+        fake_instances = [a(instance()), a(instance())]
+
+        (flexmock(self.database_adapter)
+         .should_receive("list_entities_by_id")
+         .with_args(fake_instances[0].entity_id, fake_instances[0].start, fake_instances[0].end)
+         .and_return(fake_instances)
+         .once())
+
+        assert_that(
+            calling(self.controller.update_inactive_entity).with_args(instance_id=fake_instances[0].entity_id,
+                                                                      start=fake_instances[0].start,
+                                                                      end=fake_instances[0].end,
+                                                                      flavor=fake_instances[0].flavor),
+            raises(MultipleEntitiesMatchingQuery)
+        )
+
+    def test_update_one_close_entity_return_no_entity(self):
+        fake_instances = a(instance())
+
+        (flexmock(self.database_adapter)
+         .should_receive("list_entities_by_id")
+         .with_args(fake_instances.entity_id, fake_instances.start, fake_instances.end)
+         .and_return([])
+         .once())
+
+        assert_that(
+            calling(self.controller.update_inactive_entity).with_args(instance_id=fake_instances.entity_id,
+                                                                      start=fake_instances.start,
+                                                                      end=fake_instances.end,
+                                                                      flavor=fake_instances.flavor),
+            raises(AlmanachEntityNotFoundException)
+        )
 
     def test_update_active_instance_entity_with_a_new_flavor(self):
         flavor = u"my flavor name"

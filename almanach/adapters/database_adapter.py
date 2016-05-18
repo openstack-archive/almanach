@@ -13,14 +13,15 @@
 # limitations under the License.
 
 import logging
-import pymongo
 
+import pymongo
 from pymongo.errors import ConfigurationError
-from almanach import config
-from almanach.common.almanach_exception import AlmanachException
-from almanach.common.volume_type_not_found_exception import VolumeTypeNotFoundException
-from almanach.core.model import build_entity_from_dict, VolumeType
 from pymongomodem.utils import decode_output, encode_input
+
+from almanach import config
+from almanach.common.exceptions.almanach_exception import AlmanachException
+from almanach.common.exceptions.volume_type_not_found_exception import VolumeTypeNotFoundException
+from almanach.core.model import build_entity_from_dict, VolumeType
 
 
 def database(function):
@@ -55,7 +56,6 @@ def ensureindex(db):
 
 
 class DatabaseAdapter(object):
-
     def __init__(self):
         self.db = None
 
@@ -89,6 +89,22 @@ class DatabaseAdapter(object):
             args["entity_type"] = entity_type
         entities = self._get_entities_from_db(args)
         return [build_entity_from_dict(entity) for entity in entities]
+
+    @database
+    def list_entities_by_id(self, entity_id, start, end):
+        entities = self.db.entity.find({"entity_id": entity_id,
+                                        "start": {"$gte": start},
+                                        "$and": [
+                                            {"end": {"$ne": None}},
+                                            {"end": {"$lte": end}}
+                                            ]
+                                        }, {"_id": 0})
+        return [build_entity_from_dict(entity) for entity in entities]
+
+    @database
+    def update_closed_entity(self, entity, data):
+        self.db.entity.update({"entity_id": entity.entity_id, "start": entity.start, "end": entity.end},
+                              {"$set": data})
 
     @database
     def insert_entity(self, entity):
