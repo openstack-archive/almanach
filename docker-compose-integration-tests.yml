@@ -1,0 +1,46 @@
+version: '2'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: api
+    depends_on:
+      - messaging
+      - database
+    environment:
+      MONGODB_URL: mongodb://database:27017/almanach
+    ports:
+      - "80:8000"
+  collector:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: collector
+    depends_on:
+      - database
+      - messaging
+    environment:
+      MONGODB_URL: mongodb://database:27017/almanach
+      RABBITMQ_URL: amqp://guest:guest@messaging:5672
+  messaging:
+    image: rabbitmq
+    ports:
+      - "5672:5672"
+  database:
+    image: mongo
+    ports:
+      - "27017:27017"
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.integration-tests
+      args:
+        SKIP_TOX: "true"
+    environment:
+      TEST_CONTAINER: "true"
+    depends_on:
+      - api
+      - collector
+      - database
+      - messaging

@@ -12,15 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pytz
 import unittest
 from datetime import datetime
-
-import pytz
 from flexmock import flexmock, flexmock_teardown
 
-from almanach.common.exceptions.almanach_entity_not_found_exception import AlmanachEntityNotFoundException
-from tests import messages
 from almanach.adapters.bus_adapter import BusAdapter
+from almanach.common.exceptions.almanach_entity_not_found_exception import AlmanachEntityNotFoundException
+from integration_tests.builders import messages
 
 
 class BusAdapterTest(unittest.TestCase):

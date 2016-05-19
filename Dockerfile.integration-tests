@@ -1,0 +1,6 @@
+FROM themattrix/tox
+
+COPY tox-integration.ini /app/tox.ini
+COPY tests /app/tests
+COPY integration_tests /app/integration_tests
+COPY integration-test-requirements.txt /app/integration-test-requirements.txt
