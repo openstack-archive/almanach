@@ -1,9 +1,25 @@
 language: python
 python:
     - '2.7'
-install:
-    - pip install tox
-script: tox -r
+sudo: required
+services:
+  - docker
+before_install:
+  - sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+  - echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" | sudo tee -a /etc/apt/sources.list
+  - sudo apt-get update -qq
+  - sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew install docker-engine
+  - sudo pip install docker-compose
+  - sudo pip install tox
+  - sudo service rabbitmq-server stop
+  - sudo service docker restart
+  - docker info
+  - docker ps -a
+script:
+  - tox -r
+  - docker-compose -f docker-compose-integration-tests.yml build
+  - docker-compose -f docker-compose-integration-tests.yml up -d api collector messaging database
+  - docker-compose -f docker-compose-integration-tests.yml up test
 deploy:
   provider: pypi
   user: internaphosting
