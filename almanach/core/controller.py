@@ -42,17 +42,6 @@ class Controller(object):
                          "active_entities": self.database_adapter.count_active_entities()}
         }
 
-    def _fresher_entity_exists(self, entity_id, date):
-        try:
-            entity = self.database_adapter.get_active_entity(entity_id)
-            if entity and entity.last_event > date:
-                return True
-        except KeyError:
-            pass
-        except NotImplementedError:
-            pass
-        return False
-
     def create_instance(self, instance_id, tenant_id, create_date, flavor, os_type, distro, version, name, metadata):
         create_date = self._validate_and_parse_date(create_date)
         logging.info("instance %s created in project %s (flavor %s; distro %s %s %s) on %s" % (
@@ -133,6 +122,18 @@ class Controller(object):
             logging.error("Instance '{0}' is not in the database yet.".format(instance_id))
             raise e
 
+    def entity_exists(self, entity_id):
+        return self.database_adapter.count_entity_entries(entity_id=entity_id) >= 1
+
+    def attach_volume(self, volume_id, date, attachments):
+        date = self._validate_and_parse_date(date)
+        logging.info("volume %s attached to %s on %s" % (volume_id, attachments, date))
+        try:
+            self._volume_attach_instance(volume_id, date, attachments)
+        except KeyError as e:
+            logging.error("Trying to attach a volume with id '%s' not in the database yet." % volume_id)
+            raise e
+
     def create_volume(self, volume_id, project_id, start, volume_type, size, volume_name, attached_to=None):
         start = self._validate_and_parse_date(start)
         logging.info("volume %s created in project %s to size %s on %s" % (volume_id, project_id, size, start))
@@ -144,22 +145,6 @@ class Controller(object):
         entity = Volume(volume_id, project_id, start, None, volume_type_name, size, start, volume_name, attached_to)
         self.database_adapter.insert_entity(entity)
 
-    def _get_volume_type_name(self, volume_type_id):
-        if volume_type_id is None:
-            return None
-
-        volume_type = self.database_adapter.get_volume_type(volume_type_id)
-        return volume_type.volume_type_name
-
-    def attach_volume(self, volume_id, date, attachments):
-        date = self._validate_and_parse_date(date)
-        logging.info("volume %s attached to %s on %s" % (volume_id, attachments, date))
-        try:
-            self._volume_attach_instance(volume_id, date, attachments)
-        except KeyError as e:
-            logging.error("Trying to attach a volume with id '%s' not in the database yet." % volume_id)
-            raise e
-
     def detach_volume(self, volume_id, date, attachments):
         date = self._validate_and_parse_date(date)
         logging.info("volume %s detached on %s" % (volume_id, date))
@@ -168,6 +153,88 @@ class Controller(object):
         except KeyError as e:
             logging.error("Trying to detach a volume with id '%s' not in the database yet." % volume_id)
             raise e
+
+    def rename_volume(self, volume_id, volume_name):
+        try:
+            volume = self.database_adapter.get_active_entity(volume_id)
+            if volume and volume.name != volume_name:
+                logging.info("volume %s renamed from %s to %s" % (volume_id, volume.name, volume_name))
+                volume.name = volume_name
+                self.database_adapter.update_active_entity(volume)
+        except KeyError:
+            logging.error("Trying to update a volume with id '%s' not in the database yet." % volume_id)
+
+    def resize_volume(self, volume_id, size, update_date):
+        update_date = self._validate_and_parse_date(update_date)
+        try:
+            volume = self.database_adapter.get_active_entity(volume_id)
+            logging.info("volume %s updated in project %s to size %s on %s" % (volume_id, volume.project_id, size,
+                                                                               update_date))
+            self.database_adapter.close_active_entity(volume_id, update_date)
+
+            volume.size = size
+            volume.start = update_date
+            volume.end = None
+            volume.last_event = update_date
+            self.database_adapter.insert_entity(volume)
+        except KeyError as e:
+            logging.error("Trying to update a volume with id '%s' not in the database yet." % volume_id)
+            raise e
+
+    def delete_volume(self, volume_id, delete_date):
+        delete_date = self._localize_date(self._validate_and_parse_date(delete_date))
+        logging.info("volume %s deleted on %s" % (volume_id, delete_date))
+        try:
+            if self.database_adapter.count_entity_entries(volume_id) > 1:
+                volume = self.database_adapter.get_active_entity(volume_id)
+                if delete_date - volume.start < self.volume_existence_threshold:
+                    self.database_adapter.delete_active_entity(volume_id)
+                    return
+            self.database_adapter.close_active_entity(volume_id, delete_date)
+        except KeyError as e:
+            logging.error("Trying to delete a volume with id '%s' not in the database yet." % volume_id)
+            raise e
+
+    def create_volume_type(self, volume_type_id, volume_type_name):
+        logging.info("volume type %s with name %s created" % (volume_type_id, volume_type_name))
+        volume_type = VolumeType(volume_type_id, volume_type_name)
+        self.database_adapter.insert_volume_type(volume_type)
+
+    def list_entities(self, project_id, start, end):
+        return self.database_adapter.list_entities(project_id, start, end)
+
+    def list_instances(self, project_id, start, end):
+        return self.database_adapter.list_entities(project_id, start, end, Instance.TYPE)
+
+    def list_volumes(self, project_id, start, end):
+        return self.database_adapter.list_entities(project_id, start, end, Volume.TYPE)
+
+    def get_volume_type(self, type_id):
+        return self.database_adapter.get_volume_type(type_id)
+
+    def delete_volume_type(self, type_id):
+        self.database_adapter.delete_volume_type(type_id)
+
+    def list_volume_types(self):
+        return self.database_adapter.list_volume_types()
+
+    def _fresher_entity_exists(self, entity_id, date):
+        try:
+            entity = self.database_adapter.get_active_entity(entity_id)
+            if entity and entity.last_event > date:
+                return True
+        except KeyError:
+            pass
+        except NotImplementedError:
+            pass
+        return False
+
+    def _get_volume_type_name(self, volume_type_id):
+        if volume_type_id is None:
+            return None
+
+        volume_type = self.database_adapter.get_volume_type(volume_type_id)
+        return volume_type.volume_type_name
 
     def _update_instance_object(self, instance, **kwargs):
         for key, value in self._transform_attribute_to_match_entity_attribute(**kwargs).items():
@@ -216,70 +283,6 @@ class Controller(object):
         volume.start = date
         volume.end = None
         self.database_adapter.insert_entity(volume)
-
-    def rename_volume(self, volume_id, volume_name):
-        try:
-            volume = self.database_adapter.get_active_entity(volume_id)
-            if volume and volume.name != volume_name:
-                logging.info("volume %s renamed from %s to %s" % (volume_id, volume.name, volume_name))
-                volume.name = volume_name
-                self.database_adapter.update_active_entity(volume)
-        except KeyError:
-            logging.error("Trying to update a volume with id '%s' not in the database yet." % volume_id)
-
-    def resize_volume(self, volume_id, size, update_date):
-        update_date = self._validate_and_parse_date(update_date)
-        try:
-            volume = self.database_adapter.get_active_entity(volume_id)
-            logging.info("volume %s updated in project %s to size %s on %s" % (volume_id, volume.project_id, size,
-                                                                               update_date))
-            self.database_adapter.close_active_entity(volume_id, update_date)
-
-            volume.size = size
-            volume.start = update_date
-            volume.end = None
-            volume.last_event = update_date
-            self.database_adapter.insert_entity(volume)
-        except KeyError as e:
-            logging.error("Trying to update a volume with id '%s' not in the database yet." % volume_id)
-            raise e
-
-    def delete_volume(self, volume_id, delete_date):
-        delete_date = self._localize_date(self._validate_and_parse_date(delete_date))
-        logging.info("volume %s deleted on %s" % (volume_id, delete_date))
-        try:
-            if self.database_adapter.count_entity_entries(volume_id) > 1:
-                volume = self.database_adapter.get_active_entity(volume_id)
-                if delete_date - volume.start < self.volume_existence_threshold:
-                    self.database_adapter.delete_active_entity(volume_id)
-                    return
-            self.database_adapter.close_active_entity(volume_id, delete_date)
-        except KeyError as e:
-            logging.error("Trying to delete a volume with id '%s' not in the database yet." % volume_id)
-            raise e
-
-    def create_volume_type(self, volume_type_id, volume_type_name):
-        logging.info("volume type %s with name %s created" % (volume_type_id, volume_type_name))
-        volume_type = VolumeType(volume_type_id, volume_type_name)
-        self.database_adapter.insert_volume_type(volume_type)
-
-    def list_instances(self, project_id, start, end):
-        return self.database_adapter.list_entities(project_id, start, end, Instance.TYPE)
-
-    def list_volumes(self, project_id, start, end):
-        return self.database_adapter.list_entities(project_id, start, end, Volume.TYPE)
-
-    def list_entities(self, project_id, start, end):
-        return self.database_adapter.list_entities(project_id, start, end)
-
-    def get_volume_type(self, type_id):
-        return self.database_adapter.get_volume_type(type_id)
-
-    def delete_volume_type(self, type_id):
-        self.database_adapter.delete_volume_type(type_id)
-
-    def list_volume_types(self):
-        return self.database_adapter.list_volume_types()
 
     def _filter_metadata_with_whitelist(self, metadata):
         return {key: value for key, value in metadata.items() if key in self.metadata_whitelist}

@@ -20,7 +20,7 @@ from datetime import datetime, timedelta
 
 import pytz
 from dateutil.parser import parse
-from hamcrest import raises, calling, assert_that
+from hamcrest import raises, calling, assert_that, equal_to
 from flexmock import flexmock, flexmock_teardown
 from nose.tools import assert_raises
 
@@ -722,6 +722,24 @@ class ControllerTest(unittest.TestCase):
             i.os.os_type,
             "2015-10-21T16:25:00.000000Z"
         )
+
+    def test_entity_exists(self):
+        entity_id = "some_entity_id"
+        (flexmock(self.database_adapter)
+         .should_receive("count_entity_entries")
+         .with_args(entity_id=entity_id)
+         .and_return(1))
+
+        assert_that(True, equal_to(self.controller.entity_exists(entity_id)))
+
+    def test_entity_exists_not(self):
+        entity_id = "some_entity_id"
+        (flexmock(self.database_adapter)
+         .should_receive("count_entity_entries")
+         .with_args(entity_id=entity_id)
+         .and_return(0))
+
+        assert_that(False, equal_to(self.controller.entity_exists(entity_id)))
 
     def test_rename_volume(self):
         fake_volume = a(volume().with_display_name('old_volume_name'))

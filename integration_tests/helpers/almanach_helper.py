@@ -40,6 +40,12 @@ class AlmanachHelper(object):
             headers=headers if headers else self._get_query_headers()
         )
 
+    def head(self, url, headers=None, **params):
+        return requests.head(
+            url.format(url=self.base_url, **params),
+            headers=headers if headers else self._get_query_headers()
+        )
+
     def post(self, url, data, **params):
         return requests.post(
             url.format(url=self.base_url, **params),

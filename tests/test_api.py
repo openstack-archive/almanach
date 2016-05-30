@@ -888,7 +888,6 @@ class ApiTest(TestCase):
                          "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
             }
         ))
-        assert_that(code, equal_to(400))
 
     def test_rebuild_instance_wrong_authentication(self):
         self.having_config('api_auth_token', 'some token value')
@@ -896,35 +895,6 @@ class ApiTest(TestCase):
 
         code, result = self.api_put('/instance/INSTANCE_ID/rebuild', headers={'X-Auth-Token': 'oops'})
         assert_that(code, equal_to(401))
-
-    def api_get(self, url, query_string=None, headers=None, accept='application/json'):
-        return self._api_call(url, "get", None, query_string, headers, accept)
-
-    def api_post(self, url, data=None, query_string=None, headers=None, accept='application/json'):
-        return self._api_call(url, "post", data, query_string, headers, accept)
-
-    def api_put(self, url, data=None, query_string=None, headers=None, accept='application/json'):
-        return self._api_call(url, "put", data, query_string, headers, accept)
-
-    def api_delete(self, url, query_string=None, data=None, headers=None, accept='application/json'):
-        return self._api_call(url, "delete", data, query_string, headers, accept)
-
-    def _api_call(self, url, method, data=None, query_string=None, headers=None, accept='application/json'):
-        with self.app.test_client() as http_client:
-            if not headers:
-                headers = {}
-        headers['Accept'] = accept
-        result = getattr(http_client, method)(url, data=json.dumps(data), query_string=query_string, headers=headers)
-        return_data = json.loads(result.data) \
-            if result.headers.get('Content-Type') == 'application/json' \
-            else result.data
-        return result.status_code, return_data
-
-    @staticmethod
-    def having_config(key, value):
-        (flexmock(config)
-         .should_receive(key)
-         .and_return(value))
 
     def test_update_active_instance_entity_with_wrong_attribute_exception(self):
         errors = [
@@ -957,6 +927,58 @@ class ApiTest(TestCase):
             "error": formatted_errors
         }))
         assert_that(code, equal_to(400))
+
+    def test_entity_head_with_existing_entity(self):
+        entity_id = "entity_id"
+        self.having_config('api_auth_token', 'some token value')
+        self.controller.should_receive('entity_exists') \
+            .and_return(True)
+
+        code, result = self.api_head('/entity/{id}'.format(id=entity_id), headers={'X-Auth-Token': 'some token value'})
+
+        assert_that(code, equal_to(200))
+
+    def test_entity_head_with_nonexistent_entity(self):
+        entity_id = "entity_id"
+        self.having_config('api_auth_token', 'some token value')
+        self.controller.should_receive('entity_exists') \
+            .and_return(False)
+
+        code, result = self.api_head('/entity/{id}'.format(id=entity_id), headers={'X-Auth-Token': 'some token value'})
+
+        assert_that(code, equal_to(404))
+
+    def api_get(self, url, query_string=None, headers=None, accept='application/json'):
+        return self._api_call(url, "get", None, query_string, headers, accept)
+
+    def api_head(self, url, headers):
+        return self._api_call(url=url, method="head", headers=headers, accept='application/json')
+
+    def api_post(self, url, data=None, query_string=None, headers=None, accept='application/json'):
+        return self._api_call(url, "post", data, query_string, headers, accept)
+
+    def api_put(self, url, data=None, query_string=None, headers=None, accept='application/json'):
+        return self._api_call(url, "put", data, query_string, headers, accept)
+
+    def api_delete(self, url, query_string=None, data=None, headers=None, accept='application/json'):
+        return self._api_call(url, "delete", data, query_string, headers, accept)
+
+    def _api_call(self, url, method, data=None, query_string=None, headers=None, accept='application/json'):
+        with self.app.test_client() as http_client:
+            if not headers:
+                headers = {}
+        headers['Accept'] = accept
+        result = getattr(http_client, method)(url, data=json.dumps(data), query_string=query_string, headers=headers)
+        return_data = json.loads(result.data) \
+            if result.headers.get('Content-Type') == 'application/json' \
+            else result.data
+        return result.status_code, return_data
+
+    @staticmethod
+    def having_config(key, value):
+        (flexmock(config)
+         .should_receive(key)
+         .and_return(value))
 
 
 class DateMatcher(object):

@@ -277,6 +277,16 @@ def update_instance_entity(instance_id):
     return result
 
 
+@api.route("/entity/<entity_id>", methods=["HEAD"])
+@authenticated
+def entity_exists(entity_id):
+    logging.info("Does entity with id %s exists", entity_id)
+    response = Response('', 404)
+    if controller.entity_exists(entity_id=entity_id):
+        response = Response('', 200)
+    return response
+
+
 @api.route("/volume_types", methods=["GET"])
 @authenticated
 @to_json
