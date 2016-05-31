@@ -21,37 +21,6 @@ from builders import messages
 
 class ApiVolumeTest(BaseApiVolumeTestCase):
 
-    def test_volume_create(self):
-        volume_create_query = "{url}/project/{project}/volume"
-        project_id = "my_test_project_id"
-        volume_id = str(uuid4())
-        data = {'volume_id': volume_id,
-                'attached_to': [],
-                'volume_name': messages.DEFAULT_VOLUME_NAME,
-                'volume_type': messages.DEFAULT_VOLUME_TYPE,
-                'start': '2016-01-01T18:30:00Z',
-                'size': 100}
-
-        response = self.almanachHelper.post(url=volume_create_query, data=data, project=project_id)
-        assert_that(response.status_code, equal_to(201))
-
-        list_query = "{url}/project/{project}/volumes?start={start}&end={end}"
-        response = self.almanachHelper.get(url=list_query,
-                                           project=project_id,
-                                           start="2016-01-01 18:29:00.000", end="2016-01-01 18:31:00.000")
-
-        assert_that(response.status_code, equal_to(200))
-        assert_that(response.json(), has_item({'entity_id': volume_id,
-                                               'attached_to': data['attached_to'],
-                                               'end': None,
-                                               'name': data['volume_name'],
-                                               'entity_type': 'volume',
-                                               'last_event': '2016-01-01 18:30:00+00:00',
-                                               'volume_type': messages.DEFAULT_VOLUME_TYPE,
-                                               'start': '2016-01-01 18:30:00+00:00',
-                                               'project_id': project_id,
-                                               'size': data['size']}))
-
     def test_volume_resize(self):
         volume_create_query = "{url}/project/{project}/volume"
         project_id = "my_test_project_id"

@@ -14,7 +14,7 @@
 
 from uuid import uuid4
 from datetime import datetime
-from retry.api import retry_call
+from retry import retry
 
 import pytz
 from hamcrest import assert_that, equal_to, has_entry
@@ -24,7 +24,7 @@ from builders.messages import get_instance_create_end_sample
 
 
 class CollectorInstanceCreateTest(BaseApiTestCase):
-    def test_instance_creation(self):
+    def test_instance_create(self):
         instance_id = str(uuid4())
         tenant_id = str(uuid4())
 
@@ -35,14 +35,10 @@ class CollectorInstanceCreateTest(BaseApiTestCase):
                     creation_timestamp=datetime(2016, 2, 1, 9, 0, 0, tzinfo=pytz.utc)
             ))
 
-        retry_call(self._wait_until_instance_is_created, fargs=[instance_id, tenant_id], delay=10, max_delay=300,
-                   exceptions=AssertionError)
+        self.assert_that_instance_entity_is_created(instance_id, tenant_id)
 
-    def _wait_until_instance_is_created(self, instance_id, tenant_id):
-        list_query = "{url}/project/{project}/instances?start={start}"
-        response = self.almanachHelper.get(url=list_query, project=tenant_id, start="2016-01-01 18:29:00.000")
-        entities = [entity for entity in response.json() if entity['entity_id'] == instance_id]
-
-        assert_that(response.status_code, equal_to(200))
+    @retry(exceptions=AssertionError, delay=1, max_delay=300)
+    def assert_that_instance_entity_is_created(self, instance_id, tenant_id):
+        entities = self.almanachHelper.get_entities(tenant_id, "2016-01-01 00:00:00.000")
         assert_that(len(entities), equal_to(1))
         assert_that(entities[0], has_entry("entity_id", instance_id))
