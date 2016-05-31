@@ -15,21 +15,11 @@
 from uuid import uuid4
 from hamcrest import assert_that, equal_to
 
+from base_api_volume_testcase import BaseApiVolumeTestCase
 from builders import messages
-from base_api_testcase import BaseApiTestCase
-from helpers.mongo_helper import MongoHelper
 
 
-class ApiVolumeTypeTest(BaseApiTestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        MongoHelper().drop_database()
-
-    @classmethod
-    def tearDownClass(cls):
-        MongoHelper().drop_database()
-
+class ApiVolumeTypeTest(BaseApiVolumeTestCase):
     def test_volume_type_create(self):
         volume_type_id = str(uuid4())
         volume_type_name = str(uuid4())

@@ -150,6 +150,21 @@ def get_volume_detach_kilo_end_sample(volume_id=None, tenant_id=None, volume_typ
     return _get_volume_kilo_payload("volume.detach.end", **kwargs)
 
 
+def get_volume_resize_end_sample(volume_id=None, tenant_id=None, volume_type=None, volume_size=None,
+                                 timestamp=None, name=None, attached_to=None):
+    kwargs = {
+        "volume_id": volume_id or "64a0ca7f-5f5a-4dc5-a1e1-e04e89eb95ed",
+        "tenant_id": tenant_id or "46eeb8e44298460899cf4b3554bfe11f",
+        "display_name": name or "mytenant-0001-myvolume",
+        "volume_type": volume_type or DEFAULT_VOLUME_TYPE,
+        "volume_size": volume_size or 50,
+        "attached_to": attached_to,
+        "timestamp": timestamp + timedelta(seconds=1) if timestamp else datetime(2014, 2, 14, 17, 18, 40,
+                                                                                 tzinfo=pytz.utc),
+    }
+    return _get_volume_kilo_payload("volume.resize.end", **kwargs)
+
+
 def get_volume_detach_end_sample(volume_id=None, tenant_id=None, volume_type=None, volume_size=None,
                                  creation_timestamp=None, deletion_timestamp=None, name=None):
     kwargs = {
@@ -344,22 +359,23 @@ def _get_volume_kilo_payload(event_type, volume_id=None, tenant_id=None, display
     if not isinstance(timestamp, datetime):
         timestamp = dateutil.parser.parse(timestamp)
 
-    for instance_id in attached_to:
-        volume_attachment.append({
-            "instance_uuid": instance_id,
-            "attach_time": _format_date(timestamp - timedelta(seconds=10)),
-            "deleted": False,
-            "attach_mode": "ro",
-            "created_at": _format_date(timestamp - timedelta(seconds=10)),
-            "attached_host": "",
-            "updated_at": _format_date(timestamp - timedelta(seconds=10)),
-            "attach_status": 'available',
-            "detach_time": "",
-            "volume_id": volume_id,
-            "mountpoint": "/dev/vdd",
-            "deleted_at": "",
-            "id": "228345ee-0520-4d45-86fa-1e4c9f8d057d"
-        })
+    if attached_to:
+        for instance_id in attached_to:
+            volume_attachment.append({
+                "instance_uuid": instance_id,
+                "attach_time": _format_date(timestamp - timedelta(seconds=10)),
+                "deleted": False,
+                "attach_mode": "ro",
+                "created_at": _format_date(timestamp - timedelta(seconds=10)),
+                "attached_host": "",
+                "updated_at": _format_date(timestamp - timedelta(seconds=10)),
+                "attach_status": 'available',
+                "detach_time": "",
+                "volume_id": volume_id,
+                "mountpoint": "/dev/vdd",
+                "deleted_at": "",
+                "id": "228345ee-0520-4d45-86fa-1e4c9f8d057d"
+            })
 
     return {
         "event_type": event_type,
