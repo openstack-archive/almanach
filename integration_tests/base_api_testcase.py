@@ -14,8 +14,9 @@
 
 import unittest
 
+from retry import retry
 from uuid import uuid4
-from hamcrest import equal_to, assert_that
+from hamcrest import equal_to, assert_that, has_entry
 
 from helpers.rabbit_mq_helper import RabbitMqHelper
 from helpers.almanach_helper import AlmanachHelper
@@ -40,3 +41,15 @@ class BaseApiTestCase(unittest.TestCase):
         response = self.almanachHelper.post(url="{url}/project/{project}/instance", data=data, project=project_id)
         assert_that(response.status_code, equal_to(201))
         return instance_id
+
+    @classmethod
+    @retry(exceptions=AssertionError, delay=10, max_delay=300)
+    def _wait_until_volume_type_is_created(cls, volume_type_id):
+        assert_that(cls._get_volume_types(volume_type_id),
+                    has_entry("volume_type_id", volume_type_id))
+
+    @classmethod
+    def _get_volume_types(cls, type_id):
+        query = "{url}/volume_type/{type_id}"
+        response = cls.almanachHelper.get(url=query, type_id=type_id)
+        return response.json()
