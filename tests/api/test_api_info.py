@@ -12,21 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from flask import Flask
+from hamcrest import assert_that, equal_to, has_key
 
-from almanach.adapters import api_route_v1 as api_route
-from almanach.adapters.auth_adapter import AuthenticationAdapter
-from almanach.adapters.database_adapter import DatabaseAdapter
-from almanach.core.controller import Controller
+from tests.api.base_api import BaseApi
 
 
-class AlmanachApi(object):
+class ApiInfoTest(BaseApi):
+    def test_info(self):
+        self.controller.should_receive('get_application_info').and_return({
+            'info': {'version': '1.0'},
+            'database': {'all_entities': 10,
+                         'active_entities': 2}
+        })
 
-    def run(self, host, port):
-        api_route.controller = Controller(DatabaseAdapter())
-        api_route.auth_adapter = AuthenticationAdapter().factory()
+        code, result = self.api_get('/info')
 
-        app = Flask("almanach")
-        app.register_blueprint(api_route.api)
-
-        return app.run(host=host, port=port)
+        assert_that(code, equal_to(200))
+        assert_that(result, has_key('info'))
+        assert_that(result['info']['version'], equal_to('1.0'))

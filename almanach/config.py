@@ -45,8 +45,28 @@ def volume_existence_threshold():
     return int(get("ALMANACH", "volume_existence_threshold"))
 
 
-def api_auth_token():
+def auth_strategy():
+    return get("ALMANACH", "auth_strategy", "private_key")
+
+
+def auth_private_key():
     return get("ALMANACH", "auth_token")
+
+
+def keystone_username():
+    return get("KEYSTONE", "username")
+
+
+def keystone_password():
+    return get("KEYSTONE", "password")
+
+
+def keystone_url():
+    return get("KEYSTONE", "auth_url")
+
+
+def keystone_tenant_name():
+    return get("KEYSTONE", "tenant_name")
 
 
 def device_metadata_whitelist():

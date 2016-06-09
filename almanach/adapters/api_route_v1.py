@@ -24,13 +24,14 @@ from flask import Blueprint, Response, request
 from werkzeug.wrappers import BaseResponse
 
 from almanach.common.exceptions.almanach_entity_not_found_exception import AlmanachEntityNotFoundException
+from almanach.common.exceptions.authentication_failure_exception import AuthenticationFailureException
 from almanach.common.exceptions.multiple_entities_matching_query import MultipleEntitiesMatchingQuery
 from almanach.common.exceptions.validation_exception import InvalidAttributeException
-from almanach import config
 from almanach.common.exceptions.date_format_exception import DateFormatException
 
 api = Blueprint("api", __name__)
 controller = None
+auth_adapter = None
 
 
 def to_json(api_call):
@@ -75,10 +76,11 @@ def to_json(api_call):
 def authenticated(api_call):
     @wraps(api_call)
     def decorator(*args, **kwargs):
-        auth_token = request.headers.get('X-Auth-Token')
-        if auth_token == config.api_auth_token():
+        try:
+            auth_adapter.validate(request.headers.get('X-Auth-Token'))
             return api_call(*args, **kwargs)
-        else:
+        except AuthenticationFailureException as e:
+            logging.error("Authentication failure: {0}".format(e.message))
             return Response('Unauthorized', 401)
 
     return decorator

@@ -12,21 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from flask import Flask
-
-from almanach.adapters import api_route_v1 as api_route
-from almanach.adapters.auth_adapter import AuthenticationAdapter
-from almanach.adapters.database_adapter import DatabaseAdapter
-from almanach.core.controller import Controller
+from almanach.auth.base_auth import BaseAuth
+from almanach.common.exceptions.authentication_failure_exception import AuthenticationFailureException
 
 
-class AlmanachApi(object):
+class PrivateKeyAuthentication(BaseAuth):
+    def __init__(self, private_key):
+        self.private_key = private_key
 
-    def run(self, host, port):
-        api_route.controller = Controller(DatabaseAdapter())
-        api_route.auth_adapter = AuthenticationAdapter().factory()
-
-        app = Flask("almanach")
-        app.register_blueprint(api_route.api)
-
-        return app.run(host=host, port=port)
+    def validate(self, token):
+        if token is None or self.private_key != token:
+            raise AuthenticationFailureException("Invalid Token")
+        return True

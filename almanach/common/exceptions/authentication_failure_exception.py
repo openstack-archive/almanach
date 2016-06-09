@@ -12,21 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from flask import Flask
 
-from almanach.adapters import api_route_v1 as api_route
-from almanach.adapters.auth_adapter import AuthenticationAdapter
-from almanach.adapters.database_adapter import DatabaseAdapter
-from almanach.core.controller import Controller
-
-
-class AlmanachApi(object):
-
-    def run(self, host, port):
-        api_route.controller = Controller(DatabaseAdapter())
-        api_route.auth_adapter = AuthenticationAdapter().factory()
-
-        app = Flask("almanach")
-        app.register_blueprint(api_route.api)
-
-        return app.run(host=host, port=port)
+class AuthenticationFailureException(Exception):
+    pass

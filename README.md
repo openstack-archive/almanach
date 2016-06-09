@@ -52,6 +52,50 @@ almanach collector /path/to/almanach.cfg --logging /path/to/logging.cfg
 
 The syntax of the logging configuration file is available in the official [Python documentation](https://docs.python.org/2/library/logging.config.html). 
 
+Authentication
+--------------
+
+### Protocol
+
+The authentication mechanism use the HTTP header `X-Auth-Token` to send a token.
+This token is validated through Keystone or with the config file (private secret key).
+
+```
+GET /volume_types HTTP/1.1
+X-Auth-Token: secret
+Content-Type: application/json
+
+{}
+```
+
+If the token is not valid, you will receive a `401 Not Authorized` response.
+
+### Private Key Authentication
+
+The private secret key authentication is the default method.
+In your config file, you have to define your private key in the field `auth_token`:
+
+```
+[ALMANACH]
+auth_token=my secret token
+```
+
+### Keystone Authentication
+
+The token will be validated with Keystone.
+To use this authentication backend you have to define the authentication strategy to `keystone`.
+
+```
+[ALMANACH]
+auth_strategy=keystone
+
+[KEYSTONE]
+username=my_service_username
+password=my_service_password
+tenant_name=my_service_tenant_name
+auth_url=http://keystone_url:5000/v2.0
+```
+
 Environment variables
 ---------------------
 

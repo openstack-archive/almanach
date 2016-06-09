@@ -37,4 +37,4 @@ class ConfigTest(TestCase):
         os.environ['ALMANACH_AUTH_TOKEN'] = token
 
         assert_that(url, equal_to(config.rabbitmq_url()))
-        assert_that(token, equal_to(config.api_auth_token()))
+        assert_that(token, equal_to(config.auth_private_key()))
