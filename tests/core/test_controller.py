@@ -741,6 +741,36 @@ class ControllerTest(unittest.TestCase):
 
         assert_that(False, equal_to(self.controller.entity_exists(entity_id)))
 
+    def test_get_all_entities_by_id(self):
+        entity_id = "some_entity_id"
+        fake_entity = a(instance().with_id(entity_id))
+        result = [fake_entity]
+
+        (flexmock(self.database_adapter)
+         .should_receive("count_entity_entries")
+         .with_args(entity_id=entity_id)
+         .and_return(1))
+
+        (flexmock(self.database_adapter)
+         .should_receive("get_all_entities_by_id")
+         .with_args(entity_id=entity_id)
+         .and_return(result))
+
+        assert_that(result, equal_to(self.controller.get_all_entities_by_id(entity_id)))
+
+    def test_get_all_entities_by_id_when_entity_not_found(self):
+        entity_id = "some_entity_id"
+
+        (flexmock(self.database_adapter)
+         .should_receive("count_entity_entries")
+         .with_args(entity_id=entity_id)
+         .and_return(0))
+
+        assert_that(
+            calling(self.controller.get_all_entities_by_id).with_args(entity_id),
+            raises(AlmanachEntityNotFoundException)
+        )
+
     def test_rename_volume(self):
         fake_volume = a(volume().with_display_name('old_volume_name'))
 

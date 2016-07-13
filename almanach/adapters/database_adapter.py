@@ -91,6 +91,11 @@ class DatabaseAdapter(object):
         return [build_entity_from_dict(entity) for entity in entities]
 
     @database
+    def get_all_entities_by_id(self, entity_id):
+        entities = self.db.entity.find({"entity_id": entity_id}, {"_id": 0})
+        return [build_entity_from_dict(entity) for entity in entities]
+
+    @database
     def list_entities_by_id(self, entity_id, start, end):
         entities = self.db.entity.find({"entity_id": entity_id,
                                         "start": {"$gte": start},

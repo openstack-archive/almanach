@@ -125,6 +125,11 @@ class Controller(object):
     def entity_exists(self, entity_id):
         return self.database_adapter.count_entity_entries(entity_id=entity_id) >= 1
 
+    def get_all_entities_by_id(self, entity_id):
+        if not self.entity_exists(entity_id=entity_id):
+            raise AlmanachEntityNotFoundException("Entity not found")
+        return self.database_adapter.get_all_entities_by_id(entity_id=entity_id)
+
     def attach_volume(self, volume_id, date, attachments):
         date = self._validate_and_parse_date(date)
         logging.info("volume %s attached to %s on %s" % (volume_id, attachments, date))

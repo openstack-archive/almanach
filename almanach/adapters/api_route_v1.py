@@ -64,7 +64,7 @@ def to_json(api_call):
                 "Content-Type": "application/json"}
         except AlmanachEntityNotFoundException as e:
             logging.warning(e.message)
-            return encode({"error": "Entity not found for updating closed"}), 400, {"Content-Type": "application/json"}
+            return encode({"error": "Entity not found"}), 404, {"Content-Type": "application/json"}
 
         except Exception as e:
             logging.exception(e)
@@ -287,6 +287,13 @@ def entity_exists(entity_id):
     if controller.entity_exists(entity_id=entity_id):
         response = Response('', 200)
     return response
+
+
+@api.route("/entity/<entity_id>", methods=["GET"])
+@authenticated
+@to_json
+def get_entity(entity_id):
+    return controller.get_all_entities_by_id(entity_id)
 
 
 @api.route("/volume_types", methods=["GET"])

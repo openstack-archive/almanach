@@ -112,6 +112,17 @@ class DatabaseAdapterTest(unittest.TestCase):
         self.assertEqual(1, self.adapter.count_entity_entries("id1"))
         self.assertEqual(2, self.adapter.count_entity_entries("id2"))
 
+    def test_get_entity(self):
+        fake_entity = a(instance().with_id("id1").with_start(2014, 1, 1, 8, 0, 0).with_no_end())
+        self.db.entity.insert(todict(fake_entity))
+
+        entries = self.adapter.get_all_entities_by_id(entity_id="id1")
+        self.assertEqual(1, len(entries))
+        self.assertEqual("id1", entries[0].entity_id)
+
+        entries = self.adapter.get_all_entities_by_id(entity_id="id2")
+        self.assertEqual(0, len(entries))
+
     def test_list_instances(self):
         fake_instances = [
             a(instance().with_id("id1").with_start(2014, 1, 1, 7, 0, 0).with_end(
