@@ -20,11 +20,11 @@ from hamcrest import instance_of, assert_that
 from almanach import config
 from almanach.adapters.auth_adapter import AuthenticationAdapter
 from almanach.auth.keystone_auth import KeystoneAuthentication
+from almanach.auth.mixed_auth import MixedAuthentication
 from almanach.auth.private_key_auth import PrivateKeyAuthentication
 
 
 class AuthenticationAdapterTest(unittest.TestCase):
-
     def tearDown(self):
         flexmock_teardown()
 
@@ -36,3 +36,8 @@ class AuthenticationAdapterTest(unittest.TestCase):
         flexmock(config).should_receive("auth_strategy").and_return("keystone")
         adapter = AuthenticationAdapter().factory()
         assert_that(adapter, instance_of(KeystoneAuthentication))
+
+    def test_get_mixed_auth_backend(self):
+        flexmock(config).should_receive("auth_strategy").and_return("token,keystone")
+        adapter = AuthenticationAdapter().factory()
+        assert_that(adapter, instance_of(MixedAuthentication))

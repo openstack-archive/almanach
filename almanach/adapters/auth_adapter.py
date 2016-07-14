@@ -15,6 +15,7 @@
 import logging
 
 from almanach import config
+from almanach.auth.mixed_auth import MixedAuthentication
 from almanach.auth.keystone_auth import KeystoneAuthentication, KeystoneTokenManagerFactory
 from almanach.auth.private_key_auth import PrivateKeyAuthentication
 
@@ -31,6 +32,16 @@ class AuthenticationAdapter(object):
                 auth_url=config.keystone_url(),
                 tenant_name=config.keystone_tenant_name()
             ))
+        elif all(auth_method in config.auth_strategy() for auth_method in ['token', 'keystone']):
+            logging.info("Loading Keystone authentication backend")
+            auths = [PrivateKeyAuthentication(config.auth_private_key()),
+                     KeystoneAuthentication(KeystoneTokenManagerFactory(
+                         username=config.keystone_username(),
+                         password=config.keystone_password(),
+                         auth_url=config.keystone_url(),
+                         tenant_name=config.keystone_tenant_name()
+                     ))]
+            return MixedAuthentication(auths)
         else:
             logging.info("Loading PrivateKey authentication backend")
             return PrivateKeyAuthentication(config.auth_private_key())
