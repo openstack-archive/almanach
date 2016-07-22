@@ -16,6 +16,21 @@ Almanach is composed of two parts:
 - **Collector**: Listen for OpenStack events and store the relevant information in the database.
 - **REST API**: Expose the information collected to external systems.
 
+Resources
+---------
+
+### Launchpad Projects
+
+- https://launchpad.net/almanach
+
+### Blueprints
+
+- https://blueprints.launchpad.net/almanach
+
+### Bug Tracking
+
+- https://bugs.launchpad.net/almanach
+
 Requirements
 ------------
 
