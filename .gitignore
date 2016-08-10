@@ -7,3 +7,5 @@
 .DS_Store
 AUTHORS
 ChangeLog
+doc/build
+build
