@@ -16,7 +16,6 @@ import logging
 
 import pymongo
 from pymongo.errors import ConfigurationError
-from pymongomodem.utils import decode_output, encode_input
 
 from almanach import config
 from almanach.common.exceptions.almanach_exception import AlmanachException
@@ -161,14 +160,11 @@ class DatabaseAdapter(object):
     def delete_active_entity(self, entity_id):
         self.db.entity.remove({"entity_id": entity_id, "end": None})
 
-    @encode_input
     def _insert_entity(self, entity):
         self.db.entity.insert(entity)
 
-    @decode_output
     def _get_entities_from_db(self, args):
         return list(self.db.entity.find(args, {"_id": 0}))
 
-    @decode_output
     def _get_one_entity_from_db(self, args):
         return self.db.entity.find_one(args, {"_id": 0})

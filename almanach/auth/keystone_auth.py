@@ -46,6 +46,6 @@ class KeystoneAuthentication(BaseAuth):
         try:
             self.token_manager_factory.get_manager().validate(token)
         except Exception as e:
-            raise AuthenticationFailureException(e.message)
+            raise AuthenticationFailureException(e)
 
         return True

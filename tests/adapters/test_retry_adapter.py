@@ -61,12 +61,7 @@ class BusAdapterTest(unittest.TestCase):
         self.retry_adapter = RetryAdapter(connection)
 
     def test_publish_to_retry_queue_happy_path(self):
-        message = MyObject
-        message.headers = []
-        message.body = 'omnomnom'
-        message.delivery_info = {'routing_key': 42}
-        message.content_type = 'xml/rapture'
-        message.content_encoding = 'iso8859-1'
+        message = self.build_message()
 
         self.config_mock.should_receive('rabbitmq_retry').and_return(1)
         self.expect_publish_with(message, 'almanach.retry').once()
@@ -74,12 +69,7 @@ class BusAdapterTest(unittest.TestCase):
         self.retry_adapter.publish_to_dead_letter(message)
 
     def test_publish_to_retry_queue_retries_if_it_fails(self):
-        message = MyObject
-        message.headers = {}
-        message.body = 'omnomnom'
-        message.delivery_info = {'routing_key': 42}
-        message.content_type = 'xml/rapture'
-        message.content_encoding = 'iso8859-1'
+        message = self.build_message()
 
         self.config_mock.should_receive('rabbitmq_retry').and_return(2)
         self.expect_publish_with(message, 'almanach.retry').times(4)\
@@ -90,13 +80,17 @@ class BusAdapterTest(unittest.TestCase):
 
         self.retry_adapter.publish_to_dead_letter(message)
 
-    def test_publish_to_dead_letter_messages_retried_more_than_twice(self):
-        message = MyObject
-        message.headers = {'x-death': [0, 1, 2, 3]}
-        message.body = 'omnomnom'
-        message.delivery_info = {'routing_key': ''}
+    def build_message(self, headers=dict()):
+        message = MyObject()
+        message.headers = headers
+        message.body = b'Now that the worst is behind you, it\'s time we get you back. - Mr. Robot'
+        message.delivery_info = {'routing_key': 42}
         message.content_type = 'xml/rapture'
         message.content_encoding = 'iso8859-1'
+        return message
+
+    def test_publish_to_dead_letter_messages_retried_more_than_twice(self):
+        message = self.build_message(headers={'x-death': [0, 1, 2, 3]})
 
         self.config_mock.should_receive('rabbitmq_retry').and_return(2)
         self.expect_publish_with(message, 'almanach.dead').once()
@@ -117,4 +111,8 @@ class BusAdapterTest(unittest.TestCase):
 
 
 class MyObject(object):
-    pass
+    headers = None
+    body = None
+    delivery_info = None
+    content_type = None
+    content_encoding = None

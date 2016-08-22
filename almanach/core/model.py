@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import six
 
 
 class Entity(object):
@@ -44,6 +45,10 @@ class Instance(Entity):
         self.flavor = flavor
         self.metadata = metadata
         self.os = OS(**os)
+
+    def as_dict(self):
+        _replace_metadata_name_with_dot_instead_of_circumflex(self)
+        return todict(self)
 
     def __eq__(self, other):
         return (super(Instance, self).__eq__(other) and
@@ -95,6 +100,7 @@ class VolumeType(object):
 
 def build_entity_from_dict(entity_dict):
     if entity_dict.get("entity_type") == Instance.TYPE:
+        _replace_metadata_name_with_circumflex_instead_of_dot(entity_dict)
         return Instance(**entity_dict)
     elif entity_dict.get("entity_type") == Volume.TYPE:
         return Volume(**entity_dict)
@@ -102,13 +108,34 @@ def build_entity_from_dict(entity_dict):
 
 
 def todict(obj):
-    if isinstance(obj, dict):
+    if isinstance(obj, dict) or isinstance(obj, six.text_type):
         return obj
     elif hasattr(obj, "__iter__"):
         return [todict(v) for v in obj]
     elif hasattr(obj, "__dict__"):
         return dict([(key, todict(value))
-                     for key, value in obj.__dict__.iteritems()
+                     for key, value in obj.__dict__.items()
                      if not callable(value) and not key.startswith('_')])
     else:
         return obj
+
+
+def _replace_metadata_name_with_dot_instead_of_circumflex(instance):
+    if instance.metadata:
+        cleaned_metadata = dict()
+        for key, value in instance.metadata.items():
+            if '.' in key:
+                key = key.replace(".", "^")
+            cleaned_metadata[key] = value
+        instance.metadata = cleaned_metadata
+
+
+def _replace_metadata_name_with_circumflex_instead_of_dot(entity_dict):
+    metadata = entity_dict.get("metadata")
+    if metadata:
+        dirty_metadata = dict()
+        for key, value in metadata.items():
+            if '^' in key:
+                key = key.replace("^", ".")
+            dirty_metadata[key] = value
+        entity_dict["metadata"] = dirty_metadata

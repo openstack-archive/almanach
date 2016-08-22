@@ -12,13 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import ConfigParser
 import os
 import os.path as os_path
+import six
 
 from almanach.common.exceptions.almanach_exception import AlmanachException
 
-configuration = ConfigParser.RawConfigParser()
+if six.PY2:
+    from ConfigParser import RawConfigParser
+else:
+    from configparser import RawConfigParser
+
+configuration = RawConfigParser()
 
 
 def read(filename):
