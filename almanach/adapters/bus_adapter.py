@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 import logging
 import kombu
+import six
 
 from kombu.mixins import ConsumerMixin
+from oslo_serialization import jsonutils
+
 from almanach import config
 from almanach.adapters.instance_bus_adapter import InstanceBusAdapter
 from almanach.adapters.volume_bus_adapter import VolumeBusAdapter
@@ -34,14 +36,14 @@ class BusAdapter(ConsumerMixin):
         try:
             self._process_notification(notification)
         except Exception as e:
-            logging.warning("Sending notification to retry letter exchange {0}".format(json.dumps(notification)))
-            logging.exception(e.message)
+            logging.warning("Sending notification to retry letter exchange {0}".format(jsonutils.dumps(notification)))
+            logging.exception(e)
             self.retry_adapter.publish_to_dead_letter(message)
         message.ack()
 
     def _process_notification(self, notification):
-        if isinstance(notification, basestring):
-            notification = json.loads(notification)
+        if isinstance(notification, six.string_types):
+            notification = jsonutils.loads(notification)
 
         event_type = notification.get("event_type")
         logging.info("Received event: '{0}'".format(event_type))

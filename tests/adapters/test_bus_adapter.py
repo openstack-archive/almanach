@@ -36,7 +36,7 @@ class BusAdapterTest(unittest.TestCase):
         instance_id = "e7d44dea-21c1-452c-b50c-cbab0d07d7d3"
         tenant_id = "0be9215b503b43279ae585d50a33aed8"
         instance_type = "myflavor"
-        timestamp = datetime(2014, 02, 14, 16, 30, 10, tzinfo=pytz.utc)
+        timestamp = datetime(2014, 2, 14, 16, 30, 10, tzinfo=pytz.utc)
         hostname = "some hostname"
         metadata = {"a_metadata.to_filter": "filtered_value", }
 
@@ -72,7 +72,7 @@ class BusAdapterTest(unittest.TestCase):
         instance_id = "e7d44dea-21c1-452c-b50c-cbab0d07d7d3"
         tenant_id = "0be9215b503b43279ae585d50a33aed8"
         instance_type = "myflavor"
-        timestamp = datetime(2014, 02, 14, 16, 30, 10, tzinfo=pytz.utc)
+        timestamp = datetime(2014, 2, 14, 16, 30, 10, tzinfo=pytz.utc)
         hostname = "some hostname"
 
         notification = messages.get_instance_create_end_sample(instance_id=instance_id, tenant_id=tenant_id,
@@ -173,7 +173,7 @@ class BusAdapterTest(unittest.TestCase):
     def test_on_message_with_volume(self):
         volume_id = "vol_id"
         tenant_id = "tenant_id"
-        timestamp_datetime = datetime(2014, 02, 14, 16, 30, 10, tzinfo=pytz.utc)
+        timestamp_datetime = datetime(2014, 2, 14, 16, 30, 10, tzinfo=pytz.utc)
         volume_type = "SF400"
         volume_size = 100000
         some_volume = "volume_name"

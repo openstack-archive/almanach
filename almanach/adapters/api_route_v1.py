@@ -13,16 +13,17 @@
 # limitations under the License.
 
 import logging
-import json
 from datetime import datetime
 from functools import wraps
 
 import jsonpickle
 
 from flask import Blueprint, Response, request
+from oslo_serialization import jsonutils
 
 from werkzeug.wrappers import BaseResponse
 
+from almanach.common.exceptions.almanach_exception import AlmanachException
 from almanach.common.exceptions.almanach_entity_not_found_exception import AlmanachEntityNotFoundException
 from almanach.common.exceptions.authentication_failure_exception import AuthenticationFailureException
 from almanach.common.exceptions.multiple_entities_matching_query import MultipleEntitiesMatchingQuery
@@ -48,7 +49,7 @@ def to_json(api_call):
             logging.warning(e.message)
             return Response(encode({"error": e.message}), 400, {"Content-Type": "application/json"})
         except KeyError as e:
-            message = "The '{param}' param is mandatory for the request you have made.".format(param=e.message)
+            message = "The {param} param is mandatory for the request you have made.".format(param=e)
             logging.warning(message)
             return encode({"error": message}), 400, {"Content-Type": "application/json"}
         except TypeError:
@@ -65,10 +66,12 @@ def to_json(api_call):
         except AlmanachEntityNotFoundException as e:
             logging.warning(e.message)
             return encode({"error": "Entity not found"}), 404, {"Content-Type": "application/json"}
-
-        except Exception as e:
+        except AlmanachException as e:
             logging.exception(e)
             return Response(encode({"error": e.message}), 500, {"Content-Type": "application/json"})
+        except Exception as e:
+            logging.exception(e)
+            return Response(encode({"error": e}), 500, {"Content-Type": "application/json"})
 
     return decorator
 
@@ -80,7 +83,7 @@ def authenticated(api_call):
             auth_adapter.validate(request.headers.get('X-Auth-Token'))
             return api_call(*args, **kwargs)
         except AuthenticationFailureException as e:
-            logging.error("Authentication failure: {0}".format(e.message))
+            logging.error("Authentication failure: {0}".format(e))
             return Response('Unauthorized', 401)
 
     return decorator
@@ -97,7 +100,7 @@ def get_info():
 @authenticated
 @to_json
 def create_instance(project_id):
-    instance = json.loads(request.data)
+    instance = jsonutils.loads(request.data)
     logging.info("Creating instance for tenant %s with data %s", project_id, instance)
     controller.create_instance(
         tenant_id=project_id,
@@ -118,7 +121,7 @@ def create_instance(project_id):
 @authenticated
 @to_json
 def delete_instance(instance_id):
-    data = json.loads(request.data)
+    data = jsonutils.loads(request.data)
     logging.info("Deleting instance with id %s with data %s", instance_id, data)
     controller.delete_instance(
         instance_id=instance_id,
@@ -132,7 +135,7 @@ def delete_instance(instance_id):
 @authenticated
 @to_json
 def resize_instance(instance_id):
-    instance = json.loads(request.data)
+    instance = jsonutils.loads(request.data)
     logging.info("Resizing instance with id %s with data %s", instance_id, instance)
     controller.resize_instance(
         instance_id=instance_id,
@@ -147,7 +150,7 @@ def resize_instance(instance_id):
 @authenticated
 @to_json
 def rebuild_instance(instance_id):
-    instance = json.loads(request.data)
+    instance = jsonutils.loads(request.data)
     logging.info("Rebuilding instance with id %s with data %s", instance_id, instance)
     controller.rebuild_instance(
         instance_id=instance_id,
@@ -173,7 +176,7 @@ def list_instances(project_id):
 @authenticated
 @to_json
 def create_volume(project_id):
-    volume = json.loads(request.data)
+    volume = jsonutils.loads(request.data)
     logging.info("Creating volume for tenant %s with data %s", project_id, volume)
     controller.create_volume(
         project_id=project_id,
@@ -192,7 +195,7 @@ def create_volume(project_id):
 @authenticated
 @to_json
 def delete_volume(volume_id):
-    data = json.loads(request.data)
+    data = jsonutils.loads(request.data)
     logging.info("Deleting volume with id %s with data %s", volume_id, data)
     controller.delete_volume(
         volume_id=volume_id,
@@ -206,7 +209,7 @@ def delete_volume(volume_id):
 @authenticated
 @to_json
 def resize_volume(volume_id):
-    volume = json.loads(request.data)
+    volume = jsonutils.loads(request.data)
     logging.info("Resizing volume with id %s with data %s", volume_id, volume)
     controller.resize_volume(
         volume_id=volume_id,
@@ -221,7 +224,7 @@ def resize_volume(volume_id):
 @authenticated
 @to_json
 def attach_volume(volume_id):
-    volume = json.loads(request.data)
+    volume = jsonutils.loads(request.data)
     logging.info("Attaching volume with id %s with data %s", volume_id, volume)
     controller.attach_volume(
         volume_id=volume_id,
@@ -236,7 +239,7 @@ def attach_volume(volume_id):
 @authenticated
 @to_json
 def detach_volume(volume_id):
-    volume = json.loads(request.data)
+    volume = jsonutils.loads(request.data)
     logging.info("Detaching volume with id %s with data %s", volume_id, volume)
     controller.detach_volume(
         volume_id=volume_id,
@@ -269,7 +272,7 @@ def list_entity(project_id):
 @authenticated
 @to_json
 def update_instance_entity(instance_id):
-    data = json.loads(request.data)
+    data = jsonutils.loads(request.data)
     logging.info("Updating instance entity with id %s with data %s", instance_id, data)
     if 'start' in request.args:
         start, end = get_period()
@@ -316,7 +319,7 @@ def get_volume_type(type_id):
 @authenticated
 @to_json
 def create_volume_type():
-    volume_type = json.loads(request.data)
+    volume_type = jsonutils.loads(request.data)
     logging.info("Creating volume type with data '%s'", volume_type)
     controller.create_volume_type(
         volume_type_id=volume_type['type_id'],

@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 import logging
 
 from kombu import Exchange, Queue, Producer
+from oslo_serialization import jsonutils
+
 from almanach import config
 
 
@@ -38,7 +39,7 @@ class RetryAdapter:
         else:
             logging.info("Publishing to dead letter queue")
             self._publish_message(self._dead_producer, message)
-            logging.info("Publishing notification to dead letter queue: {0}".format(json.dumps(message.body)))
+            logging.info("Publishing notification to dead letter queue: {0}".format(jsonutils.dumps(message.body)))
 
     def _configure_retry_exchanges(self, connection):
         def declare_queues():

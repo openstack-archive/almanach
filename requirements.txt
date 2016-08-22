@@ -5,7 +5,9 @@ jsonpickle==0.7.1
 pymongo==2.7.2
 kombu>=3.0.30
 python-dateutil==2.2
-python-pymongomodem==0.0.3
 pytz>=2014.10
 voluptuous==0.8.11
 python-keystoneclient>=1.6.0
+six>=1.10.0 # MIT
+oslo.serialization>=2.13.0
+configparser>=3.5.0

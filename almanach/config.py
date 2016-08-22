@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import ConfigParser
+from backports.configparser import RawConfigParser
 import os
 import os.path as os_path
 
 from almanach.common.exceptions.almanach_exception import AlmanachException
 
-configuration = ConfigParser.RawConfigParser()
+configuration = RawConfigParser()
 
 
 def read(filename):

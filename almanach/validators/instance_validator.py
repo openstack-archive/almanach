@@ -1,3 +1,4 @@
+import six
 from voluptuous import Schema, MultipleInvalid, Datetime, Required
 
 from almanach.common.exceptions.validation_exception import InvalidAttributeException
@@ -6,12 +7,12 @@ from almanach.common.exceptions.validation_exception import InvalidAttributeExce
 class InstanceValidator(object):
     def __init__(self):
         self.schema = Schema({
-            'name': unicode,
-            'flavor': unicode,
+            'name': six.text_type,
+            'flavor': six.text_type,
             'os': {
-                Required('distro'): unicode,
-                Required('version'): unicode,
-                Required('os_type'): unicode,
+                Required('distro'): six.text_type,
+                Required('version'): six.text_type,
+                Required('os_type'): six.text_type,
             },
             'metadata': dict,
             'start_date': Datetime(),

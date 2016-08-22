@@ -1,9 +1,9 @@
-FROM python:2.7
+FROM python:3.4
 
 RUN mkdir -p /opt/almanach/src
 ADD almanach /opt/almanach/src/almanach
 ADD setup.* /opt/almanach/src/
-ADD README.md /opt/almanach/src/
+ADD README.rst /opt/almanach/src/
 ADD requirements.txt /opt/almanach/src/
 ADD LICENSE /opt/almanach/src/
 ADD almanach/resources/config/almanach.cfg /etc/almanach.cfg

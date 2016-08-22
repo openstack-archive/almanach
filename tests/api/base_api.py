@@ -18,6 +18,7 @@ import flask
 from unittest import TestCase
 from datetime import datetime
 from flexmock import flexmock, flexmock_teardown
+import oslo_serialization
 
 from almanach import config
 from almanach.adapters import api_route_v1 as api_route
@@ -76,7 +77,7 @@ class BaseApi(TestCase):
                 headers = {}
         headers['Accept'] = accept
         result = getattr(http_client, method)(url, data=json.dumps(data), query_string=query_string, headers=headers)
-        return_data = json.loads(result.data) \
+        return_data = oslo_serialization.jsonutils.loads(result.data) \
             if result.headers.get('Content-Type') == 'application/json' \
             else result.data
         return result.status_code, return_data
