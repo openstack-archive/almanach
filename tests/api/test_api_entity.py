@@ -31,7 +31,7 @@ class ApiEntityTest(BaseApi):
             .with_args(
                 instance_id="INSTANCE_ID",
                 start_date=data["start_date"],
-        ).and_return(a(instance().with_id('INSTANCE_ID').with_start(2014, 01, 01, 00, 0, 00)))
+        ).and_return(a(instance().with_id('INSTANCE_ID').with_start(2014, 1, 1, 0, 0, 0)))
 
         code, result = self.api_put(
                 '/entity/instance/INSTANCE_ID',

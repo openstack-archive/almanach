@@ -54,8 +54,8 @@ class ApiInstanceTest(BaseApi):
         ).and_return(a(
                 instance().
                 with_id('INSTANCE_ID').
-                with_start(2016, 03, 01, 00, 0, 00).
-                with_end(2016, 03, 03, 00, 0, 00).
+                with_start(2016, 3, 1, 0, 0, 0).
+                with_end(2016, 3, 3, 0, 0, 0).
                 with_flavor(some_new_flavor))
         )
 

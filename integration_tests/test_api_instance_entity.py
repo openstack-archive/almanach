@@ -41,7 +41,9 @@ class ApiInstanceEntityTest(BaseApiTestCase):
                                            )
 
         assert_that(response.status_code, equal_to(400))
-        assert_that(response.json(), equal_to({"error": {"flavor": "expected unicode", "os": "expected a dictionary"}}))
+        error_dict = response.json()['error']
+        assert_that(len(error_dict), equal_to(2))
+        assert_that(sorted(error_dict.keys()), equal_to(["flavor", "os"]))
 
     def test_update_entity_instance_with_one_attribute(self):
         instance_id = self._create_instance_entity()
