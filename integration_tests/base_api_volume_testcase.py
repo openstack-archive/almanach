@@ -18,7 +18,6 @@ from helpers.mongo_helper import MongoHelper
 
 
 class BaseApiVolumeTestCase(BaseApiTestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.setup_volume_type()
@@ -30,7 +29,7 @@ class BaseApiVolumeTestCase(BaseApiTestCase):
     @classmethod
     def setup_volume_type(cls):
         cls.rabbitMqHelper.push(
-                message=messages.get_volume_type_create_sample(volume_type_id=messages.DEFAULT_VOLUME_TYPE,
-                                                               volume_type_name=messages.DEFAULT_VOLUME_TYPE),
+            message=messages.get_volume_type_create_sample(volume_type_id=messages.DEFAULT_VOLUME_TYPE,
+                                                           volume_type_name=messages.DEFAULT_VOLUME_TYPE),
         )
         cls._wait_until_volume_type_is_created(volume_type_id=messages.DEFAULT_VOLUME_TYPE)

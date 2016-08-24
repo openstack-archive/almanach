@@ -11,11 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from almanach.common.exceptions.almanach_exception import AlmanachException
+from almanach.common.exceptions import almanach_exception
 
 
-class VolumeTypeNotFoundException(AlmanachException):
-
+class VolumeTypeNotFoundException(almanach_exception.AlmanachException):
     def __init__(self, volume_type_id, message=None):
         if not message:
             message = "Unable to find volume_type id '{volume_type_id}'".format(volume_type_id=volume_type_id)

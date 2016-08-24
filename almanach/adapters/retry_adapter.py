@@ -14,20 +14,19 @@
 
 import logging
 
-from kombu import Exchange, Queue, Producer
+import kombu
 from oslo_serialization import jsonutils
 
 from almanach import config
 
 
-class RetryAdapter:
-
+class RetryAdapter(object):
     def __init__(self, connection):
         self.connection = connection
         retry_exchange = self._configure_retry_exchanges(self.connection)
         dead_exchange = self._configure_dead_exchange(self.connection)
-        self._retry_producer = Producer(self.connection, exchange=retry_exchange)
-        self._dead_producer = Producer(self.connection, exchange=dead_exchange)
+        self._retry_producer = kombu.Producer(self.connection, exchange=retry_exchange)
+        self._dead_producer = kombu.Producer(self.connection, exchange=dead_exchange)
 
     def publish_to_dead_letter(self, message):
         death_count = self._rejected_count(message)
@@ -44,22 +43,22 @@ class RetryAdapter:
     def _configure_retry_exchanges(self, connection):
         def declare_queues():
             channel = connection.channel()
-            almanach_exchange = Exchange(name=config.rabbitmq_retry_return_exchange(),
-                                         type='direct',
-                                         channel=channel)
-            retry_exchange = Exchange(name=config.rabbitmq_retry_exchange(),
-                                      type='direct',
+            almanach_exchange = kombu.Exchange(name=config.rabbitmq_retry_return_exchange(),
+                                               type='direct',
+                                               channel=channel)
+            retry_exchange = kombu.Exchange(name=config.rabbitmq_retry_exchange(),
+                                            type='direct',
+                                            channel=channel)
+            retry_queue = kombu.Queue(name=config.rabbitmq_retry_queue(),
+                                      exchange=retry_exchange,
+                                      routing_key=config.rabbitmq_routing_key(),
+                                      queue_arguments=self._get_queue_arguments(),
                                       channel=channel)
-            retry_queue = Queue(name=config.rabbitmq_retry_queue(),
-                                exchange=retry_exchange,
-                                routing_key=config.rabbitmq_routing_key(),
-                                queue_arguments=self._get_queue_arguments(),
-                                channel=channel)
-            almanach_queue = Queue(name=config.rabbitmq_queue(),
-                                   exchange=almanach_exchange,
-                                   durable=False,
-                                   routing_key=config.rabbitmq_routing_key(),
-                                   channel=channel)
+            almanach_queue = kombu.Queue(name=config.rabbitmq_queue(),
+                                         exchange=almanach_exchange,
+                                         durable=False,
+                                         routing_key=config.rabbitmq_routing_key(),
+                                         channel=channel)
 
             retry_queue.declare()
             almanach_queue.declare()
@@ -76,13 +75,13 @@ class RetryAdapter:
     def _configure_dead_exchange(self, connection):
         def declare_dead_queue():
             channel = connection.channel()
-            dead_exchange = Exchange(name=config.rabbitmq_dead_exchange(),
-                                     type='direct',
+            dead_exchange = kombu.Exchange(name=config.rabbitmq_dead_exchange(),
+                                           type='direct',
+                                           channel=channel)
+            dead_queue = kombu.Queue(name=config.rabbitmq_dead_queue(),
+                                     routing_key=config.rabbitmq_routing_key(),
+                                     exchange=dead_exchange,
                                      channel=channel)
-            dead_queue = Queue(name=config.rabbitmq_dead_queue(),
-                               routing_key=config.rabbitmq_routing_key(),
-                               exchange=dead_exchange,
-                               channel=channel)
 
             dead_queue.declare()
 

@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from datetime import datetime, timedelta
-
-import dateutil.parser
 import pytz
+
+from datetime import datetime
+from datetime import timedelta
+import dateutil.parser
 
 DEFAULT_VOLUME_TYPE = "my_block_storage_type"
 DEFAULT_VOLUME_NAME = "my_block_storage_name"

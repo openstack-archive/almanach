@@ -13,7 +13,11 @@
 # limitations under the License.
 
 import unittest
-from hamcrest import raises, assert_that, calling, equal_to
+
+from hamcrest import assert_that
+from hamcrest import calling
+from hamcrest import equal_to
+from hamcrest import raises
 
 from almanach.auth.private_key_auth import PrivateKeyAuthentication
 from almanach.common.exceptions.authentication_failure_exception import AuthenticationFailureException

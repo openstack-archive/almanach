@@ -13,14 +13,16 @@
 # limitations under the License.
 
 from uuid import uuid4
-from hamcrest import assert_that, equal_to, has_entries
+
+from hamcrest import assert_that
+from hamcrest import equal_to
+from hamcrest import has_entries
 
 from almanach.common.exceptions.date_format_exception import DateFormatException
 from tests.api.base_api import BaseApi
 
 
 class ApiVolumeTest(BaseApi):
-
     def test_successful_volume_create(self):
         data = dict(volume_id="VOLUME_ID",
                     start="START_DATE",
@@ -35,9 +37,9 @@ class ApiVolumeTest(BaseApi):
             .once()
 
         code, result = self.api_post(
-                '/project/PROJECT_ID/volume',
-                data=data,
-                headers={'X-Auth-Token': 'some token value'}
+            '/project/PROJECT_ID/volume',
+            data=data,
+            headers={'X-Auth-Token': 'some token value'}
         )
         assert_that(code, equal_to(201))
 
@@ -52,13 +54,13 @@ class ApiVolumeTest(BaseApi):
             .never()
 
         code, result = self.api_post(
-                '/project/PROJECT_ID/volume',
-                data=data,
-                headers={'X-Auth-Token': 'some token value'}
+            '/project/PROJECT_ID/volume',
+            data=data,
+            headers={'X-Auth-Token': 'some token value'}
         )
         assert_that(
-                result,
-                has_entries({"error": "The 'volume_type' param is mandatory for the request you have made."})
+            result,
+            has_entries({"error": "The 'volume_type' param is mandatory for the request you have made."})
         )
         assert_that(code, equal_to(400))
 
@@ -77,15 +79,15 @@ class ApiVolumeTest(BaseApi):
             .and_raise(DateFormatException)
 
         code, result = self.api_post(
-                '/project/PROJECT_ID/volume',
-                data=data,
-                headers={'X-Auth-Token': 'some token value'}
+            '/project/PROJECT_ID/volume',
+            data=data,
+            headers={'X-Auth-Token': 'some token value'}
         )
         assert_that(result, has_entries(
-                {
-                    "error": "The provided date has an invalid format. "
-                             "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
-                }
+            {
+                "error": "The provided date has an invalid format. "
+                         "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
+            }
         ))
         assert_that(code, equal_to(400))
 
@@ -101,7 +103,6 @@ class ApiVolumeTest(BaseApi):
         assert_that(code, equal_to(202))
 
     def test_volume_delete_missing_a_param_returns_bad_request_code(self):
-
         self.controller.should_receive('delete_volume') \
             .never()
 
@@ -128,10 +129,10 @@ class ApiVolumeTest(BaseApi):
 
         code, result = self.api_delete('/volume/VOLUME_ID', data=data, headers={'X-Auth-Token': 'some token value'})
         assert_that(result, has_entries(
-                {
-                    "error": "The provided date has an invalid format. "
-                             "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
-                }
+            {
+                "error": "The provided date has an invalid format. "
+                         "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
+            }
         ))
         assert_that(code, equal_to(400))
 
@@ -171,10 +172,10 @@ class ApiVolumeTest(BaseApi):
 
         code, result = self.api_put('/volume/VOLUME_ID/resize', data=data, headers={'X-Auth-Token': 'some token value'})
         assert_that(result, has_entries(
-                {
-                    "error": "The provided date has an invalid format. "
-                             "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
-                }
+            {
+                "error": "The provided date has an invalid format. "
+                         "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
+            }
         ))
         assert_that(code, equal_to(400))
 
@@ -198,13 +199,13 @@ class ApiVolumeTest(BaseApi):
             .never()
 
         code, result = self.api_put(
-                '/volume/VOLUME_ID/attach',
-                data=data,
-                headers={'X-Auth-Token': 'some token value'}
+            '/volume/VOLUME_ID/attach',
+            data=data,
+            headers={'X-Auth-Token': 'some token value'}
         )
         assert_that(
-                result,
-                has_entries({"error": "The 'attachments' param is mandatory for the request you have made."})
+            result,
+            has_entries({"error": "The 'attachments' param is mandatory for the request you have made."})
         )
         assert_that(code, equal_to(400))
 
@@ -221,10 +222,10 @@ class ApiVolumeTest(BaseApi):
 
         code, result = self.api_put('/volume/VOLUME_ID/attach', data=data, headers={'X-Auth-Token': 'some token value'})
         assert_that(result, has_entries(
-                {
-                    "error": "The provided date has an invalid format. "
-                             "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
-                }
+            {
+                "error": "The provided date has an invalid format. "
+                         "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
+            }
         ))
         assert_that(code, equal_to(400))
 
@@ -249,8 +250,8 @@ class ApiVolumeTest(BaseApi):
 
         code, result = self.api_put('/volume/VOLUME_ID/detach', data=data, headers={'X-Auth-Token': 'some token value'})
         assert_that(
-                result,
-                has_entries({"error": "The 'attachments' param is mandatory for the request you have made."})
+            result,
+            has_entries({"error": "The 'attachments' param is mandatory for the request you have made."})
         )
         assert_that(code, equal_to(400))
 
@@ -267,9 +268,9 @@ class ApiVolumeTest(BaseApi):
 
         code, result = self.api_put('/volume/VOLUME_ID/detach', data=data, headers={'X-Auth-Token': 'some token value'})
         assert_that(result, has_entries(
-                {
-                    "error": "The provided date has an invalid format. "
-                             "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
-                }
+            {
+                "error": "The provided date has an invalid format. "
+                         "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
+            }
         ))
         assert_that(code, equal_to(400))

@@ -13,10 +13,10 @@
 # limitations under the License.
 
 from keystoneclient.v2_0 import client as keystone_client
-from keystoneclient.v2_0.tokens import TokenManager
+from keystoneclient.v2_0 import tokens
 
-from almanach.auth.base_auth import BaseAuth
-from almanach.common.exceptions.authentication_failure_exception import AuthenticationFailureException
+from almanach.auth import base_auth
+from almanach.common.exceptions import authentication_failure_exception
 
 
 class KeystoneTokenManagerFactory(object):
@@ -27,7 +27,7 @@ class KeystoneTokenManagerFactory(object):
         self.username = username
 
     def get_manager(self):
-        return TokenManager(keystone_client.Client(
+        return tokens.TokenManager(keystone_client.Client(
             username=self.username,
             password=self.password,
             auth_url=self.auth_url,
@@ -35,17 +35,17 @@ class KeystoneTokenManagerFactory(object):
         )
 
 
-class KeystoneAuthentication(BaseAuth):
+class KeystoneAuthentication(base_auth.BaseAuth):
     def __init__(self, token_manager_factory):
         self.token_manager_factory = token_manager_factory
 
     def validate(self, token):
         if token is None:
-            raise AuthenticationFailureException("No token provided")
+            raise authentication_failure_exception.AuthenticationFailureException("No token provided")
 
         try:
             self.token_manager_factory.get_manager().validate(token)
         except Exception as e:
-            raise AuthenticationFailureException(e)
+            raise authentication_failure_exception.AuthenticationFailureException(e)
 
         return True

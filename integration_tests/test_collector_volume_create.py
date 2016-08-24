@@ -14,7 +14,9 @@
 
 import uuid
 
-from hamcrest import has_entry, assert_that, equal_to
+from hamcrest import assert_that
+from hamcrest import equal_to
+from hamcrest import has_entry
 from retry import retry
 
 from base_api_volume_testcase import BaseApiVolumeTestCase
@@ -27,7 +29,7 @@ class CollectorVolumeCreateTest(BaseApiVolumeTestCase):
         volume_id = str(uuid.uuid4())
 
         self.rabbitMqHelper.push(message=messages.get_volume_create_end_sample(
-                volume_id=volume_id, tenant_id=tenant_id, volume_type=messages.DEFAULT_VOLUME_TYPE))
+            volume_id=volume_id, tenant_id=tenant_id, volume_type=messages.DEFAULT_VOLUME_TYPE))
 
         self.assert_that_volume_entity_is_created(tenant_id)
 

@@ -12,15 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from hamcrest import assert_that, equal_to, has_entries, has_length, has_key, has_entry
+from hamcrest import assert_that
+from hamcrest import equal_to
+from hamcrest import has_entries
+from hamcrest import has_entry
+from hamcrest import has_key
+from hamcrest import has_length
 
 from almanach.common.exceptions.almanach_exception import AlmanachException
-from tests.builder import volume_type, a
 from tests.api.base_api import BaseApi
+from tests.builder import a
+from tests.builder import volume_type
 
 
 class ApiVolumeTypeTest(BaseApi):
-
     def test_get_volume_types(self):
         self.controller.should_receive('list_volume_types') \
             .and_return([a(volume_type().with_volume_type_name('some_volume_type_name'))]) \
@@ -35,14 +40,14 @@ class ApiVolumeTypeTest(BaseApi):
 
     def test_successful_volume_type_create(self):
         data = dict(
-                type_id='A_VOLUME_TYPE_ID',
-                type_name="A_VOLUME_TYPE_NAME"
+            type_id='A_VOLUME_TYPE_ID',
+            type_name="A_VOLUME_TYPE_NAME"
         )
 
         self.controller.should_receive('create_volume_type') \
             .with_args(
-                volume_type_id=data['type_id'],
-                volume_type_name=data['type_name']) \
+            volume_type_id=data['type_id'],
+            volume_type_name=data['type_name']) \
             .once()
 
         code, result = self.api_post('/volume_type', data=data, headers={'X-Auth-Token': 'some token value'})

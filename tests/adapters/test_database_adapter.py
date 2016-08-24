@@ -12,23 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 from datetime import datetime
-
 import pkg_resources
-import mongomock
-from flexmock import flexmock, flexmock_teardown
-from hamcrest import assert_that, contains_inanyorder
+import unittest
 
+from flexmock import flexmock
+from flexmock import flexmock_teardown
+from hamcrest import assert_that
+from hamcrest import contains_inanyorder
+import mongomock
 from pymongo import MongoClient
 import pytz
 
 from almanach.adapters.database_adapter import DatabaseAdapter
-from almanach.common.exceptions.volume_type_not_found_exception import VolumeTypeNotFoundException
 from almanach.common.exceptions.almanach_exception import AlmanachException
+from almanach.common.exceptions.volume_type_not_found_exception import VolumeTypeNotFoundException
 from almanach import config
 from almanach.core.model import todict
-from tests.builder import a, instance, volume, volume_type
+from tests.builder import a
+from tests.builder import instance
+from tests.builder import volume
+from tests.builder import volume_type
 
 
 class DatabaseAdapterTest(unittest.TestCase):
@@ -257,8 +261,8 @@ class DatabaseAdapterTest(unittest.TestCase):
 
         self.adapter.update_active_entity(fake_entity)
 
-        self.assertEqual(self.db.entity.find_one({"entity_id": fake_entity.entity_id})[
-                             "os"]["distro"], fake_entity.os.distro)
+        self.assertEqual(self.db.entity.find_one({"entity_id": fake_entity.entity_id})["os"]["distro"],
+                         fake_entity.os.distro)
 
     def test_insert_volume(self):
         count = self.db.entity.count()

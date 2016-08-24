@@ -13,7 +13,10 @@
 # limitations under the License.
 
 from uuid import uuid4
-from hamcrest import assert_that, has_entry, equal_to
+
+from hamcrest import assert_that
+from hamcrest import equal_to
+from hamcrest import has_entry
 
 from base_api_testcase import BaseApiTestCase
 
@@ -92,7 +95,7 @@ class ApiInstanceEntityTest(BaseApiTestCase):
 
         assert_that(response.status_code, equal_to(400))
         assert_that(response.json(), equal_to(
-                {"error": {"start_date": "value does not match expected format %Y-%m-%dT%H:%M:%S.%fZ"}}
+            {"error": {"start_date": "value does not match expected format %Y-%m-%dT%H:%M:%S.%fZ"}}
         ))
 
     def test_update_entity_change_flavor_of_closed(self):

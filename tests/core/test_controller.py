@@ -12,26 +12,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
-import logging
-import unittest
 from copy import copy
-from datetime import datetime, timedelta
-
-import pytz
+from datetime import datetime
+from datetime import timedelta
 from dateutil.parser import parse
-from hamcrest import raises, calling, assert_that, equal_to
-from flexmock import flexmock, flexmock_teardown
+import logging
+import sys
+import unittest
+
+from flexmock import flexmock
+from flexmock import flexmock_teardown
+from hamcrest import assert_that
+from hamcrest import calling
+from hamcrest import equal_to
+from hamcrest import raises
 from nose.tools import assert_raises
+import pytz
 
 from almanach.common.exceptions.almanach_entity_not_found_exception import AlmanachEntityNotFoundException
-from almanach.common.exceptions.multiple_entities_matching_query import MultipleEntitiesMatchingQuery
-from tests.builder import a, instance, volume, volume_type
-from almanach import config
 from almanach.common.exceptions.date_format_exception import DateFormatException
+from almanach.common.exceptions.multiple_entities_matching_query import MultipleEntitiesMatchingQuery
 from almanach.common.exceptions.validation_exception import InvalidAttributeException
+from almanach import config
 from almanach.core.controller import Controller
-from almanach.core.model import Instance, Volume
+from almanach.core.model import Instance
+from almanach.core.model import Volume
+from tests.builder import a
+from tests.builder import instance
+from tests.builder import volume
+from tests.builder import volume_type
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
