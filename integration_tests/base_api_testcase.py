@@ -13,13 +13,15 @@
 # limitations under the License.
 
 import unittest
-
-from retry import retry
 from uuid import uuid4
-from hamcrest import equal_to, assert_that, has_entry
 
-from helpers.rabbit_mq_helper import RabbitMqHelper
+from hamcrest import assert_that
+from hamcrest import equal_to
+from hamcrest import has_entry
+from retry import retry
+
 from helpers.almanach_helper import AlmanachHelper
+from helpers.rabbit_mq_helper import RabbitMqHelper
 
 
 class BaseApiTestCase(unittest.TestCase):

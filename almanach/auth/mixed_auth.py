@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-from almanach.auth.base_auth import BaseAuth
-from almanach.common.exceptions.authentication_failure_exception import AuthenticationFailureException
+
+from almanach.auth import base_auth
+from almanach.common.exceptions import authentication_failure_exception
 
 
-class MixedAuthentication(BaseAuth):
+class MixedAuthentication(base_auth.BaseAuth):
     def __init__(self, authentication_methods):
         self.authentication_methods = authentication_methods
 
@@ -27,6 +28,6 @@ class MixedAuthentication(BaseAuth):
                 if valid:
                     logging.debug('Validated token with auth {0}'.format(method.__class__))
                     return True
-            except AuthenticationFailureException:
+            except authentication_failure_exception.AuthenticationFailureException:
                 logging.debug('Failed to validate with auth {0}'.format(method.__class__))
-        raise AuthenticationFailureException('No valid auth method matching token')
+        raise authentication_failure_exception.AuthenticationFailureException('No valid auth method matching token')

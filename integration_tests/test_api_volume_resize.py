@@ -13,14 +13,17 @@
 # limitations under the License.
 
 from uuid import uuid4
-from hamcrest import equal_to, assert_that, has_entry, has_item
+
+from hamcrest import assert_that
+from hamcrest import equal_to
+from hamcrest import has_entry
+from hamcrest import has_item
 
 from base_api_volume_testcase import BaseApiVolumeTestCase
 from builders import messages
 
 
 class ApiVolumeTest(BaseApiVolumeTestCase):
-
     def test_volume_resize(self):
         volume_create_query = "{url}/project/{project}/volume"
         project_id = "my_test_project_id"
@@ -68,9 +71,9 @@ class ApiVolumeTest(BaseApiVolumeTestCase):
         response = self.almanachHelper.put(url=volume_resize_query, data=resize_data)
         assert_that(response.status_code, equal_to(400))
         assert_that(response.json(), has_entry(
-                'error',
-                'The provided date has an invalid format. Format should be of yyyy-mm-ddThh:mm:ss.msZ, '
-                'ex: 2015-01-31T18:24:34.1523Z'
+            'error',
+            'The provided date has an invalid format. Format should be of yyyy-mm-ddThh:mm:ss.msZ, '
+            'ex: 2015-01-31T18:24:34.1523Z'
         ))
 
     def test_volume_resize_missing_param(self):
@@ -80,6 +83,6 @@ class ApiVolumeTest(BaseApiVolumeTestCase):
         response = self.almanachHelper.put(url=volume_resize_query, data=resize_data, instance_id="my_instance_id")
         assert_that(response.status_code, equal_to(400))
         assert_that(response.json(), has_entry(
-                "error",
-                "The 'date' param is mandatory for the request you have made."
+            "error",
+            "The 'date' param is mandatory for the request you have made."
         ))

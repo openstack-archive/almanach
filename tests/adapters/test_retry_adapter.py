@@ -14,13 +14,14 @@
 
 import unittest
 
+from flexmock import flexmock
+from flexmock import flexmock_teardown
 from kombu import Connection
 from kombu.tests import mocks
 from kombu.transport import pyamqp
-from flexmock import flexmock, flexmock_teardown
 
-from almanach import config
 from almanach.adapters.retry_adapter import RetryAdapter
+from almanach import config
 
 
 class BusAdapterTest(unittest.TestCase):

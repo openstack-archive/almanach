@@ -11,10 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from almanach.common.exceptions.almanach_exception import AlmanachException
+from almanach.common.exceptions import almanach_exception
 
 
-class InvalidAttributeException(AlmanachException):
+class InvalidAttributeException(almanach_exception.AlmanachException):
     def __init__(self, errors):
         self.errors = errors
 

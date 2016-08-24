@@ -12,19 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from datetime import datetime
 import unittest
 
-from datetime import datetime
-
+from flexmock import flexmock
+from flexmock import flexmock_teardown
 import pytz
-from flexmock import flexmock, flexmock_teardown
 
 from almanach.adapters.volume_bus_adapter import VolumeBusAdapter
 from integration_tests.builders import messages
 
 
 class VolumeBusAdapterTest(unittest.TestCase):
-
     def setUp(self):
         self.controller = flexmock()
         self.retry = flexmock()
@@ -53,9 +52,9 @@ class VolumeBusAdapterTest(unittest.TestCase):
 
     def test_attach_volume_with_kilo_payload_and_empty_attachments(self):
         notification = messages.get_volume_attach_kilo_end_sample(
-                volume_id="my-volume-id",
-                timestamp=datetime(2014, 2, 14, 17, 18, 35, tzinfo=pytz.utc),
-                attached_to=[]
+            volume_id="my-volume-id",
+            timestamp=datetime(2014, 2, 14, 17, 18, 35, tzinfo=pytz.utc),
+            attached_to=[]
         )
 
         self.controller \
@@ -91,8 +90,8 @@ class VolumeBusAdapterTest(unittest.TestCase):
 
     def test_attach_volume_with_icehouse_payload(self):
         notification = messages.get_volume_attach_icehouse_end_sample(
-                volume_id="my-volume-id",
-                creation_timestamp=datetime(2014, 2, 14, 17, 18, 35, tzinfo=pytz.utc), attached_to="my-instance-id"
+            volume_id="my-volume-id",
+            creation_timestamp=datetime(2014, 2, 14, 17, 18, 35, tzinfo=pytz.utc), attached_to="my-instance-id"
         )
 
         self.controller \
@@ -104,9 +103,9 @@ class VolumeBusAdapterTest(unittest.TestCase):
 
     def test_attach_volume_with_kilo_payload(self):
         notification = messages.get_volume_attach_kilo_end_sample(
-                volume_id="my-volume-id",
-                timestamp=datetime(2014, 2, 14, 17, 18, 35, tzinfo=pytz.utc),
-                attached_to=["I1"]
+            volume_id="my-volume-id",
+            timestamp=datetime(2014, 2, 14, 17, 18, 35, tzinfo=pytz.utc),
+            attached_to=["I1"]
         )
 
         self.controller \
@@ -121,13 +120,13 @@ class VolumeBusAdapterTest(unittest.TestCase):
         self.assertEqual([], self.volume_bus_adapter._get_attached_instances({"instance_uuid": None}))
         self.assertEqual([], self.volume_bus_adapter._get_attached_instances({}))
         self.assertEqual(
-                ["a", "b"],
-                self.volume_bus_adapter._get_attached_instances(
-                        {"volume_attachment": [{"instance_uuid": "a"}, {"instance_uuid": "b"}]}
-                )
+            ["a", "b"],
+            self.volume_bus_adapter._get_attached_instances(
+                {"volume_attachment": [{"instance_uuid": "a"}, {"instance_uuid": "b"}]}
+            )
         )
         self.assertEqual(
-                ["a"],
-                self.volume_bus_adapter._get_attached_instances({"volume_attachment": [{"instance_uuid": "a"}]})
+            ["a"],
+            self.volume_bus_adapter._get_attached_instances({"volume_attachment": [{"instance_uuid": "a"}]})
         )
         self.assertEqual([], self.volume_bus_adapter._get_attached_instances({"volume_attachment": []}))

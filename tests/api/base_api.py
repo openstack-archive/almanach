@@ -12,17 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
-import flask
-
-from unittest import TestCase
 from datetime import datetime
-from flexmock import flexmock, flexmock_teardown
+import json
+from unittest import TestCase
+
+import flask
+from flexmock import flexmock
+from flexmock import flexmock_teardown
 import oslo_serialization
 
-from almanach import config
 from almanach.adapters import api_route_v1 as api_route
 from almanach.common.exceptions.authentication_failure_exception import AuthenticationFailureException
+from almanach import config
 
 
 class BaseApi(TestCase):

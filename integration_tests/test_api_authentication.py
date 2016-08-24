@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from hamcrest import assert_that, equal_to
+from hamcrest import assert_that
+from hamcrest import equal_to
+
 from base_api_testcase import BaseApiTestCase
 
 

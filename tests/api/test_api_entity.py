@@ -12,16 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from hamcrest import assert_that, equal_to, has_entries, has_key, is_
+from hamcrest import assert_that
+from hamcrest import equal_to
+from hamcrest import has_entries
+from hamcrest import has_key
+from hamcrest import is_
 from voluptuous import Invalid
 
 from almanach.common.exceptions.validation_exception import InvalidAttributeException
-from tests.builder import instance, a
 from tests.api.base_api import BaseApi
+from tests.builder import a
+from tests.builder import instance
 
 
 class ApiEntityTest(BaseApi):
-
     def test_update_instance_entity_with_a_new_start_date(self):
         data = {
             "start_date": "2014-01-01 00:00:00.0000",
@@ -29,14 +33,14 @@ class ApiEntityTest(BaseApi):
 
         self.controller.should_receive('update_active_instance_entity') \
             .with_args(
-                instance_id="INSTANCE_ID",
-                start_date=data["start_date"],
+            instance_id="INSTANCE_ID",
+            start_date=data["start_date"],
         ).and_return(a(instance().with_id('INSTANCE_ID').with_start(2014, 1, 1, 0, 0, 0)))
 
         code, result = self.api_put(
-                '/entity/instance/INSTANCE_ID',
-                headers={'X-Auth-Token': 'some token value'},
-                data=data,
+            '/entity/instance/INSTANCE_ID',
+            headers={'X-Auth-Token': 'some token value'},
+            data=data,
         )
 
         assert_that(code, equal_to(200))
@@ -67,9 +71,9 @@ class ApiEntityTest(BaseApi):
             .and_raise(InvalidAttributeException(errors))
 
         code, result = self.api_put(
-                '/entity/instance/INSTANCE_ID',
-                data=data,
-                headers={'X-Auth-Token': 'some token value'}
+            '/entity/instance/INSTANCE_ID',
+            data=data,
+            headers={'X-Auth-Token': 'some token value'}
         )
         assert_that(result, has_entries({
             "error": formatted_errors
