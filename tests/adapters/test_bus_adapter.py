@@ -12,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytz
-import unittest
 from datetime import datetime
-from flexmock import flexmock, flexmock_teardown
+import unittest
+
+from flexmock import flexmock
+from flexmock import flexmock_teardown
+import pytz
 
 from almanach.adapters.bus_adapter import BusAdapter
 from almanach.common.exceptions.almanach_entity_not_found_exception import AlmanachEntityNotFoundException

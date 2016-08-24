@@ -12,14 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytz
-import uuid
 from datetime import datetime
-from hamcrest import has_entry, is_not, assert_that
+import uuid
+
+from hamcrest import assert_that
+from hamcrest import has_entry
+from hamcrest import is_not
+import pytz
 from retry import retry
 
 from base_api_testcase import BaseApiTestCase
-from builders.messages import get_instance_delete_end_sample, get_instance_create_end_sample
+from builders.messages import get_instance_create_end_sample
+from builders.messages import get_instance_delete_end_sample
 
 
 class CollectorInstanceDeleteBeforeCreateTest(BaseApiTestCase):
@@ -28,18 +32,18 @@ class CollectorInstanceDeleteBeforeCreateTest(BaseApiTestCase):
         instance_id = str(uuid.uuid4())
 
         self.rabbitMqHelper.push(
-                get_instance_delete_end_sample(
-                        instance_id=instance_id,
-                        tenant_id=tenant_id,
-                        deletion_timestamp=datetime(2016, 2, 1, 10, 0, 0, tzinfo=pytz.utc)
-                ))
+            get_instance_delete_end_sample(
+                instance_id=instance_id,
+                tenant_id=tenant_id,
+                deletion_timestamp=datetime(2016, 2, 1, 10, 0, 0, tzinfo=pytz.utc)
+            ))
 
         self.rabbitMqHelper.push(
-                get_instance_create_end_sample(
-                        instance_id=instance_id,
-                        tenant_id=tenant_id,
-                        creation_timestamp=datetime(2016, 2, 1, 9, 0, 0, tzinfo=pytz.utc)
-                ))
+            get_instance_create_end_sample(
+                instance_id=instance_id,
+                tenant_id=tenant_id,
+                creation_timestamp=datetime(2016, 2, 1, 9, 0, 0, tzinfo=pytz.utc)
+            ))
 
         self.assert_instance_delete_received_before_instance_create(tenant_id)
 

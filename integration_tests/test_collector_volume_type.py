@@ -13,7 +13,9 @@
 # limitations under the License.
 
 from uuid import uuid4
-from hamcrest import assert_that, equal_to
+
+from hamcrest import assert_that
+from hamcrest import equal_to
 
 from base_api_volume_testcase import BaseApiVolumeTestCase
 from builders import messages
@@ -25,7 +27,7 @@ class ApiVolumeTypeTest(BaseApiVolumeTestCase):
         volume_type_name = str(uuid4())
 
         self.rabbitMqHelper.push(message=messages.get_volume_type_create_sample(
-                volume_type_id=volume_type_id, volume_type_name=volume_type_name)
+            volume_type_id=volume_type_id, volume_type_name=volume_type_name)
         )
 
         self._wait_until_volume_type_is_created(volume_type_id=volume_type_id)

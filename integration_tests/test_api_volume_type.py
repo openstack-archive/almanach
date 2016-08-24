@@ -13,7 +13,9 @@
 # limitations under the License.
 
 from uuid import uuid4
-from hamcrest import assert_that, equal_to
+
+from hamcrest import assert_that
+from hamcrest import equal_to
 
 from base_api_volume_testcase import BaseApiVolumeTestCase
 from builders import messages
@@ -24,8 +26,8 @@ class ApiVolumeTypeTest(BaseApiVolumeTestCase):
         volume_type_query = "{url}/volume_type"
         volume_type_id = str(uuid4())
         data = dict(
-                type_id=volume_type_id,
-                type_name=messages.DEFAULT_VOLUME_NAME
+            type_id=volume_type_id,
+            type_name=messages.DEFAULT_VOLUME_NAME
         )
 
         response = self.almanachHelper.post(url=volume_type_query, data=data)

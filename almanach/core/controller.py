@@ -12,20 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
 from datetime import timedelta
-
-import pytz
 from dateutil import parser as date_parser
-
+import logging
 from pkg_resources import get_distribution
 
-from almanach.common.exceptions.almanach_entity_not_found_exception import AlmanachEntityNotFoundException
-from almanach.common.exceptions.date_format_exception import DateFormatException
-from almanach.common.exceptions.multiple_entities_matching_query import MultipleEntitiesMatchingQuery
-from almanach.core.model import Instance, Volume, VolumeType
-from almanach.validators.instance_validator import InstanceValidator
+import pytz
+
+from almanach.common.exceptions import almanach_entity_not_found_exception
+from almanach.common.exceptions import date_format_exception
+from almanach.common.exceptions import multiple_entities_matching_query
 from almanach import config
+from almanach.core import model
+from almanach.validators import instance_validator
 
 
 class Controller(object):
@@ -52,14 +51,16 @@ class Controller(object):
 
         filtered_metadata = self._filter_metadata_with_whitelist(metadata)
 
-        entity = Instance(instance_id, tenant_id, create_date, None, flavor, {"os_type": os_type, "distro": distro,
-                                                                              "version": version},
-                          create_date, name, filtered_metadata)
+        entity = model.Instance(instance_id, tenant_id, create_date, None, flavor,
+                                {"os_type": os_type, "distro": distro,
+                                 "version": version},
+                                create_date, name, filtered_metadata)
         self.database_adapter.insert_entity(entity)
 
     def delete_instance(self, instance_id, delete_date):
         if not self.database_adapter.has_active_entity(instance_id):
-            raise AlmanachEntityNotFoundException("InstanceId: {0} Not Found".format(instance_id))
+            raise almanach_entity_not_found_exception.AlmanachEntityNotFoundException(
+                "InstanceId: {0} Not Found".format(instance_id))
 
         delete_date = self._validate_and_parse_date(delete_date)
         logging.info("instance %s deleted on %s" % (instance_id, delete_date))
@@ -101,9 +102,10 @@ class Controller(object):
     def update_inactive_entity(self, instance_id, start, end, **kwargs):
         inactive_entities = self.database_adapter.list_entities_by_id(instance_id, start, end)
         if len(inactive_entities) > 1:
-            raise MultipleEntitiesMatchingQuery()
+            raise multiple_entities_matching_query.MultipleEntitiesMatchingQuery()
         if len(inactive_entities) < 1:
-            raise AlmanachEntityNotFoundException("InstanceId: {0} Not Found with start".format(instance_id))
+            raise almanach_entity_not_found_exception.AlmanachEntityNotFoundException(
+                "InstanceId: {0} Not Found with start".format(instance_id))
         entity = inactive_entities[0]
         entity_update = self._transform_attribute_to_match_entity_attribute(**kwargs)
         self.database_adapter.update_closed_entity(entity=entity, data=entity_update)
@@ -113,7 +115,7 @@ class Controller(object):
 
     def update_active_instance_entity(self, instance_id, **kwargs):
         try:
-            InstanceValidator().validate_update(kwargs)
+            instance_validator.InstanceValidator().validate_update(kwargs)
             instance = self.database_adapter.get_active_entity(instance_id)
             self._update_instance_object(instance, **kwargs)
             self.database_adapter.update_active_entity(instance)
@@ -127,7 +129,7 @@ class Controller(object):
 
     def get_all_entities_by_id(self, entity_id):
         if not self.entity_exists(entity_id=entity_id):
-            raise AlmanachEntityNotFoundException("Entity not found")
+            raise almanach_entity_not_found_exception.AlmanachEntityNotFoundException("Entity not found")
         return self.database_adapter.get_all_entities_by_id(entity_id=entity_id)
 
     def attach_volume(self, volume_id, date, attachments):
@@ -147,7 +149,8 @@ class Controller(object):
 
         volume_type_name = self._get_volume_type_name(volume_type)
 
-        entity = Volume(volume_id, project_id, start, None, volume_type_name, size, start, volume_name, attached_to)
+        entity = model.Volume(volume_id, project_id, start, None, volume_type_name, size, start, volume_name,
+                              attached_to)
         self.database_adapter.insert_entity(entity)
 
     def detach_volume(self, volume_id, date, attachments):
@@ -202,17 +205,17 @@ class Controller(object):
 
     def create_volume_type(self, volume_type_id, volume_type_name):
         logging.info("volume type %s with name %s created" % (volume_type_id, volume_type_name))
-        volume_type = VolumeType(volume_type_id, volume_type_name)
+        volume_type = model.VolumeType(volume_type_id, volume_type_name)
         self.database_adapter.insert_volume_type(volume_type)
 
     def list_entities(self, project_id, start, end):
         return self.database_adapter.list_entities(project_id, start, end)
 
     def list_instances(self, project_id, start, end):
-        return self.database_adapter.list_entities(project_id, start, end, Instance.TYPE)
+        return self.database_adapter.list_entities(project_id, start, end, model.Instance.TYPE)
 
     def list_volumes(self, project_id, start, end):
-        return self.database_adapter.list_entities(project_id, start, end, Volume.TYPE)
+        return self.database_adapter.list_entities(project_id, start, end, model.Volume.TYPE)
 
     def get_volume_type(self, type_id):
         return self.database_adapter.get_volume_type(type_id)
@@ -297,7 +300,7 @@ class Controller(object):
             date = date_parser.parse(date)
             return self._localize_date(date)
         except TypeError:
-            raise DateFormatException()
+            raise date_format_exception.DateFormatException()
 
     @staticmethod
     def _localize_date(date):

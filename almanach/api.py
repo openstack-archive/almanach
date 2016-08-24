@@ -15,16 +15,15 @@
 from flask import Flask
 
 from almanach.adapters import api_route_v1 as api_route
-from almanach.adapters.auth_adapter import AuthenticationAdapter
-from almanach.adapters.database_adapter import DatabaseAdapter
-from almanach.core.controller import Controller
+from almanach.adapters import auth_adapter
+from almanach.adapters import database_adapter
+from almanach.core import controller
 
 
 class AlmanachApi(object):
-
     def run(self, host, port):
-        api_route.controller = Controller(DatabaseAdapter())
-        api_route.auth_adapter = AuthenticationAdapter().factory()
+        api_route.controller = controller.Controller(database_adapter.DatabaseAdapter())
+        api_route.auth_adapter = auth_adapter.AuthenticationAdapter().factory()
 
         app = Flask("almanach")
         app.register_blueprint(api_route.api)

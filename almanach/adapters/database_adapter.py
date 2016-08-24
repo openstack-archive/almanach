@@ -15,12 +15,13 @@
 import logging
 
 import pymongo
-from pymongo.errors import ConfigurationError
+from pymongo import errors
 
+from almanach.common.exceptions import almanach_exception
+from almanach.common.exceptions import volume_type_not_found_exception
 from almanach import config
-from almanach.common.exceptions.almanach_exception import AlmanachException
-from almanach.common.exceptions.volume_type_not_found_exception import VolumeTypeNotFoundException
-from almanach.core.model import build_entity_from_dict, VolumeType
+from almanach.core import model
+from almanach.core.model import build_entity_from_dict
 
 
 def database(function):
@@ -33,11 +34,11 @@ def database(function):
             return function(self, *args, **kwargs)
         except KeyError as e:
             raise e
-        except VolumeTypeNotFoundException as e:
+        except volume_type_not_found_exception.VolumeTypeNotFoundException as e:
             raise e
         except NotImplementedError as e:
             raise e
-        except ConfigurationError as e:
+        except errors.ConfigurationError as e:
             logging.exception("DB Connection, make sure username and password doesn't contain the following :+&/ "
                               "character")
             raise e
@@ -101,7 +102,7 @@ class DatabaseAdapter(object):
                                         "$and": [
                                             {"end": {"$ne": None}},
                                             {"end": {"$lte": end}}
-                                            ]
+                                        ]
                                         }, {"_id": 0})
         return [build_entity_from_dict(entity) for entity in entities]
 
@@ -123,30 +124,30 @@ class DatabaseAdapter(object):
         volume_type = self.db.volume_type.find_one({"volume_type_id": volume_type_id})
         if not volume_type:
             logging.error("Trying to get a volume type not in the database.")
-            raise VolumeTypeNotFoundException(volume_type_id=volume_type_id)
+            raise volume_type_not_found_exception.VolumeTypeNotFoundException(volume_type_id=volume_type_id)
 
-        return VolumeType(volume_type_id=volume_type["volume_type_id"],
-                          volume_type_name=volume_type["volume_type_name"])
+        return model.VolumeType(volume_type_id=volume_type["volume_type_id"],
+                                volume_type_name=volume_type["volume_type_name"])
 
     @database
     def delete_volume_type(self, volume_type_id):
         if volume_type_id is None:
             error = "Trying to delete all volume types which is not permitted."
             logging.error(error)
-            raise AlmanachException(error)
+            raise almanach_exception.AlmanachException(error)
         returned_value = self.db.volume_type.remove({"volume_type_id": volume_type_id})
         if returned_value['n'] == 1:
             logging.info("Deleted volume type with id '%s' successfully." % volume_type_id)
         else:
             error = "Volume type with id '%s' doesn't exist in the database." % volume_type_id
             logging.error(error)
-            raise AlmanachException(error)
+            raise almanach_exception.AlmanachException(error)
 
     @database
     def list_volume_types(self):
         volume_types = self.db.volume_type.find()
-        return [VolumeType(volume_type_id=volume_type["volume_type_id"],
-                           volume_type_name=volume_type["volume_type_name"]) for volume_type in volume_types]
+        return [model.VolumeType(volume_type_id=volume_type["volume_type_id"],
+                                 volume_type_name=volume_type["volume_type_name"]) for volume_type in volume_types]
 
     @database
     def close_active_entity(self, entity_id, end):

@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from uuid import uuid4
 from datetime import datetime
 from retry import retry
+from uuid import uuid4
 
+from hamcrest import assert_that
+from hamcrest import equal_to
+from hamcrest import has_entry
 import pytz
-from hamcrest import assert_that, equal_to, has_entry
 
 from base_api_testcase import BaseApiTestCase
 from builders.messages import get_instance_create_end_sample
@@ -30,9 +32,9 @@ class CollectorInstanceCreateTest(BaseApiTestCase):
 
         self.rabbitMqHelper.push(
             get_instance_create_end_sample(
-                    instance_id=instance_id,
-                    tenant_id=tenant_id,
-                    creation_timestamp=datetime(2016, 2, 1, 9, 0, 0, tzinfo=pytz.utc)
+                instance_id=instance_id,
+                tenant_id=tenant_id,
+                creation_timestamp=datetime(2016, 2, 1, 9, 0, 0, tzinfo=pytz.utc)
             ))
 
         self.assert_that_instance_entity_is_created(instance_id, tenant_id)
