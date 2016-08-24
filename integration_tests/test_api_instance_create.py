@@ -13,13 +13,16 @@
 # limitations under the License.
 
 from uuid import uuid4
-from hamcrest import assert_that, equal_to, has_item, has_entry
+
+from hamcrest import assert_that
+from hamcrest import equal_to
+from hamcrest import has_entry
+from hamcrest import has_item
 
 from base_api_testcase import BaseApiTestCase
 
 
 class ApiInstanceCreateTest(BaseApiTestCase):
-
     def test_instance_create(self):
         instance_create_query = "{url}/project/{project}/instance"
         project_id = "my_test_project_id"
@@ -71,9 +74,9 @@ class ApiInstanceCreateTest(BaseApiTestCase):
 
         assert_that(response.status_code, equal_to(400))
         assert_that(response.json(), has_entry(
-                'error',
-                'The provided date has an invalid format. Format should be of yyyy-mm-ddThh:mm:ss.msZ, '
-                'ex: 2015-01-31T18:24:34.1523Z'
+            'error',
+            'The provided date has an invalid format. Format should be of yyyy-mm-ddThh:mm:ss.msZ, '
+            'ex: 2015-01-31T18:24:34.1523Z'
         ))
 
     def test_instance_create_missing_flavor_param(self):
@@ -91,21 +94,21 @@ class ApiInstanceCreateTest(BaseApiTestCase):
 
         assert_that(response.status_code, equal_to(400))
         assert_that(response.json(), has_entry(
-                "error",
-                "The 'flavor' param is mandatory for the request you have made."
+            "error",
+            "The 'flavor' param is mandatory for the request you have made."
         ))
 
     def test_instance_create_missing_type_name_param(self):
         volume_type_query = "{url}/volume_type"
         volume_type_id = str(uuid4())
         data = dict(
-                type_id=volume_type_id
+            type_id=volume_type_id
         )
 
         response = self.almanachHelper.post(url=volume_type_query, data=data)
 
         assert_that(response.status_code, equal_to(400))
         assert_that(response.json(), has_entry(
-                "error",
-                "The 'type_name' param is mandatory for the request you have made."
+            "error",
+            "The 'type_name' param is mandatory for the request you have made."
         ))

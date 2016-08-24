@@ -14,9 +14,10 @@
 
 import os
 import pkg_resources
-
 from unittest import TestCase
-from hamcrest import assert_that, equal_to
+
+from hamcrest import assert_that
+from hamcrest import equal_to
 
 from almanach import config
 

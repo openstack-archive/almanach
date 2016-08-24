@@ -14,14 +14,16 @@
 
 import unittest
 
-from flexmock import flexmock, flexmock_teardown
-from hamcrest import instance_of, assert_that
+from flexmock import flexmock
+from flexmock import flexmock_teardown
+from hamcrest import assert_that
+from hamcrest import instance_of
 
-from almanach import config
 from almanach.adapters.auth_adapter import AuthenticationAdapter
 from almanach.auth.keystone_auth import KeystoneAuthentication
 from almanach.auth.mixed_auth import MixedAuthentication
 from almanach.auth.private_key_auth import PrivateKeyAuthentication
+from almanach import config
 
 
 class AuthenticationAdapterTest(unittest.TestCase):

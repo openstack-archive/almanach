@@ -14,22 +14,22 @@
 
 import logging
 
-from kombu import Connection
+import kombu
 
+from almanach.adapters import bus_adapter
+from almanach.adapters import database_adapter
+from almanach.adapters import retry_adapter
 from almanach import config
-from almanach.adapters.bus_adapter import BusAdapter
-from almanach.adapters.database_adapter import DatabaseAdapter
-from almanach.adapters.retry_adapter import RetryAdapter
-from almanach.core.controller import Controller
+from almanach.core import controller
 
 
 class AlmanachCollector(object):
-
     def __init__(self):
-        self._controller = Controller(DatabaseAdapter())
-        _connection = Connection(config.rabbitmq_url(), heartbeat=540)
-        retry_adapter = RetryAdapter(_connection)
-        self._busAdapter = BusAdapter(self._controller, _connection, retry_adapter)
+        self._controller = controller.Controller(database_adapter.DatabaseAdapter())
+        _connection = kombu.Connection(config.rabbitmq_url(), heartbeat=540)
+        retry_adapter_instance = retry_adapter.RetryAdapter(_connection)
+        self._busAdapter = bus_adapter.BusAdapter(self._controller, _connection,
+                                                  retry_adapter_instance)
 
     def run(self):
         logging.info("Listening for incoming events")

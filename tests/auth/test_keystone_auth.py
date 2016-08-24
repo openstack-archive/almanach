@@ -14,8 +14,12 @@
 
 import unittest
 
-from flexmock import flexmock, flexmock_teardown
-from hamcrest import raises, assert_that, calling, equal_to
+from flexmock import flexmock
+from flexmock import flexmock_teardown
+from hamcrest import assert_that
+from hamcrest import calling
+from hamcrest import equal_to
+from hamcrest import raises
 
 from almanach.auth.keystone_auth import KeystoneAuthentication
 from almanach.common.exceptions.authentication_failure_exception import AuthenticationFailureException

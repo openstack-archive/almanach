@@ -15,9 +15,9 @@
 import os
 
 from kombu import BrokerConnection
+from kombu.common import maybe_declare
 from kombu import Exchange
 from kombu.pools import producers
-from kombu.common import maybe_declare
 
 
 class RabbitMqHelper(object):

@@ -14,7 +14,8 @@
 
 import unittest
 
-from flexmock import flexmock, flexmock_teardown
+from flexmock import flexmock
+from flexmock import flexmock_teardown
 
 from almanach.adapters.instance_bus_adapter import InstanceBusAdapter
 from integration_tests.builders import messages

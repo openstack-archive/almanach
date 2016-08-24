@@ -12,15 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from almanach.auth.base_auth import BaseAuth
-from almanach.common.exceptions.authentication_failure_exception import AuthenticationFailureException
+from almanach.auth import base_auth
+from almanach.common.exceptions import authentication_failure_exception
 
 
-class PrivateKeyAuthentication(BaseAuth):
+class PrivateKeyAuthentication(base_auth.BaseAuth):
     def __init__(self, private_key):
         self.private_key = private_key
 
     def validate(self, token):
         if token is None or self.private_key != token:
-            raise AuthenticationFailureException("Invalid Token")
+            raise authentication_failure_exception.AuthenticationFailureException("Invalid Token")
         return True

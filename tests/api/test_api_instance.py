@@ -12,15 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from hamcrest import assert_that, equal_to, has_key, has_length, has_entries, is_
+from hamcrest import assert_that
+from hamcrest import equal_to
+from hamcrest import has_entries
+from hamcrest import has_key
+from hamcrest import has_length
+from hamcrest import is_
 
 from almanach.common.exceptions.date_format_exception import DateFormatException
-from tests.builder import instance, a
-from tests.api.base_api import BaseApi, a_date_matching
+from tests.api.base_api import a_date_matching
+from tests.api.base_api import BaseApi
+from tests.builder import a
+from tests.builder import instance
 
 
 class ApiInstanceTest(BaseApi):
-
     def test_get_instances(self):
         self.controller.should_receive('list_instances') \
             .with_args('TENANT_ID', a_date_matching("2014-01-01 00:00:00.0000"),
@@ -47,26 +53,26 @@ class ApiInstanceTest(BaseApi):
 
         self.controller.should_receive('update_inactive_entity') \
             .with_args(
-                instance_id="INSTANCE_ID",
-                start=a_date_matching(start),
-                end=a_date_matching(end),
-                flavor=some_new_flavor,
+            instance_id="INSTANCE_ID",
+            start=a_date_matching(start),
+            end=a_date_matching(end),
+            flavor=some_new_flavor,
         ).and_return(a(
-                instance().
-                with_id('INSTANCE_ID').
-                with_start(2016, 3, 1, 0, 0, 0).
-                with_end(2016, 3, 3, 0, 0, 0).
-                with_flavor(some_new_flavor))
+            instance().
+            with_id('INSTANCE_ID').
+            with_start(2016, 3, 1, 0, 0, 0).
+            with_end(2016, 3, 3, 0, 0, 0).
+            with_flavor(some_new_flavor))
         )
 
         code, result = self.api_put(
-                '/entity/instance/INSTANCE_ID',
-                headers={'X-Auth-Token': 'some token value'},
-                query_string={
-                    'start': start,
-                    'end': end,
-                },
-                data=data,
+            '/entity/instance/INSTANCE_ID',
+            headers={'X-Auth-Token': 'some token value'},
+            query_string={
+                'start': start,
+                'end': end,
+            },
+            data=data,
         )
         assert_that(code, equal_to(200))
         assert_that(result, has_key('entity_id'))
@@ -96,9 +102,9 @@ class ApiInstanceTest(BaseApi):
             .once()
 
         code, result = self.api_post(
-                '/project/PROJECT_ID/instance',
-                data=data,
-                headers={'X-Auth-Token': 'some token value'}
+            '/project/PROJECT_ID/instance',
+            data=data,
+            headers={'X-Auth-Token': 'some token value'}
         )
         assert_that(code, equal_to(201))
 
@@ -115,9 +121,9 @@ class ApiInstanceTest(BaseApi):
             .never()
 
         code, result = self.api_post(
-                '/project/PROJECT_ID/instance',
-                data=data,
-                headers={'X-Auth-Token': 'some token value'}
+            '/project/PROJECT_ID/instance',
+            data=data,
+            headers={'X-Auth-Token': 'some token value'}
         )
         assert_that(result, has_entries({"error": "The 'os_distro' param is mandatory for the request you have made."}))
         assert_that(code, equal_to(400))
@@ -146,15 +152,15 @@ class ApiInstanceTest(BaseApi):
             .and_raise(DateFormatException)
 
         code, result = self.api_post(
-                '/project/PROJECT_ID/instance',
-                data=data,
-                headers={'X-Auth-Token': 'some token value'}
+            '/project/PROJECT_ID/instance',
+            data=data,
+            headers={'X-Auth-Token': 'some token value'}
         )
         assert_that(result, has_entries(
-                {
-                    "error": "The provided date has an invalid format. "
-                             "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
-                }
+            {
+                "error": "The provided date has an invalid format. "
+                         "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
+            }
         ))
         assert_that(code, equal_to(400))
 
@@ -169,9 +175,9 @@ class ApiInstanceTest(BaseApi):
             .once()
 
         code, result = self.api_put(
-                '/instance/INSTANCE_ID/resize',
-                data=data,
-                headers={'X-Auth-Token': 'some token value'}
+            '/instance/INSTANCE_ID/resize',
+            data=data,
+            headers={'X-Auth-Token': 'some token value'}
         )
         assert_that(code, equal_to(200))
 
@@ -191,9 +197,9 @@ class ApiInstanceTest(BaseApi):
             .never()
 
         code, result = self.api_delete(
-                '/instance/INSTANCE_ID',
-                data=dict(),
-                headers={'X-Auth-Token': 'some token value'}
+            '/instance/INSTANCE_ID',
+            data=dict(),
+            headers={'X-Auth-Token': 'some token value'}
         )
         assert_that(result, has_entries({"error": "The 'date' param is mandatory for the request you have made."}))
         assert_that(code, equal_to(400))
@@ -217,10 +223,10 @@ class ApiInstanceTest(BaseApi):
 
         code, result = self.api_delete('/instance/INSTANCE_ID', data=data, headers={'X-Auth-Token': 'some token value'})
         assert_that(result, has_entries(
-                {
-                    "error": "The provided date has an invalid format. "
-                             "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
-                }
+            {
+                "error": "The provided date has an invalid format. "
+                         "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
+            }
         ))
         assert_that(code, equal_to(400))
 
@@ -231,9 +237,9 @@ class ApiInstanceTest(BaseApi):
             .never()
 
         code, result = self.api_put(
-                '/instance/INSTANCE_ID/resize',
-                data=data,
-                headers={'X-Auth-Token': 'some token value'}
+            '/instance/INSTANCE_ID/resize',
+            data=data,
+            headers={'X-Auth-Token': 'some token value'}
         )
         assert_that(result, has_entries({"error": "The 'flavor' param is mandatory for the request you have made."}))
         assert_that(code, equal_to(400))
@@ -250,15 +256,15 @@ class ApiInstanceTest(BaseApi):
             .and_raise(DateFormatException)
 
         code, result = self.api_put(
-                '/instance/INSTANCE_ID/resize',
-                data=data,
-                headers={'X-Auth-Token': 'some token value'}
+            '/instance/INSTANCE_ID/resize',
+            data=data,
+            headers={'X-Auth-Token': 'some token value'}
         )
         assert_that(result, has_entries(
-                {
-                    "error": "The provided date has an invalid format. "
-                             "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
-                }
+            {
+                "error": "The provided date has an invalid format. "
+                         "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
+            }
         ))
         assert_that(code, equal_to(400))
 
@@ -272,17 +278,17 @@ class ApiInstanceTest(BaseApi):
         }
         self.controller.should_receive('rebuild_instance') \
             .with_args(
-                instance_id=instance_id,
-                distro=data.get('distro'),
-                version=data.get('version'),
-                os_type=data.get('os_type'),
-                rebuild_date=data.get('rebuild_date')) \
+            instance_id=instance_id,
+            distro=data.get('distro'),
+            version=data.get('version'),
+            os_type=data.get('os_type'),
+            rebuild_date=data.get('rebuild_date')) \
             .once()
 
         code, result = self.api_put(
-                '/instance/INSTANCE_ID/rebuild',
-                data=data,
-                headers={'X-Auth-Token': 'some token value'}
+            '/instance/INSTANCE_ID/rebuild',
+            data=data,
+            headers={'X-Auth-Token': 'some token value'}
         )
 
         assert_that(code, equal_to(200))
@@ -297,9 +303,9 @@ class ApiInstanceTest(BaseApi):
             .never()
 
         code, result = self.api_put(
-                '/instance/INSTANCE_ID/rebuild',
-                data=data,
-                headers={'X-Auth-Token': 'some token value'}
+            '/instance/INSTANCE_ID/rebuild',
+            data=data,
+            headers={'X-Auth-Token': 'some token value'}
         )
         assert_that(result, has_entries({"error": "The 'version' param is mandatory for the request you have made."}))
         assert_that(code, equal_to(400))
@@ -319,13 +325,13 @@ class ApiInstanceTest(BaseApi):
             .and_raise(DateFormatException)
 
         code, result = self.api_put(
-                '/instance/INSTANCE_ID/rebuild',
-                data=data,
-                headers={'X-Auth-Token': 'some token value'}
+            '/instance/INSTANCE_ID/rebuild',
+            data=data,
+            headers={'X-Auth-Token': 'some token value'}
         )
         assert_that(result, has_entries(
-                {
-                    "error": "The provided date has an invalid format. "
-                             "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
-                }
+            {
+                "error": "The provided date has an invalid format. "
+                         "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
+            }
         ))

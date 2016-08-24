@@ -13,13 +13,13 @@
 # limitations under the License.
 
 import argparse
-import sys
 import logging
 import logging.config as logging_config
+import sys
 
+from almanach import api
+from almanach import collector
 from almanach import config
-from almanach.api import AlmanachApi
-from almanach.collector import AlmanachCollector
 
 
 def run():
@@ -41,10 +41,10 @@ def run():
         logging.debug("Logging to stdout")
 
     if args.service == "api":
-        almanach_api = AlmanachApi()
+        almanach_api = api.AlmanachApi()
         almanach_api.run(host=args.host, port=args.port)
     else:
-        almanach_collector = AlmanachCollector()
+        almanach_collector = collector.AlmanachCollector()
         almanach_collector.run()
 
 

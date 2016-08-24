@@ -13,13 +13,16 @@
 # limitations under the License.
 
 from uuid import uuid4
-from hamcrest import assert_that, equal_to, has_item, has_entry
+
+from hamcrest import assert_that
+from hamcrest import equal_to
+from hamcrest import has_entry
+from hamcrest import has_item
 
 from base_api_testcase import BaseApiTestCase
 
 
 class ApiInstanceDelete(BaseApiTestCase):
-
     def test_instance_resize(self):
         instance_create_query = "{url}/project/{project}/instance"
         project_id = "my_test_project_id"
@@ -72,9 +75,9 @@ class ApiInstanceDelete(BaseApiTestCase):
         response = self.almanachHelper.put(url=instance_resize_query, data=resize_data, instance_id="my_instance_id")
         assert_that(response.status_code, equal_to(400))
         assert_that(response.json(), has_entry(
-                'error',
-                'The provided date has an invalid format. Format should be of yyyy-mm-ddThh:mm:ss.msZ, '
-                'ex: 2015-01-31T18:24:34.1523Z'
+            'error',
+            'The provided date has an invalid format. Format should be of yyyy-mm-ddThh:mm:ss.msZ, '
+            'ex: 2015-01-31T18:24:34.1523Z'
         ))
 
     def test_instance_resize_missing_param(self):
@@ -84,6 +87,6 @@ class ApiInstanceDelete(BaseApiTestCase):
         response = self.almanachHelper.put(url=instance_resize_query, data=resize_data, instance_id="my_instance_id")
         assert_that(response.status_code, equal_to(400))
         assert_that(response.json(), has_entry(
-                "error",
-                "The 'date' param is mandatory for the request you have made."
+            "error",
+            "The 'date' param is mandatory for the request you have made."
         ))

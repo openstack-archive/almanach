@@ -12,25 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
 from datetime import datetime
 from functools import wraps
+import logging
 
+import flask
 import jsonpickle
-
-from flask import Blueprint, Response, request
 from oslo_serialization import jsonutils
+from werkzeug import wrappers
 
-from werkzeug.wrappers import BaseResponse
+from almanach.common.exceptions import almanach_entity_not_found_exception
+from almanach.common.exceptions import almanach_exception
+from almanach.common.exceptions import authentication_failure_exception
+from almanach.common.exceptions import date_format_exception
+from almanach.common.exceptions import multiple_entities_matching_query
+from almanach.common.exceptions import validation_exception
 
-from almanach.common.exceptions.almanach_exception import AlmanachException
-from almanach.common.exceptions.almanach_entity_not_found_exception import AlmanachEntityNotFoundException
-from almanach.common.exceptions.authentication_failure_exception import AuthenticationFailureException
-from almanach.common.exceptions.multiple_entities_matching_query import MultipleEntitiesMatchingQuery
-from almanach.common.exceptions.validation_exception import InvalidAttributeException
-from almanach.common.exceptions.date_format_exception import DateFormatException
-
-api = Blueprint("api", __name__)
+api = flask.Blueprint("api", __name__)
 controller = None
 auth_adapter = None
 
@@ -43,11 +41,11 @@ def to_json(api_call):
     def decorator(*args, **kwargs):
         try:
             result = api_call(*args, **kwargs)
-            return result if isinstance(result, BaseResponse) \
-                else Response(encode(result), 200, {"Content-Type": "application/json"})
-        except DateFormatException as e:
+            return result if isinstance(result, wrappers.BaseResponse) \
+                else flask.Response(encode(result), 200, {"Content-Type": "application/json"})
+        except date_format_exception.DateFormatException as e:
             logging.warning(e.message)
-            return Response(encode({"error": e.message}), 400, {"Content-Type": "application/json"})
+            return flask.Response(encode({"error": e.message}), 400, {"Content-Type": "application/json"})
         except KeyError as e:
             message = "The {param} param is mandatory for the request you have made.".format(param=e)
             logging.warning(message)
@@ -56,22 +54,22 @@ def to_json(api_call):
             message = "The request you have made must have data. None was given."
             logging.warning(message)
             return encode({"error": message}), 400, {"Content-Type": "application/json"}
-        except InvalidAttributeException as e:
+        except validation_exception.InvalidAttributeException as e:
             logging.warning(e.get_error_message())
             return encode({"error": e.get_error_message()}), 400, {"Content-Type": "application/json"}
-        except MultipleEntitiesMatchingQuery as e:
+        except multiple_entities_matching_query.MultipleEntitiesMatchingQuery as e:
             logging.warning(e.message)
             return encode({"error": "Multiple entities found while updating closed"}), 400, {
                 "Content-Type": "application/json"}
-        except AlmanachEntityNotFoundException as e:
+        except almanach_entity_not_found_exception.AlmanachEntityNotFoundException as e:
             logging.warning(e.message)
             return encode({"error": "Entity not found"}), 404, {"Content-Type": "application/json"}
-        except AlmanachException as e:
+        except almanach_exception.AlmanachException as e:
             logging.exception(e)
-            return Response(encode({"error": e.message}), 500, {"Content-Type": "application/json"})
+            return flask.Response(encode({"error": e.message}), 500, {"Content-Type": "application/json"})
         except Exception as e:
             logging.exception(e)
-            return Response(encode({"error": e}), 500, {"Content-Type": "application/json"})
+            return flask.Response(encode({"error": e}), 500, {"Content-Type": "application/json"})
 
     return decorator
 
@@ -80,11 +78,11 @@ def authenticated(api_call):
     @wraps(api_call)
     def decorator(*args, **kwargs):
         try:
-            auth_adapter.validate(request.headers.get('X-Auth-Token'))
+            auth_adapter.validate(flask.request.headers.get('X-Auth-Token'))
             return api_call(*args, **kwargs)
-        except AuthenticationFailureException as e:
+        except authentication_failure_exception.AuthenticationFailureException as e:
             logging.error("Authentication failure: {0}".format(e))
-            return Response('Unauthorized', 401)
+            return flask.Response('Unauthorized', 401)
 
     return decorator
 
@@ -100,7 +98,7 @@ def get_info():
 @authenticated
 @to_json
 def create_instance(project_id):
-    instance = jsonutils.loads(request.data)
+    instance = jsonutils.loads(flask.request.data)
     logging.info("Creating instance for tenant %s with data %s", project_id, instance)
     controller.create_instance(
         tenant_id=project_id,
@@ -114,28 +112,28 @@ def create_instance(project_id):
         metadata={}
     )
 
-    return Response(status=201)
+    return flask.Response(status=201)
 
 
 @api.route("/instance/<instance_id>", methods=["DELETE"])
 @authenticated
 @to_json
 def delete_instance(instance_id):
-    data = jsonutils.loads(request.data)
+    data = jsonutils.loads(flask.request.data)
     logging.info("Deleting instance with id %s with data %s", instance_id, data)
     controller.delete_instance(
         instance_id=instance_id,
         delete_date=data['date']
     )
 
-    return Response(status=202)
+    return flask.Response(status=202)
 
 
 @api.route("/instance/<instance_id>/resize", methods=["PUT"])
 @authenticated
 @to_json
 def resize_instance(instance_id):
-    instance = jsonutils.loads(request.data)
+    instance = jsonutils.loads(flask.request.data)
     logging.info("Resizing instance with id %s with data %s", instance_id, instance)
     controller.resize_instance(
         instance_id=instance_id,
@@ -143,14 +141,14 @@ def resize_instance(instance_id):
         flavor=instance['flavor']
     )
 
-    return Response(status=200)
+    return flask.Response(status=200)
 
 
 @api.route("/instance/<instance_id>/rebuild", methods=["PUT"])
 @authenticated
 @to_json
 def rebuild_instance(instance_id):
-    instance = jsonutils.loads(request.data)
+    instance = jsonutils.loads(flask.request.data)
     logging.info("Rebuilding instance with id %s with data %s", instance_id, instance)
     controller.rebuild_instance(
         instance_id=instance_id,
@@ -160,7 +158,7 @@ def rebuild_instance(instance_id):
         rebuild_date=instance['rebuild_date'],
     )
 
-    return Response(status=200)
+    return flask.Response(status=200)
 
 
 @api.route("/project/<project_id>/instances", methods=["GET"])
@@ -176,7 +174,7 @@ def list_instances(project_id):
 @authenticated
 @to_json
 def create_volume(project_id):
-    volume = jsonutils.loads(request.data)
+    volume = jsonutils.loads(flask.request.data)
     logging.info("Creating volume for tenant %s with data %s", project_id, volume)
     controller.create_volume(
         project_id=project_id,
@@ -188,28 +186,28 @@ def create_volume(project_id):
         attached_to=volume['attached_to']
     )
 
-    return Response(status=201)
+    return flask.Response(status=201)
 
 
 @api.route("/volume/<volume_id>", methods=["DELETE"])
 @authenticated
 @to_json
 def delete_volume(volume_id):
-    data = jsonutils.loads(request.data)
+    data = jsonutils.loads(flask.request.data)
     logging.info("Deleting volume with id %s with data %s", volume_id, data)
     controller.delete_volume(
         volume_id=volume_id,
         delete_date=data['date']
     )
 
-    return Response(status=202)
+    return flask.Response(status=202)
 
 
 @api.route("/volume/<volume_id>/resize", methods=["PUT"])
 @authenticated
 @to_json
 def resize_volume(volume_id):
-    volume = jsonutils.loads(request.data)
+    volume = jsonutils.loads(flask.request.data)
     logging.info("Resizing volume with id %s with data %s", volume_id, volume)
     controller.resize_volume(
         volume_id=volume_id,
@@ -217,14 +215,14 @@ def resize_volume(volume_id):
         update_date=volume['date']
     )
 
-    return Response(status=200)
+    return flask.Response(status=200)
 
 
 @api.route("/volume/<volume_id>/attach", methods=["PUT"])
 @authenticated
 @to_json
 def attach_volume(volume_id):
-    volume = jsonutils.loads(request.data)
+    volume = jsonutils.loads(flask.request.data)
     logging.info("Attaching volume with id %s with data %s", volume_id, volume)
     controller.attach_volume(
         volume_id=volume_id,
@@ -232,14 +230,14 @@ def attach_volume(volume_id):
         attachments=volume['attachments']
     )
 
-    return Response(status=200)
+    return flask.Response(status=200)
 
 
 @api.route("/volume/<volume_id>/detach", methods=["PUT"])
 @authenticated
 @to_json
 def detach_volume(volume_id):
-    volume = jsonutils.loads(request.data)
+    volume = jsonutils.loads(flask.request.data)
     logging.info("Detaching volume with id %s with data %s", volume_id, volume)
     controller.detach_volume(
         volume_id=volume_id,
@@ -247,7 +245,7 @@ def detach_volume(volume_id):
         attachments=volume['attachments']
     )
 
-    return Response(status=200)
+    return flask.Response(status=200)
 
 
 @api.route("/project/<project_id>/volumes", methods=["GET"])
@@ -272,9 +270,9 @@ def list_entity(project_id):
 @authenticated
 @to_json
 def update_instance_entity(instance_id):
-    data = jsonutils.loads(request.data)
+    data = jsonutils.loads(flask.request.data)
     logging.info("Updating instance entity with id %s with data %s", instance_id, data)
-    if 'start' in request.args:
+    if 'start' in flask.request.args:
         start, end = get_period()
         result = controller.update_inactive_entity(instance_id=instance_id, start=start, end=end, **data)
     else:
@@ -286,9 +284,9 @@ def update_instance_entity(instance_id):
 @authenticated
 def entity_exists(entity_id):
     logging.info("Does entity with id %s exists", entity_id)
-    response = Response('', 404)
+    response = flask.Response('', 404)
     if controller.entity_exists(entity_id=entity_id):
-        response = Response('', 200)
+        response = flask.Response('', 200)
     return response
 
 
@@ -319,13 +317,13 @@ def get_volume_type(type_id):
 @authenticated
 @to_json
 def create_volume_type():
-    volume_type = jsonutils.loads(request.data)
+    volume_type = jsonutils.loads(flask.request.data)
     logging.info("Creating volume type with data '%s'", volume_type)
     controller.create_volume_type(
         volume_type_id=volume_type['type_id'],
         volume_type_name=volume_type['type_name']
     )
-    return Response(status=201)
+    return flask.Response(status=201)
 
 
 @api.route("/volume_type/<type_id>", methods=["DELETE"])
@@ -334,13 +332,13 @@ def create_volume_type():
 def delete_volume_type(type_id):
     logging.info("Deleting volume type with id '%s'", type_id)
     controller.delete_volume_type(type_id)
-    return Response(status=202)
+    return flask.Response(status=202)
 
 
 def get_period():
-    start = datetime.strptime(request.args["start"], "%Y-%m-%d %H:%M:%S.%f")
-    if "end" not in request.args:
+    start = datetime.strptime(flask.request.args["start"], "%Y-%m-%d %H:%M:%S.%f")
+    if "end" not in flask.request.args:
         end = datetime.now()
     else:
-        end = datetime.strptime(request.args["end"], "%Y-%m-%d %H:%M:%S.%f")
+        end = datetime.strptime(flask.request.args["end"], "%Y-%m-%d %H:%M:%S.%f")
     return start, end

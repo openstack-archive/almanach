@@ -12,20 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
 import kombu
+import logging
 import six
 
-from kombu.mixins import ConsumerMixin
+from kombu import mixins
 from oslo_serialization import jsonutils
 
+from almanach.adapters import instance_bus_adapter
+from almanach.adapters import volume_bus_adapter
 from almanach import config
-from almanach.adapters.instance_bus_adapter import InstanceBusAdapter
-from almanach.adapters.volume_bus_adapter import VolumeBusAdapter
 
 
-class BusAdapter(ConsumerMixin):
-
+class BusAdapter(mixins.ConsumerMixin):
     def __init__(self, controller, connection, retry_adapter):
         super(BusAdapter, self).__init__()
         self.controller = controller
@@ -47,8 +46,8 @@ class BusAdapter(ConsumerMixin):
 
         event_type = notification.get("event_type")
         logging.info("Received event: '{0}'".format(event_type))
-        InstanceBusAdapter(self.controller).handle_events(event_type, notification)
-        VolumeBusAdapter(self.controller).handle_events(event_type, notification)
+        instance_bus_adapter.InstanceBusAdapter(self.controller).handle_events(event_type, notification)
+        volume_bus_adapter.VolumeBusAdapter(self.controller).handle_events(event_type, notification)
 
     def get_consumers(self, consumer, channel):
         queue = kombu.Queue(config.rabbitmq_queue(), routing_key=config.rabbitmq_routing_key())
