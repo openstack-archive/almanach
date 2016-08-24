@@ -29,7 +29,8 @@ class AlmanachCollector(object):
         self._controller = Controller(DatabaseAdapter())
         _connection = Connection(config.rabbitmq_url(), heartbeat=540)
         retry_adapter = RetryAdapter(_connection)
-        self._busAdapter = BusAdapter(self._controller, _connection, retry_adapter)
+        self._busAdapter = BusAdapter(self._controller, _connection,
+                                      retry_adapter)
 
     def run(self):
         logging.info("Listening for incoming events")
