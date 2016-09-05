@@ -36,6 +36,9 @@ class Entity(object):
                 other.name == self.name and
                 other.entity_type == self.entity_type)
 
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
 
 class Instance(Entity):
     TYPE = "instance"
@@ -56,6 +59,9 @@ class Instance(Entity):
                 other.os == self.os and
                 other.metadata == self.metadata)
 
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
 
 class OS(object):
     def __init__(self, os_type, distro, version):
@@ -67,6 +73,9 @@ class OS(object):
         return (other.os_type == self.os_type and
                 other.distro == self.distro and
                 other.version == self.version)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
 
 class Volume(Entity):
@@ -85,6 +94,9 @@ class Volume(Entity):
                 other.size == self.size and
                 other.attached_to == self.attached_to)
 
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
 
 class VolumeType(object):
     def __init__(self, volume_type_id, volume_type_name):
@@ -93,6 +105,9 @@ class VolumeType(object):
 
     def __eq__(self, other):
         return other.__dict__ == self.__dict__
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     def as_dict(self):
         return todict(self)
