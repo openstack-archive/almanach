@@ -169,6 +169,28 @@ To create a new user, open a new MongoDB shell:
     m.getDB("almanach").createUser({user: "almanach", pwd: "almanach", roles: [{role: "readWrite", db: "almanach"}]})
 
 
+Devstack configuration
+----------------------
+
+.. code:: bash
+
+    [[local|localrc]]
+    ADMIN_PASSWORD=secret
+    DATABASE_PASSWORD=$ADMIN_PASSWORD
+    RABBIT_PASSWORD=$ADMIN_PASSWORD
+    SERVICE_PASSWORD=$ADMIN_PASSWORD
+
+    enable_plugin almanach https://git.openstack.org/openstack/almanach
+
+    [[post-config|$NOVA_CONF]]
+    [DEFAULT]
+    notification_topics=almanach,notifications
+
+    [[post-config|$CINDER_CONF]]
+    [DEFAULT]
+    notification_topics=almanach,notifications
+
+
 Database entities
 -----------------
 
