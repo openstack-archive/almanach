@@ -91,6 +91,9 @@ class DateMatcher(object):
     def __eq__(self, other):
         return other == self.date
 
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
 
 def a_date_matching(date_string):
     return DateMatcher(datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S.%f"))
