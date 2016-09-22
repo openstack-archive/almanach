@@ -1,0 +1,8 @@
+Code-Review+2: Frédéric Guillot <fguillot@internap.com>
+Workflow+1: Marc Aubry <maubry@internap.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Thu, 22 Sep 2016 15:09:07 +0000
+Reviewed-on: https://review.openstack.org/372836
+Project: openstack/almanach
+Branch: refs/heads/master
