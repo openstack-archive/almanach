@@ -19,13 +19,13 @@ from almanach.adapters import auth_adapter
 from almanach.adapters import database_adapter
 from almanach.core import controller
 
+app = Flask("almanach")
+app.register_blueprint(api_route.api)
+
 
 class AlmanachApi(object):
     def run(self, host, port):
         api_route.controller = controller.Controller(database_adapter.DatabaseAdapter())
         api_route.auth_adapter = auth_adapter.AuthenticationAdapter().factory()
-
-        app = Flask("almanach")
-        app.register_blueprint(api_route.api)
 
         return app.run(host=host, port=port)
