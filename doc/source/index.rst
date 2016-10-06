@@ -260,3 +260,10 @@ Almanach will process those events:
 - :code:`volume.update.end`
 - :code:`volume.exists`
 - :code:`volume_type.create`
+
+API documentation
+-----------------
+
+.. autoflask:: almanach.api:app
+    :undoc-static:
+    :include-empty-docstring:
