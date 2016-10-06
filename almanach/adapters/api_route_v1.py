@@ -90,6 +90,10 @@ def authenticated(api_call):
 @api.route("/info", methods=["GET"])
 @to_json
 def get_info():
+    """Displays information about the current version and counts of entities in the database.
+
+    :return: version and database counts of entities
+    """
     logging.info("Get application info")
     return controller.get_application_info()
 
@@ -98,6 +102,14 @@ def get_info():
 @authenticated
 @to_json
 def create_instance(project_id):
+    """Create an instance for a tenant.
+
+    :arg uuid project_id: Tenant Uuid
+
+    :code 201 Created:
+
+    :return:
+    """
     instance = jsonutils.loads(flask.request.data)
     logging.info("Creating instance for tenant %s with data %s", project_id, instance)
     controller.create_instance(
@@ -119,6 +131,16 @@ def create_instance(project_id):
 @authenticated
 @to_json
 def delete_instance(instance_id):
+    """Deletes the instance.
+
+    :arg uuid instance_id: Instance Uuid
+
+    :raises: AlmanachEntityNotFoundException if instance not found
+
+    :code 202 Accepted:
+
+    :return:
+    """
     data = jsonutils.loads(flask.request.data)
     logging.info("Deleting instance with id %s with data %s", instance_id, data)
     controller.delete_instance(
@@ -133,6 +155,16 @@ def delete_instance(instance_id):
 @authenticated
 @to_json
 def resize_instance(instance_id):
+    """Resizes an instance when the instance flavor was changed in OpenStack.
+
+    :arg uuid instance_id: Instance Uuid
+
+    :raises: KeyError if instance does not exist
+
+    :code 200 OK:
+
+    :return:
+    """
     instance = jsonutils.loads(flask.request.data)
     logging.info("Resizing instance with id %s with data %s", instance_id, instance)
     controller.resize_instance(
@@ -148,6 +180,14 @@ def resize_instance(instance_id):
 @authenticated
 @to_json
 def rebuild_instance(instance_id):
+    """Rebuilds an instance when the instance image was changed in OpenStack.
+
+    :arg uuid instance_id: Instance Uuid
+
+    :code 200 OK:
+
+    :return:
+    """
     instance = jsonutils.loads(flask.request.data)
     logging.info("Rebuilding instance with id %s with data %s", instance_id, instance)
     controller.rebuild_instance(
@@ -165,6 +205,15 @@ def rebuild_instance(instance_id):
 @authenticated
 @to_json
 def list_instances(project_id):
+    """Lists instances for a tenant.
+
+    :arg uuid project_id: Tenant Uuid
+    :arg datetime start: Y-m-d H:M:S.f
+    :arg datetime end: Y-m-d H:M:S.f
+
+
+    :return: a list of instances
+    """
     start, end = get_period()
     logging.info("Listing instances between %s and %s", start, end)
     return controller.list_instances(project_id, start, end)
