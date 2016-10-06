@@ -90,6 +90,10 @@ def authenticated(api_call):
 @api.route("/info", methods=["GET"])
 @to_json
 def get_info():
+    """Displays information about the current version and counts of entities in the database.
+
+    :return: version and database counts of entities
+    """
     logging.info("Get application info")
     return controller.get_application_info()
 
@@ -98,6 +102,21 @@ def get_info():
 @authenticated
 @to_json
 def create_instance(project_id):
+    """Create an instance for a tenant.
+
+    :arg uuid project_id: Tenant Uuid
+    :arg uuid id: The instance uuid
+    :arg datetime created_at: Y-m-d H:M:S.f
+    :arg uuid flavor: The flavor uuid
+    :arg str os_type: The OS type
+    :arg str os_distro: The OS distro
+    :arg str os_version: The OS version
+    :arg str name: The instance name
+
+    :code 201 Created:
+
+    :return:
+    """
     instance = jsonutils.loads(flask.request.data)
     logging.info("Creating instance for tenant %s with data %s", project_id, instance)
     controller.create_instance(
@@ -119,6 +138,17 @@ def create_instance(project_id):
 @authenticated
 @to_json
 def delete_instance(instance_id):
+    """Deletes the instance.
+
+    :arg uuid instance_id: Instance Uuid
+    :arg datetime date: Y-m-d H:M:S.f
+
+    :raises: AlmanachEntityNotFoundException if instance not found
+
+    :code 202 Accepted:
+
+    :return:
+    """
     data = jsonutils.loads(flask.request.data)
     logging.info("Deleting instance with id %s with data %s", instance_id, data)
     controller.delete_instance(
@@ -133,6 +163,18 @@ def delete_instance(instance_id):
 @authenticated
 @to_json
 def resize_instance(instance_id):
+    """Resizes an instance when the instance flavor was changed in OpenStack.
+
+    :arg uuid instance_id: Instance Uuid
+    :arg datetime date: Y-m-d H:M:S.f
+    :arg uuid flavor: The flavor uuid
+
+    :raises: KeyError if instance does not exist
+
+    :code 200 OK:
+
+    :return:
+    """
     instance = jsonutils.loads(flask.request.data)
     logging.info("Resizing instance with id %s with data %s", instance_id, instance)
     controller.resize_instance(
@@ -148,6 +190,18 @@ def resize_instance(instance_id):
 @authenticated
 @to_json
 def rebuild_instance(instance_id):
+    """Rebuilds an instance when the instance image was changed in OpenStack.
+
+    :arg uuid instance_id: Instance Uuid
+    :arg str distro: The OS distro
+    :arg str version: The OS version
+    :arg str os_type: The OS type
+    :arg datetime rebuild_date: Y-m-d H:M:S.f
+
+    :code 200 OK:
+
+    :return:
+    """
     instance = jsonutils.loads(flask.request.data)
     logging.info("Rebuilding instance with id %s with data %s", instance_id, instance)
     controller.rebuild_instance(
@@ -165,6 +219,14 @@ def rebuild_instance(instance_id):
 @authenticated
 @to_json
 def list_instances(project_id):
+    """Lists instances for a tenant.
+
+    :arg uuid project_id: Tenant Uuid
+    :arg datetime start: Y-m-d H:M:S.f
+    :arg datetime end: Y-m-d H:M:S.f
+
+    :return: a list of instances
+    """
     start, end = get_period()
     logging.info("Listing instances between %s and %s", start, end)
     return controller.list_instances(project_id, start, end)
@@ -174,6 +236,20 @@ def list_instances(project_id):
 @authenticated
 @to_json
 def create_volume(project_id):
+    """Create a volume for a tenant.
+
+    :arg uuid project_id: Tenant Uuid
+    :arg uuid volume_id: The Volume Uuid
+    :arg datetime start: Y-m-d H:M:S.f
+    :arg uuid volume_type: The Volume Type Uuid
+    :arg str size: The Volume Size
+    :arg str volume_name: The Volume Name
+    :arg uuid attached_to: The Instance Uuid the volume is attached to
+
+    :code 201 Created:
+
+    :return:
+    """
     volume = jsonutils.loads(flask.request.data)
     logging.info("Creating volume for tenant %s with data %s", project_id, volume)
     controller.create_volume(
@@ -193,6 +269,17 @@ def create_volume(project_id):
 @authenticated
 @to_json
 def delete_volume(volume_id):
+    """Deletes the volume.
+
+    :arg uuid volume_id: Volume Uuid
+    :arg datetime date: Y-m-d H:M:S.f
+
+    :raises: KeyError if volume not found
+
+    :code 202 Accepted:
+
+    :return:
+    """
     data = jsonutils.loads(flask.request.data)
     logging.info("Deleting volume with id %s with data %s", volume_id, data)
     controller.delete_volume(
@@ -207,6 +294,16 @@ def delete_volume(volume_id):
 @authenticated
 @to_json
 def resize_volume(volume_id):
+    """Resizes a volume when the volume size was changed in OpenStack.
+
+    :arg uuid volume_id: Volume Uuid
+    :arg str size: The size of the volume
+    :arg datetime date: Y-m-d H:M:S.f
+
+    :code 200 OK:
+
+    :return:
+    """
     volume = jsonutils.loads(flask.request.data)
     logging.info("Resizing volume with id %s with data %s", volume_id, volume)
     controller.resize_volume(
@@ -222,6 +319,18 @@ def resize_volume(volume_id):
 @authenticated
 @to_json
 def attach_volume(volume_id):
+    """Updates the attachments for a volume when the volume attachments have been changed in OpenStack.
+
+    :arg uuid volume_id: Volume Uuid
+    :arg datetime date: Y-m-d H:M:S.f
+    :arg dict attachments: The volume attachments
+
+    :raises: KeyError if volume does not exist
+
+    :code 200 OK:
+
+    :return:
+    """
     volume = jsonutils.loads(flask.request.data)
     logging.info("Attaching volume with id %s with data %s", volume_id, volume)
     controller.attach_volume(
@@ -237,6 +346,18 @@ def attach_volume(volume_id):
 @authenticated
 @to_json
 def detach_volume(volume_id):
+    """Detaches a attachments when the volume is detached in OpenStack.
+
+    :arg uuid volume_id: Volume Uuid
+    :arg datetime date: Y-m-d H:M:S.f
+    :arg dict attachments: The volume attachments
+
+    :raises: KeyError if volume does not exist
+
+    :code 200 OK:
+
+    :return:
+    """
     volume = jsonutils.loads(flask.request.data)
     logging.info("Detaching volume with id %s with data %s", volume_id, volume)
     controller.detach_volume(
@@ -252,6 +373,14 @@ def detach_volume(volume_id):
 @authenticated
 @to_json
 def list_volumes(project_id):
+    """Lists volumes for a tenant.
+
+    :arg uuid project_id: Tenant Uuid
+    :arg datetime start: Y-m-d H:M:S.f
+    :arg datetime end: Y-m-d H:M:S.f
+
+    :return: a list of volumes
+    """
     start, end = get_period()
     logging.info("Listing volumes between %s and %s", start, end)
     return controller.list_volumes(project_id, start, end)
@@ -261,6 +390,14 @@ def list_volumes(project_id):
 @authenticated
 @to_json
 def list_entity(project_id):
+    """Lists instances and volumes for a tenant.
+
+    :arg uuid project_id: Tenant Uuid
+    :arg datetime start: Y-m-d H:M:S.f
+    :arg datetime end: Y-m-d H:M:S.f
+
+    :return: a list of instances and volumes
+    """
     start, end = get_period()
     logging.info("Listing entities between %s and %s", start, end)
     return controller.list_entities(project_id, start, end)
@@ -270,6 +407,16 @@ def list_entity(project_id):
 @authenticated
 @to_json
 def update_instance_entity(instance_id):
+    """Updates an entity.
+
+    :arg uuid instance_id: Instance Uuid
+    :arg datetime start: Y-m-d H:M:S.f
+    :arg datetime end: Y-m-d H:M:S.f
+
+    :raises: KeyError if entity does not exist
+
+    :return: the updated entity
+    """
     data = jsonutils.loads(flask.request.data)
     logging.info("Updating instance entity with id %s with data %s", instance_id, data)
     if 'start' in flask.request.args:
@@ -283,6 +430,15 @@ def update_instance_entity(instance_id):
 @api.route("/entity/<entity_id>", methods=["HEAD"])
 @authenticated
 def entity_exists(entity_id):
+    """Verifies an entities existence.
+
+    :arg uuid entity_id: Entity Uuid
+
+    :code 200 OK: if the entity exists
+    :code 404 Not Found: if the entity does not exist
+
+    :return:
+    """
     logging.info("Does entity with id %s exists", entity_id)
     response = flask.Response('', 404)
     if controller.entity_exists(entity_id=entity_id):
@@ -294,6 +450,14 @@ def entity_exists(entity_id):
 @authenticated
 @to_json
 def get_entity(entity_id):
+    """Gets an entity.
+
+    :arg uuid entity_id: Entity Uuid
+
+    :raises: AlmanachEntityNotFoundException if entity does not exist
+
+    :return: the entity
+    """
     return controller.get_all_entities_by_id(entity_id)
 
 
@@ -301,6 +465,10 @@ def get_entity(entity_id):
 @authenticated
 @to_json
 def list_volume_types():
+    """Lists volume types.
+
+    :return: a list of volume types
+    """
     logging.info("Listing volumes types")
     return controller.list_volume_types()
 
@@ -309,6 +477,12 @@ def list_volume_types():
 @authenticated
 @to_json
 def get_volume_type(type_id):
+    """Get a volume type.
+
+    :arg uuid type_id: Volume Type Uuid
+
+    :return: the volume type name
+    """
     logging.info("Get volumes type for id %s", type_id)
     return controller.get_volume_type(type_id)
 
@@ -317,6 +491,15 @@ def get_volume_type(type_id):
 @authenticated
 @to_json
 def create_volume_type():
+    """Creates a volume type.
+
+    :arg str type_id: The Volume Type id
+    :arg str type_name: The Volume Type name
+
+    :code 201 Created:
+
+    :return:
+    """
     volume_type = jsonutils.loads(flask.request.data)
     logging.info("Creating volume type with data '%s'", volume_type)
     controller.create_volume_type(
@@ -330,12 +513,27 @@ def create_volume_type():
 @authenticated
 @to_json
 def delete_volume_type(type_id):
+    """Deletes the volume.
+
+    :arg uuid type_id: Volume Type Uuid
+
+    :code 202 Accepted:
+
+    :return:
+    """
     logging.info("Deleting volume type with id '%s'", type_id)
     controller.delete_volume_type(type_id)
     return flask.Response(status=202)
 
 
 def get_period():
+    """Gets a period of time between start and end.
+
+    :arg datetime start: Y-m-d H:M:S.f
+    :arg datetime end: Y-m-d H:M:S.f
+
+    :return: the time period
+    """
     start = datetime.strptime(flask.request.args["start"], "%Y-%m-%d %H:%M:%S.%f")
     if "end" not in flask.request.args:
         end = datetime.now()
