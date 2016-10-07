@@ -20,7 +20,7 @@ from flexmock import flexmock_teardown
 import pytz
 
 from almanach.adapters.bus_adapter import BusAdapter
-from almanach.common.exceptions.almanach_entity_not_found_exception import AlmanachEntityNotFoundException
+from almanach.core import exception
 from integration_tests.builders import messages
 
 
@@ -247,7 +247,8 @@ class BusAdapterTest(unittest.TestCase):
         message = flexmock()
 
         (flexmock(message).should_receive("ack"))
-        self.controller.should_receive('delete_instance').and_raise(AlmanachEntityNotFoundException("Entity not found"))
+        self.controller.should_receive('delete_instance')\
+            .and_raise(exception.AlmanachEntityNotFoundException("Entity not found"))
         self.retry.should_receive('publish_to_dead_letter').with_args(message).once()
 
         self.bus_adapter.on_message(notification, message)

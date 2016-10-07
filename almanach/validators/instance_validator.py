@@ -11,10 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import six
 import voluptuous
 
-from almanach.common.exceptions import validation_exception
+from almanach.core import exception
 
 
 class InstanceValidator(object):
@@ -36,4 +37,4 @@ class InstanceValidator(object):
         try:
             return self.schema(payload)
         except voluptuous.MultipleInvalid as e:
-            raise validation_exception.InvalidAttributeException(e.errors)
+            raise exception.InvalidAttributeException(e.errors)

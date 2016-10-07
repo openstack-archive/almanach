@@ -19,7 +19,7 @@ from hamcrest import has_entry
 from hamcrest import has_key
 from hamcrest import has_length
 
-from almanach.common.exceptions.almanach_exception import AlmanachException
+from almanach.core import exception
 from tests.api.base_api import BaseApi
 from tests.builder import a
 from tests.builder import volume_type
@@ -74,7 +74,7 @@ class ApiVolumeTypeTest(BaseApi):
     def test_volume_type_delete_not_in_database(self):
         self.controller.should_receive('delete_volume_type') \
             .with_args('A_VOLUME_TYPE_ID') \
-            .and_raise(AlmanachException("An exception occurred")) \
+            .and_raise(exception.AlmanachException("An exception occurred")) \
             .once()
 
         code, result = self.api_delete('/volume_type/A_VOLUME_TYPE_ID', headers={'X-Auth-Token': 'some token value'})

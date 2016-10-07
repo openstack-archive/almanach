@@ -22,8 +22,8 @@ from flexmock import flexmock_teardown
 import oslo_serialization
 
 from almanach.adapters import api_route_v1 as api_route
-from almanach.common.exceptions.authentication_failure_exception import AuthenticationFailureException
 from almanach import config
+from almanach.core import exception
 
 
 class BaseApi(TestCase):
@@ -55,7 +55,8 @@ class BaseApi(TestCase):
 
     def prepare_with_failed_authentication(self):
         self.having_config('auth_private_key', 'some token value')
-        self.auth_adapter.should_receive("validate").and_raise(AuthenticationFailureException("Wrong credentials"))
+        self.auth_adapter.should_receive("validate")\
+            .and_raise(exception.AuthenticationFailureException("Wrong credentials"))
 
     def api_get(self, url, query_string=None, headers=None, accept='application/json'):
         return self._api_call(url, "get", None, query_string, headers, accept)

@@ -22,7 +22,7 @@ from hamcrest import equal_to
 from hamcrest import raises
 
 from almanach.auth.keystone_auth import KeystoneAuthentication
-from almanach.common.exceptions.authentication_failure_exception import AuthenticationFailureException
+from almanach.core import exception
 
 
 class KeystoneAuthenticationTest(unittest.TestCase):
@@ -44,7 +44,9 @@ class KeystoneAuthenticationTest(unittest.TestCase):
         token = "bad token"
         self.token_manager_factory.should_receive("get_manager").and_return(self.keystone_token_manager)
         self.keystone_token_manager.should_receive("validate").with_args(token).and_raise(Exception)
-        assert_that(calling(self.auth_backend.validate).with_args(token), raises(AuthenticationFailureException))
+        assert_that(calling(self.auth_backend.validate)
+                    .with_args(token), raises(exception.AuthenticationFailureException))
 
     def test_with_empty_token(self):
-        assert_that(calling(self.auth_backend.validate).with_args(None), raises(AuthenticationFailureException))
+        assert_that(calling(self.auth_backend.validate)
+                    .with_args(None), raises(exception.AuthenticationFailureException))

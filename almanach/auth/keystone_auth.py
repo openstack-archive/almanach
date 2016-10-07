@@ -16,7 +16,7 @@ from keystoneclient.v2_0 import client as keystone_client
 from keystoneclient.v2_0 import tokens
 
 from almanach.auth import base_auth
-from almanach.common.exceptions import authentication_failure_exception
+from almanach.core import exception
 
 
 class KeystoneTokenManagerFactory(object):
@@ -41,11 +41,11 @@ class KeystoneAuthentication(base_auth.BaseAuth):
 
     def validate(self, token):
         if token is None:
-            raise authentication_failure_exception.AuthenticationFailureException("No token provided")
+            raise exception.AuthenticationFailureException("No token provided")
 
         try:
             self.token_manager_factory.get_manager().validate(token)
         except Exception as e:
-            raise authentication_failure_exception.AuthenticationFailureException(e)
+            raise exception.AuthenticationFailureException(e)
 
         return True

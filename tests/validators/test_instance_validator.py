@@ -19,7 +19,7 @@ from hamcrest import calling
 from hamcrest import is_
 from hamcrest import raises
 
-from almanach.common.exceptions.validation_exception import InvalidAttributeException
+from almanach.core import exception
 from almanach.validators.instance_validator import InstanceValidator
 
 
@@ -28,7 +28,7 @@ class InstanceValidatorTests(unittest.TestCase):
         instance_validator = InstanceValidator()
         payload = {"invalid attribute": ".."}
         assert_that(calling(instance_validator.validate_update).with_args(payload),
-                    raises(InvalidAttributeException))
+                    raises(exception.InvalidAttributeException))
 
     def test_validate_update_with_valid_name_attribute(self):
         instance_validator = InstanceValidator()
@@ -41,7 +41,7 @@ class InstanceValidatorTests(unittest.TestCase):
         payload = {"name": 123}
 
         assert_that(calling(instance_validator.validate_update).with_args(payload),
-                    raises(InvalidAttributeException))
+                    raises(exception.InvalidAttributeException))
 
     def test_validate_update_with_valid_flavor_attribute(self):
         instance_validator = InstanceValidator()
@@ -54,7 +54,7 @@ class InstanceValidatorTests(unittest.TestCase):
         payload = {"flavor": 123}
 
         assert_that(calling(instance_validator.validate_update).with_args(payload),
-                    raises(InvalidAttributeException))
+                    raises(exception.InvalidAttributeException))
 
     def test_validate_update_with_valid_start_date(self):
         instance_validator = InstanceValidator()
@@ -68,7 +68,7 @@ class InstanceValidatorTests(unittest.TestCase):
         payload = {"start_date": "2015-10-21"}
 
         assert_that(calling(instance_validator.validate_update).with_args(payload),
-                    raises(InvalidAttributeException))
+                    raises(exception.InvalidAttributeException))
 
     def test_validate_update_with_valid_end_date(self):
         instance_validator = InstanceValidator()
@@ -82,7 +82,7 @@ class InstanceValidatorTests(unittest.TestCase):
         payload = {"end_date": "2016"}
 
         assert_that(calling(instance_validator.validate_update).with_args(payload),
-                    raises(InvalidAttributeException))
+                    raises(exception.InvalidAttributeException))
 
     def test_validate_update_with_valid_os_attribute(self):
         instance_validator = InstanceValidator()
@@ -106,7 +106,7 @@ class InstanceValidatorTests(unittest.TestCase):
         }
 
         assert_that(calling(instance_validator.validate_update).with_args(payload),
-                    raises(InvalidAttributeException))
+                    raises(exception.InvalidAttributeException))
 
     def test_validate_update_with_valid_metadata_attribute(self):
         instance_validator = InstanceValidator()
@@ -132,4 +132,4 @@ class InstanceValidatorTests(unittest.TestCase):
         }
 
         assert_that(calling(instance_validator.validate_update).with_args(payload),
-                    raises(InvalidAttributeException))
+                    raises(exception.InvalidAttributeException))

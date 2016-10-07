@@ -19,7 +19,7 @@ from hamcrest import has_key
 from hamcrest import is_
 from voluptuous import Invalid
 
-from almanach.common.exceptions.validation_exception import InvalidAttributeException
+from almanach.core import exception
 from tests.api.base_api import BaseApi
 from tests.builder import a
 from tests.builder import instance
@@ -68,7 +68,7 @@ class ApiEntityTest(BaseApi):
         self.controller.should_receive('update_active_instance_entity') \
             .with_args(instance_id=instance_id, **data) \
             .once() \
-            .and_raise(InvalidAttributeException(errors))
+            .and_raise(exception.InvalidAttributeException(errors))
 
         code, result = self.api_put(
             '/entity/instance/INSTANCE_ID',

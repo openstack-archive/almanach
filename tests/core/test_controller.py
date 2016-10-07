@@ -29,14 +29,10 @@ from hamcrest import raises
 from nose.tools import assert_raises
 import pytz
 
-from almanach.common.exceptions.almanach_entity_not_found_exception import AlmanachEntityNotFoundException
-from almanach.common.exceptions.date_format_exception import DateFormatException
-from almanach.common.exceptions.multiple_entities_matching_query import MultipleEntitiesMatchingQuery
-from almanach.common.exceptions.validation_exception import InvalidAttributeException
 from almanach import config
 from almanach.core.controller import Controller
-from almanach.core.model import Instance
-from almanach.core.model import Volume
+from almanach.core import exception
+from almanach.core import model
 from tests.builder import a
 from tests.builder import instance
 from tests.builder import volume
@@ -147,7 +143,7 @@ class ControllerTest(unittest.TestCase):
                                                                       start=fake_instances[0].start,
                                                                       end=fake_instances[0].end,
                                                                       flavor=fake_instances[0].flavor),
-            raises(MultipleEntitiesMatchingQuery)
+            raises(exception.MultipleEntitiesMatchingQuery)
         )
 
     def test_update_one_close_entity_return_no_entity(self):
@@ -164,7 +160,7 @@ class ControllerTest(unittest.TestCase):
                                                                       start=fake_instances.start,
                                                                       end=fake_instances.end,
                                                                       flavor=fake_instances.flavor),
-            raises(AlmanachEntityNotFoundException)
+            raises(exception.AlmanachEntityNotFoundException)
         )
 
     def test_update_active_instance_entity_with_a_new_flavor(self):
@@ -249,7 +245,7 @@ class ControllerTest(unittest.TestCase):
         assert_that(
             calling(self.controller.update_active_instance_entity).with_args(instance_id=fake_instance1.entity_id,
                                                                              wrong_attribute="this is wrong"),
-            raises(InvalidAttributeException))
+            raises(exception.InvalidAttributeException))
 
     def test_instance_created_but_its_an_old_event(self):
         fake_instance = a(instance()
@@ -310,7 +306,7 @@ class ControllerTest(unittest.TestCase):
          .and_return(False)
          .once())
 
-        with self.assertRaises(AlmanachEntityNotFoundException):
+        with self.assertRaises(exception.AlmanachEntityNotFoundException):
             self.controller.delete_instance("id1", "2015-10-21T16:25:00.000000Z")
 
     def test_volume_deleted(self):
@@ -385,7 +381,7 @@ class ControllerTest(unittest.TestCase):
     def test_list_instances(self):
         (flexmock(self.database_adapter)
          .should_receive("list_entities")
-         .with_args("project_id", "start", "end", Instance.TYPE)
+         .with_args("project_id", "start", "end", model.Instance.TYPE)
          .and_return(["instance1", "instance2"])
          .once())
 
@@ -394,7 +390,7 @@ class ControllerTest(unittest.TestCase):
     def test_list_volumes(self):
         (flexmock(self.database_adapter)
          .should_receive("list_entities")
-         .with_args("project_id", "start", "end", Volume.TYPE)
+         .with_args("project_id", "start", "end", model.Volume.TYPE)
          .and_return(["volume2", "volume3"]))
 
         self.assertEqual(self.controller.list_volumes("project_id", "start", "end"), ["volume2", "volume3"])
@@ -443,7 +439,7 @@ class ControllerTest(unittest.TestCase):
         some_volume = a(volume())
 
         assert_raises(
-            DateFormatException,
+            exception.DateFormatException,
             self.controller.create_volume,
             some_volume.entity_id,
             some_volume.project_id,
@@ -777,7 +773,7 @@ class ControllerTest(unittest.TestCase):
 
         assert_that(
             calling(self.controller.get_all_entities_by_id).with_args(entity_id),
-            raises(AlmanachEntityNotFoundException)
+            raises(exception.AlmanachEntityNotFoundException)
         )
 
     def test_rename_volume(self):

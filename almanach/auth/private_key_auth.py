@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from almanach.auth import base_auth
-from almanach.common.exceptions import authentication_failure_exception
+from almanach.core import exception
 
 
 class PrivateKeyAuthentication(base_auth.BaseAuth):
@@ -22,5 +22,5 @@ class PrivateKeyAuthentication(base_auth.BaseAuth):
 
     def validate(self, token):
         if token is None or self.private_key != token:
-            raise authentication_failure_exception.AuthenticationFailureException("Invalid Token")
+            raise exception.AuthenticationFailureException("Invalid Token")
         return True

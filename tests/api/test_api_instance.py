@@ -19,7 +19,7 @@ from hamcrest import has_key
 from hamcrest import has_length
 from hamcrest import is_
 
-from almanach.common.exceptions.date_format_exception import DateFormatException
+from almanach.core import exception
 from tests.api.base_api import a_date_matching
 from tests.api.base_api import BaseApi
 from tests.builder import a
@@ -149,7 +149,7 @@ class ApiInstanceTest(BaseApi):
                        name=data['name'],
                        metadata={}) \
             .once() \
-            .and_raise(DateFormatException)
+            .and_raise(exception.DateFormatException)
 
         code, result = self.api_post(
             '/project/PROJECT_ID/instance',
@@ -219,7 +219,7 @@ class ApiInstanceTest(BaseApi):
             .with_args(instance_id="INSTANCE_ID",
                        delete_date=data['date']) \
             .once() \
-            .and_raise(DateFormatException)
+            .and_raise(exception.DateFormatException)
 
         code, result = self.api_delete('/instance/INSTANCE_ID', data=data, headers={'X-Auth-Token': 'some token value'})
         assert_that(result, has_entries(
@@ -253,7 +253,7 @@ class ApiInstanceTest(BaseApi):
                        flavor=data['flavor'],
                        resize_date=data['date']) \
             .once() \
-            .and_raise(DateFormatException)
+            .and_raise(exception.DateFormatException)
 
         code, result = self.api_put(
             '/instance/INSTANCE_ID/resize',
@@ -322,7 +322,7 @@ class ApiInstanceTest(BaseApi):
         self.controller.should_receive('rebuild_instance') \
             .with_args(instance_id=instance_id, **data) \
             .once() \
-            .and_raise(DateFormatException)
+            .and_raise(exception.DateFormatException)
 
         code, result = self.api_put(
             '/instance/INSTANCE_ID/rebuild',

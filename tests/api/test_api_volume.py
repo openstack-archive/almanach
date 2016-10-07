@@ -18,7 +18,7 @@ from hamcrest import assert_that
 from hamcrest import equal_to
 from hamcrest import has_entries
 
-from almanach.common.exceptions.date_format_exception import DateFormatException
+from almanach.core import exception
 from tests.api.base_api import BaseApi
 
 
@@ -76,7 +76,7 @@ class ApiVolumeTest(BaseApi):
             .with_args(project_id="PROJECT_ID",
                        **data) \
             .once() \
-            .and_raise(DateFormatException)
+            .and_raise(exception.DateFormatException)
 
         code, result = self.api_post(
             '/project/PROJECT_ID/volume',
@@ -125,7 +125,7 @@ class ApiVolumeTest(BaseApi):
             .with_args(volume_id="VOLUME_ID",
                        delete_date=data['date']) \
             .once() \
-            .and_raise(DateFormatException)
+            .and_raise(exception.DateFormatException)
 
         code, result = self.api_delete('/volume/VOLUME_ID', data=data, headers={'X-Auth-Token': 'some token value'})
         assert_that(result, has_entries(
@@ -168,7 +168,7 @@ class ApiVolumeTest(BaseApi):
                        size=data['size'],
                        update_date=data['date']) \
             .once() \
-            .and_raise(DateFormatException)
+            .and_raise(exception.DateFormatException)
 
         code, result = self.api_put('/volume/VOLUME_ID/resize', data=data, headers={'X-Auth-Token': 'some token value'})
         assert_that(result, has_entries(
@@ -218,7 +218,7 @@ class ApiVolumeTest(BaseApi):
                        attachments=data['attachments'],
                        date=data['date']) \
             .once() \
-            .and_raise(DateFormatException)
+            .and_raise(exception.DateFormatException)
 
         code, result = self.api_put('/volume/VOLUME_ID/attach', data=data, headers={'X-Auth-Token': 'some token value'})
         assert_that(result, has_entries(
@@ -264,7 +264,7 @@ class ApiVolumeTest(BaseApi):
                        attachments=data['attachments'],
                        date=data['date']) \
             .once() \
-            .and_raise(DateFormatException)
+            .and_raise(exception.DateFormatException)
 
         code, result = self.api_put('/volume/VOLUME_ID/detach', data=data, headers={'X-Auth-Token': 'some token value'})
         assert_that(result, has_entries(

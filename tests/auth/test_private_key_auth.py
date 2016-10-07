@@ -20,7 +20,7 @@ from hamcrest import equal_to
 from hamcrest import raises
 
 from almanach.auth.private_key_auth import PrivateKeyAuthentication
-from almanach.common.exceptions.authentication_failure_exception import AuthenticationFailureException
+from almanach.core import exception
 
 
 class PrivateKeyAuthenticationTest(unittest.TestCase):
@@ -31,7 +31,9 @@ class PrivateKeyAuthenticationTest(unittest.TestCase):
         assert_that(self.auth_backend.validate("my token"), equal_to(True))
 
     def test_with_invalid_token(self):
-        assert_that(calling(self.auth_backend.validate).with_args("bad token"), raises(AuthenticationFailureException))
+        assert_that(calling(self.auth_backend.validate)
+                    .with_args("bad token"), raises(exception.AuthenticationFailureException))
 
     def test_with_empty_token(self):
-        assert_that(calling(self.auth_backend.validate).with_args(None), raises(AuthenticationFailureException))
+        assert_that(calling(self.auth_backend.validate)
+                    .with_args(None), raises(exception.AuthenticationFailureException))

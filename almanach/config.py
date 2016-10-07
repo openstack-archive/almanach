@@ -16,7 +16,7 @@ import os
 import os.path as os_path
 import six
 
-from almanach.common.exceptions import almanach_exception
+from almanach.core import exception
 
 if six.PY2:
     from ConfigParser import RawConfigParser
@@ -28,7 +28,7 @@ configuration = RawConfigParser()
 
 def read(filename):
     if not os_path.isfile(filename):
-        raise almanach_exception.AlmanachException("Config file '{0}' not found".format(filename))
+        raise exception.AlmanachException("Config file '{0}' not found".format(filename))
 
     print("Loading configuration file {0}".format(filename))
     configuration.read(filename)

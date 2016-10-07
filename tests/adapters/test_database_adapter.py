@@ -25,10 +25,9 @@ from pymongo import MongoClient
 import pytz
 
 from almanach.adapters.database_adapter import DatabaseAdapter
-from almanach.common.exceptions.almanach_exception import AlmanachException
-from almanach.common.exceptions.volume_type_not_found_exception import VolumeTypeNotFoundException
 from almanach import config
-from almanach.core.model import todict
+from almanach.core import exception
+from almanach.core import model
 from tests.builder import a
 from tests.builder import instance
 from tests.builder import volume
@@ -66,7 +65,7 @@ class DatabaseAdapterTest(unittest.TestCase):
     def test_get_instance_entity(self):
         fake_entity = a(instance().with_metadata({}))
 
-        self.db.entity.insert(todict(fake_entity))
+        self.db.entity.insert(model.todict(fake_entity))
 
         self.assertEqual(self.adapter.get_active_entity(fake_entity.entity_id), fake_entity)
 
@@ -74,7 +73,7 @@ class DatabaseAdapterTest(unittest.TestCase):
         fake_entity = a(instance().with_metadata({"a_metadata_not_sanitize": "not.sanitize",
                                                   "a_metadata^to_sanitize": "this.sanitize"}))
 
-        self.db.entity.insert(todict(fake_entity))
+        self.db.entity.insert(model.todict(fake_entity))
 
         entity = self.adapter.get_active_entity(fake_entity.entity_id)
 
@@ -95,7 +94,7 @@ class DatabaseAdapterTest(unittest.TestCase):
         fake_entity = a(instance())
         fake_entity.entity_type = "will_raise_excepion"
 
-        self.db.entity.insert(todict(fake_entity))
+        self.db.entity.insert(model.todict(fake_entity))
 
         with self.assertRaises(NotImplementedError):
             self.adapter.get_active_entity(fake_entity.entity_id)
@@ -109,7 +108,9 @@ class DatabaseAdapterTest(unittest.TestCase):
             a(instance().with_id("id1").with_start(2014, 1, 1, 7, 0, 0).with_end(2014, 1, 1, 8, 0, 0)),
             a(volume().with_id("id2").with_start(2014, 1, 1, 1, 0, 0).with_end(2014, 1, 1, 8, 0, 0)),
         ]
-        [self.db.entity.insert(todict(fake_entity)) for fake_entity in fake_active_entities + fake_inactive_entities]
+
+        all_entities = fake_active_entities + fake_inactive_entities
+        [self.db.entity.insert(model.todict(fake_entity)) for fake_entity in all_entities]
 
         self.assertEqual(4, self.adapter.count_entities())
         self.assertEqual(2, self.adapter.count_active_entities())
@@ -118,7 +119,7 @@ class DatabaseAdapterTest(unittest.TestCase):
 
     def test_get_entity(self):
         fake_entity = a(instance().with_id("id1").with_start(2014, 1, 1, 8, 0, 0).with_no_end())
-        self.db.entity.insert(todict(fake_entity))
+        self.db.entity.insert(model.todict(fake_entity))
 
         entries = self.adapter.get_all_entities_by_id(entity_id="id1")
         self.assertEqual(1, len(entries))
@@ -142,7 +143,7 @@ class DatabaseAdapterTest(unittest.TestCase):
             a(volume().with_id("id2").with_start(2014, 1, 1, 1, 0, 0).with_no_end().with_project_id("project_id")),
             a(volume().with_id("id3").with_start(2014, 1, 1, 8, 0, 0).with_no_end().with_project_id("project_id")),
         ]
-        [self.db.entity.insert(todict(fake_entity)) for fake_entity in fake_instances + fake_volumes]
+        [self.db.entity.insert(model.todict(fake_entity)) for fake_entity in fake_instances + fake_volumes]
 
         entities = self.adapter.list_entities("project_id", datetime(
             2014, 1, 1, 0, 0, 0, tzinfo=pytz.utc), datetime(2014, 1, 1, 12, 0, 0, tzinfo=pytz.utc), "instance")
@@ -181,7 +182,7 @@ class DatabaseAdapterTest(unittest.TestCase):
               .with_metadata({"a_metadata.to_sanitize": "this.sanitize"})),
         ]
 
-        [self.db.entity.insert(todict(fake_entity)) for fake_entity in fake_instances]
+        [self.db.entity.insert(model.todict(fake_entity)) for fake_entity in fake_instances]
 
         entities = self.adapter.list_entities("project_id", datetime(
             2014, 1, 1, 0, 0, 0, tzinfo=pytz.utc), datetime(2014, 1, 1, 12, 0, 0, tzinfo=pytz.utc), "instance")
@@ -208,7 +209,7 @@ class DatabaseAdapterTest(unittest.TestCase):
             a(instance().with_id("running_has_started_after").with_start(
                 2014, 1, 1, 10, 0, 0).with_no_end().with_project_id("project_id")),
         ]
-        [self.db.entity.insert(todict(fake_entity))
+        [self.db.entity.insert(model.todict(fake_entity))
          for fake_entity in fake_entities_in_period + fake_entities_out_period]
 
         entities = self.adapter.list_entities("project_id", datetime(
@@ -226,7 +227,7 @@ class DatabaseAdapterTest(unittest.TestCase):
               .with_start(2016, 3, 2, 0, 0, 0)
               .with_no_end()),
         ]
-        [self.db.entity.insert(todict(fake_instance)) for fake_instance in instances]
+        [self.db.entity.insert(model.todict(fake_instance)) for fake_instance in instances]
 
         instance_list = self.adapter.list_entities_by_id("id1", start, end)
 
@@ -236,7 +237,7 @@ class DatabaseAdapterTest(unittest.TestCase):
         fake_entity = a(instance())
         end_date = datetime(2015, 10, 21, 16, 29, 0)
 
-        self.db.entity.insert(todict(fake_entity))
+        self.db.entity.insert(model.todict(fake_entity))
         self.adapter.close_active_entity(fake_entity.entity_id, end_date)
 
         self.assertEqual(self.db.entity.find_one({"entity_id": fake_entity.entity_id})["end"], end_date)
@@ -244,7 +245,7 @@ class DatabaseAdapterTest(unittest.TestCase):
     def test_update_closed_entity(self):
         fake_entity = a(instance().with_end(2016, 3, 2, 0, 0, 0))
 
-        self.db.entity.insert(todict(fake_entity))
+        self.db.entity.insert(model.todict(fake_entity))
         fake_entity.flavor = "my_new_flavor"
         self.adapter.update_closed_entity(fake_entity, data={"flavor": fake_entity.flavor})
 
@@ -256,7 +257,7 @@ class DatabaseAdapterTest(unittest.TestCase):
         fake_entity = a(instance())
         fake_entity.os.distro = "Centos"
 
-        self.db.entity.insert(todict(fake_entity))
+        self.db.entity.insert(model.todict(fake_entity))
         fake_entity.os.distro = "Windows"
 
         self.adapter.update_active_entity(fake_entity)
@@ -275,7 +276,7 @@ class DatabaseAdapterTest(unittest.TestCase):
     def test_delete_active_entity(self):
         fake_entity = a(volume())
 
-        self.db.entity.insert(todict(fake_entity))
+        self.db.entity.insert(model.todict(fake_entity))
         self.assertEqual(1, self.db.entity.count())
 
         self.adapter.delete_active_entity(fake_entity.entity_id)
@@ -290,35 +291,35 @@ class DatabaseAdapterTest(unittest.TestCase):
 
     def test_get_volume_type(self):
         fake_volume_type = a(volume_type())
-        self.db.volume_type.insert(todict(fake_volume_type))
+        self.db.volume_type.insert(model.todict(fake_volume_type))
         self.assertEqual(self.adapter.get_volume_type(fake_volume_type.volume_type_id), fake_volume_type)
 
     def test_get_volume_type_not_exist(self):
         fake_volume_type = a(volume_type())
 
-        with self.assertRaises(VolumeTypeNotFoundException):
+        with self.assertRaises(exception.VolumeTypeNotFoundException):
             self.adapter.get_volume_type(fake_volume_type.volume_type_id)
 
     def test_delete_volume_type(self):
         fake_volume_type = a(volume_type())
-        self.db.volume_type.insert(todict(fake_volume_type))
+        self.db.volume_type.insert(model.todict(fake_volume_type))
         self.assertEqual(1, self.db.volume_type.count())
         self.adapter.delete_volume_type(fake_volume_type.volume_type_id)
         self.assertEqual(0, self.db.volume_type.count())
 
     def test_delete_volume_type_not_in_database(self):
-        with self.assertRaises(AlmanachException):
+        with self.assertRaises(exception.AlmanachException):
             self.adapter.delete_volume_type("not_in_database_id")
 
     def test_delete_all_volume_types_not_permitted(self):
-        with self.assertRaises(AlmanachException):
+        with self.assertRaises(exception.AlmanachException):
             self.adapter.delete_volume_type(None)
 
     def test_list_volume_types(self):
         fake_volume_types = [a(volume_type()), a(volume_type())]
 
         for fake_volume_type in fake_volume_types:
-            self.db.volume_type.insert(todict(fake_volume_type))
+            self.db.volume_type.insert(model.todict(fake_volume_type))
 
         self.assertEqual(len(self.adapter.list_volume_types()), 2)
 

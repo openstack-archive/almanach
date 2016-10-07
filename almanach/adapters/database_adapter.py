@@ -17,9 +17,8 @@ import logging
 import pymongo
 from pymongo import errors
 
-from almanach.common.exceptions import almanach_exception
-from almanach.common.exceptions import volume_type_not_found_exception
 from almanach import config
+from almanach.core import exception
 from almanach.core import model
 from almanach.core.model import build_entity_from_dict
 
@@ -34,7 +33,7 @@ def database(function):
             return function(self, *args, **kwargs)
         except KeyError as e:
             raise e
-        except volume_type_not_found_exception.VolumeTypeNotFoundException as e:
+        except exception.VolumeTypeNotFoundException as e:
             raise e
         except NotImplementedError as e:
             raise e
@@ -124,7 +123,7 @@ class DatabaseAdapter(object):
         volume_type = self.db.volume_type.find_one({"volume_type_id": volume_type_id})
         if not volume_type:
             logging.error("Trying to get a volume type not in the database.")
-            raise volume_type_not_found_exception.VolumeTypeNotFoundException(volume_type_id=volume_type_id)
+            raise exception.VolumeTypeNotFoundException(volume_type_id=volume_type_id)
 
         return model.VolumeType(volume_type_id=volume_type["volume_type_id"],
                                 volume_type_name=volume_type["volume_type_name"])
@@ -134,14 +133,14 @@ class DatabaseAdapter(object):
         if volume_type_id is None:
             error = "Trying to delete all volume types which is not permitted."
             logging.error(error)
-            raise almanach_exception.AlmanachException(error)
+            raise exception.AlmanachException(error)
         returned_value = self.db.volume_type.remove({"volume_type_id": volume_type_id})
         if returned_value['n'] == 1:
             logging.info("Deleted volume type with id '%s' successfully." % volume_type_id)
         else:
             error = "Volume type with id '%s' doesn't exist in the database." % volume_type_id
             logging.error(error)
-            raise almanach_exception.AlmanachException(error)
+            raise exception.AlmanachException(error)
 
     @database
     def list_volume_types(self):

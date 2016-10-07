@@ -22,7 +22,7 @@ from hamcrest import equal_to
 from hamcrest import raises
 
 from almanach.auth.mixed_auth import MixedAuthentication
-from almanach.common.exceptions.authentication_failure_exception import AuthenticationFailureException
+from almanach.core import exception
 
 
 class MixedAuthenticationTest(unittest.TestCase):
@@ -41,12 +41,13 @@ class MixedAuthenticationTest(unittest.TestCase):
 
     def test_with_token_valid_with_auth_two(self):
         token = "my token"
-        self.auth_one.should_receive("validate").and_raise(AuthenticationFailureException)
+        self.auth_one.should_receive("validate").and_raise(exception.AuthenticationFailureException)
         self.auth_two.should_receive("validate").and_return(True)
         assert_that(self.auth_backend.validate(token), equal_to(True))
 
     def test_with_token_valid_with_auth_twos(self):
         token = "bad token"
-        self.auth_one.should_receive("validate").and_raise(AuthenticationFailureException)
-        self.auth_two.should_receive("validate").and_raise(AuthenticationFailureException)
-        assert_that(calling(self.auth_backend.validate).with_args(token), raises(AuthenticationFailureException))
+        self.auth_one.should_receive("validate").and_raise(exception.AuthenticationFailureException)
+        self.auth_two.should_receive("validate").and_raise(exception.AuthenticationFailureException)
+        assert_that(calling(self.auth_backend.validate)
+                    .with_args(token), raises(exception.AuthenticationFailureException))

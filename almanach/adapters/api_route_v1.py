@@ -21,12 +21,7 @@ import jsonpickle
 from oslo_serialization import jsonutils
 from werkzeug import wrappers
 
-from almanach.common.exceptions import almanach_entity_not_found_exception
-from almanach.common.exceptions import almanach_exception
-from almanach.common.exceptions import authentication_failure_exception
-from almanach.common.exceptions import date_format_exception
-from almanach.common.exceptions import multiple_entities_matching_query
-from almanach.common.exceptions import validation_exception
+from almanach.core import exception
 
 api = flask.Blueprint("api", __name__)
 controller = None
@@ -43,7 +38,7 @@ def to_json(api_call):
             result = api_call(*args, **kwargs)
             return result if isinstance(result, wrappers.BaseResponse) \
                 else flask.Response(encode(result), 200, {"Content-Type": "application/json"})
-        except date_format_exception.DateFormatException as e:
+        except exception.DateFormatException as e:
             logging.warning(e.message)
             return flask.Response(encode({"error": e.message}), 400, {"Content-Type": "application/json"})
         except KeyError as e:
@@ -54,17 +49,17 @@ def to_json(api_call):
             message = "The request you have made must have data. None was given."
             logging.warning(message)
             return encode({"error": message}), 400, {"Content-Type": "application/json"}
-        except validation_exception.InvalidAttributeException as e:
+        except exception.InvalidAttributeException as e:
             logging.warning(e.get_error_message())
             return encode({"error": e.get_error_message()}), 400, {"Content-Type": "application/json"}
-        except multiple_entities_matching_query.MultipleEntitiesMatchingQuery as e:
+        except exception.MultipleEntitiesMatchingQuery as e:
             logging.warning(e.message)
             return encode({"error": "Multiple entities found while updating closed"}), 400, {
                 "Content-Type": "application/json"}
-        except almanach_entity_not_found_exception.AlmanachEntityNotFoundException as e:
+        except exception.AlmanachEntityNotFoundException as e:
             logging.warning(e.message)
             return encode({"error": "Entity not found"}), 404, {"Content-Type": "application/json"}
-        except almanach_exception.AlmanachException as e:
+        except exception.AlmanachException as e:
             logging.exception(e)
             return flask.Response(encode({"error": e.message}), 500, {"Content-Type": "application/json"})
         except Exception as e:
@@ -80,7 +75,7 @@ def authenticated(api_call):
         try:
             auth_adapter.validate(flask.request.headers.get('X-Auth-Token'))
             return api_call(*args, **kwargs)
-        except authentication_failure_exception.AuthenticationFailureException as e:
+        except exception.AuthenticationFailureException as e:
             logging.error("Authentication failure: {0}".format(e))
             return flask.Response('Unauthorized', 401)
 
