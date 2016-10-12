@@ -26,6 +26,7 @@ from tests.builder import instance
 
 
 class ApiEntityTest(BaseApi):
+
     def test_update_instance_entity_with_a_new_start_date(self):
         data = {
             "start_date": "2014-01-01 00:00:00.0000",

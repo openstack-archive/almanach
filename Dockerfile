@@ -1,21 +1,10 @@
-FROM python:3.4
+FROM python:3.5
 
-RUN mkdir -p /opt/almanach/src
-ADD almanach /opt/almanach/src/almanach
-ADD setup.* /opt/almanach/src/
-ADD README.rst /opt/almanach/src/
-ADD requirements.txt /opt/almanach/src/
-ADD LICENSE /opt/almanach/src/
-ADD almanach/resources/config/almanach.cfg /etc/almanach.cfg
-COPY docker-entrypoint.sh /opt/almanach/entrypoint.sh
-
-RUN cd /opt/almanach/src && \
+ADD . /usr/local/src/
+RUN cd /usr/local/src && \
     pip install -r requirements.txt && \
-    PBR_VERSION=2.0.dev0 python setup.py install && \
-    chmod +x /opt/almanach/entrypoint.sh
-
-VOLUME /opt/almanach
+    python setup.py install && \
+    mkdir -p /etc/almanach && \
+    cp /usr/local/src/etc/almanach/almanach.docker.conf /etc/almanach/almanach.conf
 
 USER nobody
-
-ENTRYPOINT ["/opt/almanach/entrypoint.sh"]

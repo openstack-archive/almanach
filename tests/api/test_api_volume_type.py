@@ -26,6 +26,7 @@ from tests.builder import volume_type
 
 
 class ApiVolumeTypeTest(BaseApi):
+
     def test_get_volume_types(self):
         self.controller.should_receive('list_volume_types') \
             .and_return([a(volume_type().with_volume_type_name('some_volume_type_name'))]) \

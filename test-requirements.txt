@@ -11,3 +11,4 @@ sphinx>=1.2.1,!=1.3b1,<1.3  # BSD
 sphinxcontrib-httpdomain  # BSD
 flake8>=2.5.4,<2.6.0  # MIT
 hacking<0.12,>=0.11.0 # Apache-2.0
+testtools>=1.4.0  # MIT
