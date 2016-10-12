@@ -20,6 +20,7 @@ from tests.api.base_api import BaseApi
 
 
 class ApiInfoTest(BaseApi):
+
     def test_info(self):
         self.controller.should_receive('get_application_info').and_return({
             'info': {'version': '1.0'},

@@ -23,6 +23,7 @@ from tests.api.base_api import BaseApi
 
 
 class ApiVolumeTest(BaseApi):
+
     def test_successful_volume_create(self):
         data = dict(volume_id="VOLUME_ID",
                     start="START_DATE",

@@ -13,48 +13,36 @@
 # limitations under the License.
 
 from datetime import datetime
-import json
-from unittest import TestCase
-
 import flask
 from flexmock import flexmock
-from flexmock import flexmock_teardown
+import json
 import oslo_serialization
 
-from almanach.adapters import api_route_v1 as api_route
-from almanach import config
+from almanach.api.v1 import routes
 from almanach.core import exception
+from tests import base
 
 
-class BaseApi(TestCase):
+class BaseApi(base.BaseTestCase):
+
     def setUp(self):
+        super(BaseApi, self).setUp()
         self.prepare()
         self.prepare_with_successful_authentication()
-
-    def tearDown(self):
-        flexmock_teardown()
-
-    @staticmethod
-    def having_config(key, value):
-        (flexmock(config)
-         .should_receive(key)
-         .and_return(value))
 
     def prepare(self):
         self.controller = flexmock()
         self.auth_adapter = flexmock()
-        api_route.controller = self.controller
-        api_route.auth_adapter = self.auth_adapter
+        routes.controller = self.controller
+        routes.auth_adapter = self.auth_adapter
 
         self.app = flask.Flask("almanach")
-        self.app.register_blueprint(api_route.api)
+        self.app.register_blueprint(routes.api)
 
     def prepare_with_successful_authentication(self):
-        self.having_config('auth_private_key', 'some token value')
         self.auth_adapter.should_receive("validate").and_return(True)
 
     def prepare_with_failed_authentication(self):
-        self.having_config('auth_private_key', 'some token value')
         self.auth_adapter.should_receive("validate")\
             .and_raise(exception.AuthenticationFailureException("Wrong credentials"))
 
