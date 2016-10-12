@@ -1,0 +1,13 @@
+.eggs
+.tox
+.idea
+.gitreview
+.gitignore
+*.egg-info
+AUTHORS
+ChangeLog
+devstack
+doc
+Dockerfile
+Dockerfile.integration-tests
+docker-compose.yml

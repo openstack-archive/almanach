@@ -4,16 +4,38 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: api
-    environment:
-      MONGODB_URL: ${MONGODB_URL}
+    command: almanach-api --config-file /etc/almanach/almanach.conf
+    depends_on:
+      - messaging
+      - database
     ports:
       - "80:8000"
   collector:
     build:
       context: .
       dockerfile: Dockerfile
-    command: collector
+    command: almanach-collector --config-file /etc/almanach/almanach.conf
+    depends_on:
+      - database
+      - messaging
+  messaging:
+    image: rabbitmq
+    ports:
+      - "5672:5672"
+  database:
+    image: mongo
+    ports:
+      - "27017:27017"
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.integration-tests
+      args:
+        SKIP_TOX: "true"
     environment:
-      MONGODB_URL: ${MONGODB_URL}
-      RABBITMQ_URL: ${RABBITMQ_URL}
+      TEST_CONTAINER: "true"
+    depends_on:
+      - api
+      - collector
+      - database
+      - messaging

@@ -19,7 +19,9 @@ from tests.api.base_api import BaseApi
 
 
 class ApiAuthenticationTest(BaseApi):
+
     def setUp(self):
+        super(ApiAuthenticationTest, self).setUp()
         self.prepare()
         self.prepare_with_failed_authentication()
 

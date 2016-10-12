@@ -20,7 +20,7 @@ Almanach stores the utilization of OpenStack resources (instances and volumes) f
 What is Almanach?
 -----------------
 
-The main purpose of this software is to bill customers based on their usage of the cloud infrastructure.
+The main purpose of this software is to record the usage of the cloud resources of each tenants.
 
 Almanach is composed of two parts:
 
@@ -32,40 +32,33 @@ Requirements
 
 - OpenStack infrastructure installed (Nova, Cinder...)
 - MongoDB
-- Python 2.7
+- Python 2.7, 3.4 or 3.5
 
-Command line usage
-------------------
 
-Usage:
+Generate config file with default values
+----------------------------------------
 
 .. code:: bash
 
-    usage: almanach [-h] [--logging LOGGING] {api,collector} config_file
+    tox -e genconfig
 
+
+Command line usage
+------------------
 
 Start the API daemon:
 
 .. code:: bash
 
-    almanach api /path/to/almanach.cfg
+    almanach-api --config-file /etc/almanach/almanach.conf
 
 
 Start the collector:
 
 .. code:: bash
 
-    almanach collector /path/to/almanach.cfg
+    almanach-collector --config-file /etc/almanach/almanach.conf
 
-
-Custom logging configuration:
-
-.. code:: bash
-
-    almanach collector /path/to/almanach.cfg --logging /path/to/logging.cfg
-
-
-The syntax of the logging configuration file is available in the official [Python documentation](https://docs.python.org/2/library/logging.config.html).
 
 Authentication
 --------------
@@ -95,8 +88,9 @@ In your config file, you have to define your private key in the field :code:`aut
 
 ::
 
-    [ALMANACH]
-    auth_token=my secret token
+    [auth]
+    strategy = private_key
+    private_key = secret
 
 
 Keystone Authentication
@@ -107,43 +101,13 @@ To use this authentication backend you have to define the authentication strateg
 
 ::
 
-    [ALMANACH]
-    auth_strategy=keystone
+    [auth]
+    strategy = keystone
+    keystone_username = my_service_username
+    keystone_password = my_service_password
+    keystone_tenant = my_service_tenant_name
+    keystone_url = http://keystone_url:5000/v2.0
 
-    [KEYSTONE]
-    username=my_service_username
-    password=my_service_password
-    tenant_name=my_service_tenant_name
-    auth_url=http://keystone_url:5000/v2.0
-
-
-Environment variables
----------------------
-
-You can override the configuration parameters by using environment variables:
-
-.. code:: bash
-
-    export RABBITMQ_URL="amqp://openstack:openstack@hostname:5672"
-    almanach collector /path/to/almanach.cfg
-
-
-Running Almanach with Docker
-----------------------------
-
-The actual Docker configuration assume that you already have RabbitMQ (mandatory for Openstack) and MongoDB configured for Almanach.
-
-.. code:: bash
-
-    export RABBITMQ_URL="amqp://guest:guest@messaging:5672/"
-    export MONGODB_URL="mongodb://almanach:almanach@database:27017/almanach"
-
-    docker-compose build
-    docker-compose up
-
-
-The command :code:`docker-compose up` starts 2 containers: the collector and the API server.
-The environment variables :code:`RABBITMQ_URL` and :code:`MONGODB_URL` are mandatory.
 
 RabbitMQ configuration
 ----------------------
@@ -264,6 +228,6 @@ Almanach will process those events:
 API documentation
 -----------------
 
-.. autoflask:: almanach.api:app
+.. autoflask:: almanach.api.main:app
     :undoc-static:
     :include-empty-docstring:

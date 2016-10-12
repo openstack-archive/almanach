@@ -11,12 +11,14 @@ Almanach stores the utilization of OpenStack resources (instances and volumes) f
 What is Almanach?
 -----------------
 
-The main purpose of this software is to bill customers based on their usage of the cloud infrastructure.
+The main purpose of this software is to record the usage of the cloud resources of each tenants.
 
 Almanach is composed of two parts:
 
 - **Collector**: Listen for OpenStack events and store the relevant information in the database.
 - **REST API**: Expose the information collected to external systems.
+
+At the moment, Almanach is only able to record the usage of instances and volumes.
 
 Resources
 ---------
