@@ -100,7 +100,7 @@ class Controller(object):
     def update_inactive_entity(self, instance_id, start, end, **kwargs):
         inactive_entities = self.database_adapter.list_entities_by_id(instance_id, start, end)
         if len(inactive_entities) > 1:
-            raise exception.MultipleEntitiesMatchingQuery()
+            raise exception.MultipleEntitiesMatchingQueryException()
         if len(inactive_entities) < 1:
             raise exception.AlmanachEntityNotFoundException(
                 "InstanceId: {0} Not Found with start".format(instance_id))

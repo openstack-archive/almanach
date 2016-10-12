@@ -35,7 +35,7 @@ class DateFormatException(AlmanachException):
         super(DateFormatException, self).__init__(message)
 
 
-class MultipleEntitiesMatchingQuery(AlmanachException):
+class MultipleEntitiesMatchingQueryException(AlmanachException):
     pass
 
 

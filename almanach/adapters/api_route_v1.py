@@ -52,7 +52,7 @@ def to_json(api_call):
         except exception.InvalidAttributeException as e:
             logging.warning(e.get_error_message())
             return encode({"error": e.get_error_message()}), 400, {"Content-Type": "application/json"}
-        except exception.MultipleEntitiesMatchingQuery as e:
+        except exception.MultipleEntitiesMatchingQueryException as e:
             logging.warning(e.message)
             return encode({"error": "Multiple entities found while updating closed"}), 400, {
                 "Content-Type": "application/json"}

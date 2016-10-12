@@ -143,7 +143,7 @@ class ControllerTest(unittest.TestCase):
                                                                       start=fake_instances[0].start,
                                                                       end=fake_instances[0].end,
                                                                       flavor=fake_instances[0].flavor),
-            raises(exception.MultipleEntitiesMatchingQuery)
+            raises(exception.MultipleEntitiesMatchingQueryException)
         )
 
     def test_update_one_close_entity_return_no_entity(self):
