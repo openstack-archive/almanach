@@ -14,23 +14,22 @@
 
 from datetime import timedelta
 from dateutil import parser as date_parser
-import logging
+from oslo_log import log
 from pkg_resources import get_distribution
-
 import pytz
 
-from almanach import config
 from almanach.core import exception
 from almanach.core import model
 from almanach.validators import instance_validator
 
+LOG = log.getLogger(__name__)
+
 
 class Controller(object):
-    def __init__(self, database_adapter):
+    def __init__(self, config, database_adapter):
         self.database_adapter = database_adapter
-        self.metadata_whitelist = config.device_metadata_whitelist()
-
-        self.volume_existence_threshold = timedelta(0, config.volume_existence_threshold())
+        self.metadata_whitelist = config.resources.device_metadata_whitelist
+        self.volume_existence_threshold = timedelta(0, config.resources.volume_existence_threshold)
 
     def get_application_info(self):
         return {
@@ -41,10 +40,11 @@ class Controller(object):
 
     def create_instance(self, instance_id, tenant_id, create_date, flavor, os_type, distro, version, name, metadata):
         create_date = self._validate_and_parse_date(create_date)
-        logging.info("instance %s created in project %s (flavor %s; distro %s %s %s) on %s" % (
-            instance_id, tenant_id, flavor, os_type, distro, version, create_date))
+        LOG.info("instance %s created in project %s (flavor %s; distro %s %s %s) on %s",
+                 instance_id, tenant_id, flavor, os_type, distro, version, create_date)
+
         if self._fresher_entity_exists(instance_id, create_date):
-            logging.warning("instance %s already exists with a more recent entry", instance_id)
+            LOG.warning("instance %s already exists with a more recent entry", instance_id)
             return
 
         filtered_metadata = self._filter_metadata_with_whitelist(metadata)
@@ -61,12 +61,12 @@ class Controller(object):
                 "InstanceId: {0} Not Found".format(instance_id))
 
         delete_date = self._validate_and_parse_date(delete_date)
-        logging.info("instance %s deleted on %s" % (instance_id, delete_date))
+        LOG.info("instance %s deleted on %s", instance_id, delete_date)
         self.database_adapter.close_active_entity(instance_id, delete_date)
 
     def resize_instance(self, instance_id, flavor, resize_date):
         resize_date = self._validate_and_parse_date(resize_date)
-        logging.info("instance %s resized to flavor %s on %s" % (instance_id, flavor, resize_date))
+        LOG.info("instance %s resized to flavor %s on %s", instance_id, flavor, resize_date)
         try:
             instance = self.database_adapter.get_active_entity(instance_id)
             if flavor != instance.flavor:
@@ -77,15 +77,15 @@ class Controller(object):
                 instance.last_event = resize_date
                 self.database_adapter.insert_entity(instance)
         except KeyError as e:
-            logging.error("Trying to resize an instance with id '%s' not in the database yet." % instance_id)
+            LOG.error("Trying to resize an instance with id '%s' not in the database yet.", instance_id)
             raise e
 
     def rebuild_instance(self, instance_id, distro, version, os_type, rebuild_date):
         rebuild_date = self._validate_and_parse_date(rebuild_date)
         instance = self.database_adapter.get_active_entity(instance_id)
-        logging.info("instance %s rebuilded in project %s to os %s %s %s on %s" % (instance_id, instance.project_id,
-                                                                                   os_type, distro, version,
-                                                                                   rebuild_date))
+        LOG.info("instance %s rebuilded in project %s to os %s %s %s on %s",
+                 instance_id, instance.project_id, os_type, distro, version, rebuild_date)
+
         if instance.os.distro != distro or instance.os.version != version:
             self.database_adapter.close_active_entity(instance_id, rebuild_date)
 
@@ -119,7 +119,7 @@ class Controller(object):
             self.database_adapter.update_active_entity(instance)
             return instance
         except KeyError as e:
-            logging.error("Instance '{0}' is not in the database yet.".format(instance_id))
+            LOG.error("Instance %s is not in the database yet.", instance_id)
             raise e
 
     def entity_exists(self, entity_id):
@@ -132,16 +132,16 @@ class Controller(object):
 
     def attach_volume(self, volume_id, date, attachments):
         date = self._validate_and_parse_date(date)
-        logging.info("volume %s attached to %s on %s" % (volume_id, attachments, date))
+        LOG.info("Volume %s attached to %s on %s", volume_id, attachments, date)
         try:
             self._volume_attach_instance(volume_id, date, attachments)
         except KeyError as e:
-            logging.error("Trying to attach a volume with id '%s' not in the database yet." % volume_id)
+            LOG.error("Trying to attach a volume with id '%s' not in the database yet.", volume_id)
             raise e
 
     def create_volume(self, volume_id, project_id, start, volume_type, size, volume_name, attached_to=None):
         start = self._validate_and_parse_date(start)
-        logging.info("volume %s created in project %s to size %s on %s" % (volume_id, project_id, size, start))
+        LOG.info("volume %s created in project %s to size %s on %s", volume_id, project_id, size, start)
         if self._fresher_entity_exists(volume_id, start):
             return
 
@@ -153,29 +153,30 @@ class Controller(object):
 
     def detach_volume(self, volume_id, date, attachments):
         date = self._validate_and_parse_date(date)
-        logging.info("volume %s detached on %s" % (volume_id, date))
+        LOG.info("volume %s detached on %s", volume_id, date)
         try:
             self._volume_detach_instance(volume_id, date, attachments)
         except KeyError as e:
-            logging.error("Trying to detach a volume with id '%s' not in the database yet." % volume_id)
+            LOG.error("Trying to detach a volume with id '%s' not in the database yet.", volume_id)
             raise e
 
     def rename_volume(self, volume_id, volume_name):
         try:
             volume = self.database_adapter.get_active_entity(volume_id)
             if volume and volume.name != volume_name:
-                logging.info("volume %s renamed from %s to %s" % (volume_id, volume.name, volume_name))
+                LOG.info("volume %s renamed from %s to %s", volume_id, volume.name, volume_name)
                 volume.name = volume_name
                 self.database_adapter.update_active_entity(volume)
         except KeyError:
-            logging.error("Trying to update a volume with id '%s' not in the database yet." % volume_id)
+            LOG.error("Trying to update a volume with id '%s' not in the database yet.", volume_id)
 
     def resize_volume(self, volume_id, size, update_date):
         update_date = self._validate_and_parse_date(update_date)
         try:
             volume = self.database_adapter.get_active_entity(volume_id)
-            logging.info("volume %s updated in project %s to size %s on %s" % (volume_id, volume.project_id, size,
-                                                                               update_date))
+            LOG.info("volume %s updated in project %s to size %s on %s",
+                     volume_id, volume.project_id, size, update_date)
+
             self.database_adapter.close_active_entity(volume_id, update_date)
 
             volume.size = size
@@ -184,12 +185,12 @@ class Controller(object):
             volume.last_event = update_date
             self.database_adapter.insert_entity(volume)
         except KeyError as e:
-            logging.error("Trying to update a volume with id '%s' not in the database yet." % volume_id)
+            LOG.error("Trying to update a volume with id '%s' not in the database yet.", volume_id)
             raise e
 
     def delete_volume(self, volume_id, delete_date):
         delete_date = self._localize_date(self._validate_and_parse_date(delete_date))
-        logging.info("volume %s deleted on %s" % (volume_id, delete_date))
+        LOG.info("volume %s deleted on %s", volume_id, delete_date)
         try:
             if self.database_adapter.count_entity_entries(volume_id) > 1:
                 volume = self.database_adapter.get_active_entity(volume_id)
@@ -198,11 +199,11 @@ class Controller(object):
                     return
             self.database_adapter.close_active_entity(volume_id, delete_date)
         except KeyError as e:
-            logging.error("Trying to delete a volume with id '%s' not in the database yet." % volume_id)
+            LOG.error("Trying to delete a volume with id '%s' not in the database yet.", volume_id)
             raise e
 
     def create_volume_type(self, volume_type_id, volume_type_name):
-        logging.info("volume type %s with name %s created" % (volume_type_id, volume_type_name))
+        LOG.info("volume type %s with name %s created", volume_type_id, volume_type_name)
         volume_type = model.VolumeType(volume_type_id, volume_type_name)
         self.database_adapter.insert_volume_type(volume_type)
 
@@ -245,7 +246,7 @@ class Controller(object):
     def _update_instance_object(self, instance, **kwargs):
         for key, value in self._transform_attribute_to_match_entity_attribute(**kwargs).items():
             setattr(instance, key, value)
-            logging.info("Updating entity for instance '{0}' with {1}={2}".format(instance.entity_id, key, value))
+            LOG.info("Updating entity for instance '%s' with %s=%s", instance.entity_id, key, value)
 
     def _transform_attribute_to_match_entity_attribute(self, **kwargs):
         entity = {}
@@ -297,7 +298,7 @@ class Controller(object):
         try:
             date = date_parser.parse(date)
             return self._localize_date(date)
-        except TypeError:
+        except (TypeError, ValueError):
             raise exception.DateFormatException()
 
     @staticmethod

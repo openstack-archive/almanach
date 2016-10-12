@@ -27,6 +27,7 @@ from tests.builder import instance
 
 
 class ApiInstanceTest(BaseApi):
+
     def test_get_instances(self):
         self.controller.should_receive('list_instances') \
             .with_args('TENANT_ID', a_date_matching("2014-01-01 00:00:00.0000"),
@@ -80,7 +81,6 @@ class ApiInstanceTest(BaseApi):
         assert_that(result['flavor'], is_(some_new_flavor))
 
     def test_successful_instance_create(self):
-        self.having_config('auth_private_key', 'some token value')
         data = dict(id="INSTANCE_ID",
                     created_at="CREATED_AT",
                     name="INSTANCE_NAME",
@@ -109,7 +109,6 @@ class ApiInstanceTest(BaseApi):
         assert_that(code, equal_to(201))
 
     def test_instance_create_missing_a_param_returns_bad_request_code(self):
-        self.having_config('auth_private_key', 'some token value')
         data = dict(id="INSTANCE_ID",
                     created_at="CREATED_AT",
                     name="INSTANCE_NAME",
@@ -129,7 +128,6 @@ class ApiInstanceTest(BaseApi):
         assert_that(code, equal_to(400))
 
     def test_instance_create_bad_date_format_returns_bad_request_code(self):
-        self.having_config('auth_private_key', 'some token value')
         data = dict(id="INSTANCE_ID",
                     created_at="A_BAD_DATE",
                     name="INSTANCE_NAME",

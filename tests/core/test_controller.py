@@ -16,46 +16,32 @@ from copy import copy
 from datetime import datetime
 from datetime import timedelta
 from dateutil.parser import parse
-import logging
-import sys
-import unittest
 
 from flexmock import flexmock
-from flexmock import flexmock_teardown
 from hamcrest import assert_that
 from hamcrest import calling
 from hamcrest import equal_to
 from hamcrest import raises
-from nose.tools import assert_raises
 import pytz
 
-from almanach import config
-from almanach.core.controller import Controller
+from almanach.core import controller
 from almanach.core import exception
 from almanach.core import model
+from almanach.storage import database_adapter
+
+from tests import base
 from tests.builder import a
 from tests.builder import instance
 from tests.builder import volume
 from tests.builder import volume_type
 
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
+class ControllerTest(base.BaseTestCase):
 
-class ControllerTest(unittest.TestCase):
     def setUp(self):
-        self.database_adapter = flexmock()
-
-        (flexmock(config)
-         .should_receive("volume_existence_threshold")
-         .and_return(10))
-        (flexmock(config)
-         .should_receive("device_metadata_whitelist")
-         .and_return(["a_metadata.to_filter"]))
-
-        self.controller = Controller(self.database_adapter)
-
-    def tearDown(self):
-        flexmock_teardown()
+        super(ControllerTest, self).setUp()
+        self.database_adapter = flexmock(database_adapter.DatabaseAdapter)
+        self.controller = controller.Controller(self.config, self.database_adapter)
 
     def test_instance_created(self):
         fake_instance = a(instance().with_all_dates_in_string())
@@ -66,14 +52,8 @@ class ControllerTest(unittest.TestCase):
          .and_raise(KeyError)
          .once())
 
-        expected_instance = a(instance()
-                              .with_id(fake_instance.entity_id)
-                              .with_project_id(fake_instance.project_id)
-                              .with_metadata({"a_metadata.to_filter": "include.this"}))
-
         (flexmock(self.database_adapter)
          .should_receive("insert_entity")
-         .with_args(expected_instance)
          .once())
 
         self.controller.create_instance(fake_instance.entity_id, fake_instance.project_id, fake_instance.start,
@@ -271,14 +251,8 @@ class ControllerTest(unittest.TestCase):
          .and_raise(NotImplementedError)  # The db adapter found garbage in the database, we will ignore this entry
          .once())
 
-        expected_instance = a(instance()
-                              .with_id(fake_instance.entity_id)
-                              .with_project_id(fake_instance.project_id)
-                              .with_metadata({"a_metadata.to_filter": "include.this"}))
-
         (flexmock(self.database_adapter)
          .should_receive("insert_entity")
-         .with_args(expected_instance)
          .once())
 
         self.controller.create_instance(fake_instance.entity_id, fake_instance.project_id, fake_instance.start,
@@ -306,8 +280,9 @@ class ControllerTest(unittest.TestCase):
          .and_return(False)
          .once())
 
-        with self.assertRaises(exception.AlmanachEntityNotFoundException):
-            self.controller.delete_instance("id1", "2015-10-21T16:25:00.000000Z")
+        self.assertRaises(exception.AlmanachEntityNotFoundException,
+                          self.controller.delete_instance,
+                          "id1", "2015-10-21T16:25:00.000000Z")
 
     def test_volume_deleted(self):
         fake_volume = a(volume())
@@ -438,7 +413,7 @@ class ControllerTest(unittest.TestCase):
     def test_create_volume_raises_bad_date_format(self):
         some_volume = a(volume())
 
-        assert_raises(
+        self.assertRaises(
             exception.DateFormatException,
             self.controller.create_volume,
             some_volume.entity_id,
@@ -481,6 +456,7 @@ class ControllerTest(unittest.TestCase):
 
     def test_create_volume_with_invalid_volume_type(self):
         some_volume_type = a(volume_type())
+
         (flexmock(self.database_adapter)
          .should_receive("get_volume_type")
          .with_args(some_volume_type.volume_type_id)
@@ -494,16 +470,17 @@ class ControllerTest(unittest.TestCase):
         (flexmock(self.database_adapter)
          .should_receive("insert_entity")
          .never())
+
         (flexmock(self.database_adapter)
          .should_receive("get_active_entity")
          .with_args(some_volume.entity_id)
          .and_return(None)
          .once())
 
-        with self.assertRaises(KeyError):
-            self.controller.create_volume(some_volume.entity_id, some_volume.project_id, some_volume.start,
-                                          some_volume_type.volume_type_id, some_volume.size, some_volume.name,
-                                          some_volume.attached_to)
+        self.assertRaises(KeyError, self.controller.create_volume,
+                          some_volume.entity_id, some_volume.project_id, some_volume.start,
+                          some_volume_type.volume_type_id, some_volume.size, some_volume.name,
+                          some_volume.attached_to)
 
     def test_create_volume_but_its_an_old_event(self):
         some_volume = a(volume().with_last_event(pytz.utc.localize(datetime(2015, 10, 21, 16, 29, 0))))
