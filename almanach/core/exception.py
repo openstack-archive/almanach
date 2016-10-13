@@ -57,3 +57,7 @@ class VolumeTypeNotFoundException(AlmanachException):
             message = "Unable to find volume_type id '{volume_type_id}'".format(volume_type_id=volume_type_id)
 
         super(VolumeTypeNotFoundException, self).__init__(message)
+
+
+class DatabaseDriverNotSupportedException(AlmanachException):
+    pass

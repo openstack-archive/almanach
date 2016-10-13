@@ -121,8 +121,8 @@ For example with Nova, add the topic "almanach" in the config file :code:`/etc/n
     notification_topics=almanach
 
 
-Database configuration
-----------------------
+MongoDB configuration
+---------------------
 
 Almanach requires a specific user to connect to the database.
 To create a new user, open a new MongoDB shell:

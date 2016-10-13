@@ -22,7 +22,7 @@ from almanach.api import auth_adapter
 from almanach.api.v1 import routes
 from almanach.core import controller
 from almanach.core import opts
-from almanach.storage import database_adapter
+from almanach.storage import storage_driver
 
 LOG = log.getLogger(__name__)
 
@@ -35,10 +35,10 @@ def main():
         opts.CONF(sys.argv[1:])
         config = opts.CONF
 
-        storage = database_adapter.DatabaseAdapter(config)
-        storage.connect()
+        database_driver = storage_driver.StorageDriver(config).get_database_driver()
+        database_driver.connect()
 
-        routes.controller = controller.Controller(config, storage)
+        routes.controller = controller.Controller(config, database_driver)
         routes.auth_adapter = auth_adapter.AuthenticationAdapter(config).get_authentication_adapter()
 
         LOG.info('Listening on %s:%d', config.api.bind_ip, config.api.bind_port)

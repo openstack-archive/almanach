@@ -24,7 +24,7 @@ from hamcrest import contains_inanyorder
 
 from almanach.core import exception
 from almanach.core import model
-from almanach.storage.database_adapter import DatabaseAdapter
+from almanach.storage.drivers import mongodb_driver
 
 from tests import base
 from tests.builder import a
@@ -33,12 +33,12 @@ from tests.builder import volume
 from tests.builder import volume_type
 
 
-class DatabaseAdapterTest(base.BaseTestCase):
+class MongoDbDriverTest(base.BaseTestCase):
     def setUp(self):
-        super(DatabaseAdapterTest, self).setUp()
+        super(MongoDbDriverTest, self).setUp()
         mongo_connection = mongomock.Connection()
         self.db = mongo_connection['almanach']
-        self.adapter = DatabaseAdapter(self.config, self.db)
+        self.adapter = mongodb_driver.MongoDbDriver(self.config, self.db)
         flexmock(pymongo.MongoClient).new_instances(mongo_connection)
 
     def test_insert_instance(self):

@@ -27,7 +27,7 @@ import pytz
 from almanach.core import controller
 from almanach.core import exception
 from almanach.core import model
-from almanach.storage import database_adapter
+from almanach.storage.drivers import base_driver
 
 from tests import base
 from tests.builder import a
@@ -40,7 +40,7 @@ class ControllerTest(base.BaseTestCase):
 
     def setUp(self):
         super(ControllerTest, self).setUp()
-        self.database_adapter = flexmock(database_adapter.DatabaseAdapter)
+        self.database_adapter = flexmock(base_driver.BaseDriver)
         self.controller = controller.Controller(self.config, self.database_adapter)
 
     def test_instance_created(self):

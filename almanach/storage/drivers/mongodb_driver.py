@@ -18,14 +18,15 @@ import pymongo
 from almanach.core import exception
 from almanach.core import model
 from almanach.core.model import build_entity_from_dict
+from almanach.storage.drivers import base_driver
 
 LOG = log.getLogger(__name__)
 
 
-class DatabaseAdapter(object):
+class MongoDbDriver(base_driver.BaseDriver):
     def __init__(self, config, db=None):
+        super(MongoDbDriver, self).__init__(config)
         self.db = db
-        self.config = config
 
     def connect(self):
         connection = pymongo.MongoClient(self.config.database.connection_url, tz_aware=True)
