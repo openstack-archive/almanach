@@ -1,0 +1,8 @@
+Code-Review+2: Paul Millette <pmillette@internap.com>
+Workflow+1: Sebastien Delisle <sebastien.delisle@internap.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Thu, 13 Oct 2016 17:52:41 +0000
+Reviewed-on: https://review.openstack.org/386104
+Project: openstack/almanach
+Branch: refs/heads/master
