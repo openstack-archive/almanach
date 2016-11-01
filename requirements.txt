@@ -3,7 +3,7 @@ Flask==0.10.1
 PyYAML==3.11
 jsonpickle==0.7.1
 pymongo>=3.0.2,!=3.1  # Apache-2.0
-kombu>=3.0.30
+kombu>=3.0.25, <4.0.0 # BSD
 pytz>=2014.10
 voluptuous==0.8.11
 python-keystoneclient>=1.6.0
