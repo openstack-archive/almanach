@@ -34,11 +34,8 @@ def main():
         database_driver.connect()
 
         application_controller = controller.Controller(config, database_driver)
-        connection = kombu.Connection(hostname=config.collector.rabbit_host,
-                                      port=config.collector.rabbit_port,
-                                      userid=config.collector.rabbit_username,
-                                      password=config.collector.rabbit_password,
-                                      heartbeat=540)
+
+        connection = kombu.Connection(config.collector.url, heartbeat=config.collector.heartbeat)
         retry_listener = retry_adapter.RetryAdapter(config, connection)
         bus_listener = bus_adapter.BusAdapter(config, application_controller,
                                               connection, retry_listener)

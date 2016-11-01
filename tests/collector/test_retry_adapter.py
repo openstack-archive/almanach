@@ -12,10 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from flexmock import flexmock
-from kombu import Connection
-from kombu.tests import mocks
-from kombu.transport import pyamqp
+import mock
 
 from almanach.collector import retry_adapter
 from tests import base
@@ -25,73 +22,28 @@ class BusAdapterTest(base.BaseTestCase):
 
     def setUp(self):
         super(BusAdapterTest, self).setUp()
-        self.setup_connection_mock()
-        self.retry_adapter = retry_adapter.RetryAdapter(self.config, self.connection)
+        self.connection = mock.Mock()
+        self.retry_producer = mock.Mock()
+        self.dead_producer = mock.Mock()
+        self.retry_adapter = retry_adapter.RetryAdapter(self.config, self.connection,
+                                                        self.retry_producer, self.dead_producer)
 
-    def setup_connection_mock(self):
-        mocks.Transport.recoverable_connection_errors = pyamqp.Transport.recoverable_connection_errors
-        self.connection = flexmock(Connection(transport=mocks.Transport))
-        self.channel_mock = flexmock(self.connection.default_channel)
-        self.connection.should_receive('channel').and_return(self.channel_mock)
-
-    def test_declare_retry_exchanges_retries_if_it_fails(self):
-        connection = flexmock(Connection(transport=mocks.Transport))
-        connection.should_receive('_establish_connection').times(3)\
-            .and_raise(IOError)\
-            .and_raise(IOError)\
-            .and_return(connection.transport.establish_connection())
-
-        self.retry_adapter = retry_adapter.RetryAdapter(self.config, connection)
-
-    def test_publish_to_retry_queue_happy_path(self):
-        message = self.build_message()
-
-        self.expect_publish_with(message, 'almanach.retry').once()
-        self.retry_adapter.publish_to_dead_letter(message)
-
-    def test_publish_to_retry_queue_retries_if_it_fails(self):
-        message = self.build_message()
-
-        self.expect_publish_with(message, 'almanach.retry').times(4)\
-            .and_raise(IOError)\
-            .and_raise(IOError)\
-            .and_raise(IOError)\
-            .and_return(message)
+    def test_message_is_published_to_retry_queue(self):
+        message = mock.Mock(headers=dict())
+        message.delivery_info = dict(routing_key='test')
 
         self.retry_adapter.publish_to_dead_letter(message)
+        self.connection.ensure.assert_called_with(self.retry_producer, self.retry_producer.publish,
+                                                  errback=self.retry_adapter._error_callback,
+                                                  interval_max=30, interval_start=0, interval_step=5)
 
-    def build_message(self, headers=dict()):
-        message = MyObject()
-        message.headers = headers
-        message.body = b'Now that the worst is behind you, it\'s time we get you back. - Mr. Robot'
-        message.delivery_info = {'routing_key': 42}
-        message.content_type = 'xml/rapture'
-        message.content_encoding = 'iso8859-1'
-        return message
-
-    def test_publish_to_dead_letter_messages_retried_more_than_twice(self):
-        message = self.build_message(headers={'x-death': [0, 1, 2, 3]})
-
-        self.expect_publish_with(message, 'almanach.dead').once()
+    def test_message_is_published_to_dead_queue(self):
+        message = mock.Mock(headers={'x-death': [0, 1, 2, 3]})
+        message.delivery_info = dict(routing_key='test')
 
         self.retry_adapter.publish_to_dead_letter(message)
+        self.assertEqual(self.connection.ensure.call_count, 3)
 
-    def expect_publish_with(self, message, exchange):
-        expected_message = {'body': message.body,
-                            'priority': 0,
-                            'content_encoding': message.content_encoding,
-                            'content_type': message.content_type,
-                            'headers': message.headers,
-                            'properties': {'delivery_mode': 2}}
-
-        return self.channel_mock.should_receive('basic_publish')\
-            .with_args(expected_message, exchange=exchange, routing_key=message.delivery_info['routing_key'],
-                       mandatory=False, immediate=False)
-
-
-class MyObject(object):
-    headers = None
-    body = None
-    delivery_info = None
-    content_type = None
-    content_encoding = None
+        self.connection.ensure.assert_called_with(self.dead_producer, self.dead_producer.publish,
+                                                  errback=self.retry_adapter._error_callback,
+                                                  interval_max=30, interval_start=0, interval_step=5)
