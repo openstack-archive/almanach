@@ -20,18 +20,18 @@ LOG = log.getLogger(__name__)
 
 
 class RetryAdapter(object):
-    def __init__(self, config, connection):
+    def __init__(self, config, connection, retry_producer=None, dead_producer=None):
         self.config = config
         self.connection = connection
 
         retry_exchange = self._configure_retry_exchanges(self.connection)
         dead_exchange = self._configure_dead_exchange(self.connection)
 
-        self._retry_producer = kombu.Producer(self.connection, exchange=retry_exchange)
-        self._dead_producer = kombu.Producer(self.connection, exchange=dead_exchange)
+        self._retry_producer = retry_producer or kombu.Producer(self.connection, exchange=retry_exchange)
+        self._dead_producer = dead_producer or kombu.Producer(self.connection, exchange=dead_exchange)
 
     def publish_to_dead_letter(self, message):
-        death_count = self._rejected_count(message)
+        death_count = self._get_rejected_count(message)
         LOG.info('Message die %d times', death_count)
 
         if death_count < self.config.collector.max_retries:
@@ -114,7 +114,7 @@ class RetryAdapter(object):
             "x-dead-letter-routing-key": self.config.collector.routing_key,
         }
 
-    def _rejected_count(self, message):
+    def _get_rejected_count(self, message):
         if 'x-death' in message.headers:
             return len(message.headers['x-death'])
         return 0
