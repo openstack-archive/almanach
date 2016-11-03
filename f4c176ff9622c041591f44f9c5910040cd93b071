@@ -1,0 +1,9 @@
+Code-Review+2: Maxime Belanger <mbelanger@internap.com>
+Code-Review+1: Paul Millette <paulmillette@gmail.com>
+Workflow+1: Olivier Cartier <ocartier@internap.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Thu, 03 Nov 2016 16:43:03 +0000
+Reviewed-on: https://review.openstack.org/393368
+Project: openstack/almanach
+Branch: refs/heads/master
