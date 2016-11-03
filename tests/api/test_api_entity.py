@@ -50,6 +50,27 @@ class ApiEntityTest(BaseApi):
         assert_that(result, has_key('end'))
         assert_that(result['start'], is_("2014-01-01 00:00:00+00:00"))
 
+    def test_update_active_instance_entity_with_bad_payload(self):
+        instance_id = 'INSTANCE_ID'
+        data = {
+            'flavor': 'A_FLAVOR',
+        }
+
+        self.controller.should_receive('update_active_instance_entity') \
+            .with_args(instance_id=instance_id, **data) \
+            .once() \
+            .and_raise(ValueError('Expecting object: line 1 column 15 (char 14)'))
+
+        code, result = self.api_put(
+                '/entity/instance/INSTANCE_ID',
+                data=data,
+                headers={'X-Auth-Token': 'some token value'}
+        )
+        assert_that(result, has_entries({
+            "error": 'Invalid parameter or payload'
+        }))
+        assert_that(code, equal_to(400))
+
     def test_update_active_instance_entity_with_wrong_attribute_raise_exception(self):
         errors = [
             Invalid(message="error message1", path=["my_attribute1"]),

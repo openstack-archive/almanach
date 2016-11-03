@@ -207,7 +207,7 @@ class ApiInstanceTest(BaseApi):
             .never()
 
         code, result = self.api_delete('/instance/INSTANCE_ID', headers={'X-Auth-Token': 'some token value'})
-        assert_that(result, has_entries({"error": "The request you have made must have data. None was given."}))
+        assert_that(result, has_entries({"error": "Invalid parameter or payload"}))
         assert_that(code, equal_to(400))
 
     def test_instance_delete_bad_date_format_returns_bad_request_code(self):

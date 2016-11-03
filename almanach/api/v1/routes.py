@@ -30,42 +30,40 @@ auth_adapter = None
 
 
 def to_json(api_call):
-    def encode(data):
+    def encode_result(data):
         return jsonpickle.encode(data, unpicklable=False)
+
+    def send_response(data, status_code):
+        return flask.Response(encode_result(data), status_code, {"Content-Type": "application/json"})
 
     @wraps(api_call)
     def decorator(*args, **kwargs):
         try:
             result = api_call(*args, **kwargs)
-            return result if isinstance(result, wrappers.BaseResponse) \
-                else flask.Response(encode(result), 200, {"Content-Type": "application/json"})
-        except exception.DateFormatException as e:
+            return result if isinstance(result, wrappers.BaseResponse) else send_response(result, 200)
+        except (exception.DateFormatException, exception.MultipleEntitiesMatchingQueryException) as e:
             LOG.warning(e.message)
-            return flask.Response(encode({"error": e.message}), 400, {"Content-Type": "application/json"})
+            return send_response({"error": e.message}, 400)
         except KeyError as e:
             message = "The {param} param is mandatory for the request you have made.".format(param=e)
             LOG.warning(message)
-            return encode({"error": message}), 400, {"Content-Type": "application/json"}
-        except TypeError:
-            message = "The request you have made must have data. None was given."
+            return send_response({"error": message}, 400)
+        except (TypeError, ValueError):
+            message = "Invalid parameter or payload"
             LOG.warning(message)
-            return encode({"error": message}), 400, {"Content-Type": "application/json"}
+            return send_response({"error": message}, 400)
         except exception.InvalidAttributeException as e:
             LOG.warning(e.get_error_message())
-            return encode({"error": e.get_error_message()}), 400, {"Content-Type": "application/json"}
-        except exception.MultipleEntitiesMatchingQueryException as e:
-            LOG.warning(e.message)
-            return encode({"error": "Multiple entities found while updating closed"}), 400, {
-                "Content-Type": "application/json"}
+            return send_response({"error": e.get_error_message()}, 400)
         except exception.AlmanachEntityNotFoundException as e:
             LOG.warning(e.message)
-            return encode({"error": "Entity not found"}), 404, {"Content-Type": "application/json"}
+            return send_response({"error": e.message}, 404)
         except exception.AlmanachException as e:
             LOG.exception(e)
-            return flask.Response(encode({"error": e.message}), 500, {"Content-Type": "application/json"})
+            return send_response({"error": e.message}, 500)
         except Exception as e:
             LOG.exception(e)
-            return flask.Response(encode({"error": e}), 500, {"Content-Type": "application/json"})
+            return send_response({"error": e}, 500)
 
     return decorator
 

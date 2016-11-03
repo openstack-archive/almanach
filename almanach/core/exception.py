@@ -19,7 +19,11 @@ class AlmanachException(Exception):
 
 
 class AlmanachEntityNotFoundException(AlmanachException):
-    pass
+    def __init__(self, message=None):
+        if not message:
+            message = "Entity not found"
+
+        super(AlmanachEntityNotFoundException, self).__init__(message)
 
 
 class AuthenticationFailureException(AlmanachException):
@@ -36,7 +40,11 @@ class DateFormatException(AlmanachException):
 
 
 class MultipleEntitiesMatchingQueryException(AlmanachException):
-    pass
+    def __init__(self, message=None):
+        if not message:
+            message = "Multiple entities found while updating a closed entity"
+
+        super(MultipleEntitiesMatchingQueryException, self).__init__(message)
 
 
 class InvalidAttributeException(AlmanachException):
