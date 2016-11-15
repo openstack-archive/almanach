@@ -60,6 +60,13 @@ Start the collector:
     almanach-collector --config-file /etc/almanach/almanach.conf
 
 
+Signal Handling
+---------------
+
+- :code:`SIGINT`: force instantaneous termination
+- :code:`SIGTERM`: graceful termination of the service
+- :code:`SIGHUP`: reload service
+
 Authentication
 --------------
 

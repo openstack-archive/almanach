@@ -12,37 +12,84 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from flexmock import flexmock
+import mock
 
 from almanach.collector.handlers import instance_handler
-from integration_tests.builders import messages
 from tests import base
+from tests.builders import notification as builder
 
 
 class InstanceHandlerTest(base.BaseTestCase):
 
     def setUp(self):
         super(InstanceHandlerTest, self).setUp()
+        self.controller = mock.Mock()
+        self.instance_handler = instance_handler.InstanceHandler(self.controller)
 
-        self.controller = flexmock()
-        self.retry = flexmock()
-        self.instance_bus_adapter = instance_handler.InstanceHandler(self.controller)
+    def test_instance_created(self):
+        notification = builder.InstanceNotificationBuilder()\
+            .with_event_type('compute.instance.create.end')\
+            .with_image_meta('os_type', 'linux')\
+            .with_image_meta('distro', 'ubuntu')\
+            .with_image_meta('version', '16.04')\
+            .build()
 
-    def test_deleted_instance(self):
-        notification = messages.get_instance_delete_end_sample()
+        self.instance_handler.handle_events(notification)
 
-        self.controller.should_receive('delete_instance').once()
-        self.instance_bus_adapter.on_instance_deleted(notification)
+        self.controller.create_instance.assert_called_once_with(
+            notification.payload['instance_id'],
+            notification.payload['tenant_id'],
+            notification.payload['created_at'],
+            notification.payload['instance_type'],
+            notification.payload['image_meta']['os_type'],
+            notification.payload['image_meta']['distro'],
+            notification.payload['image_meta']['version'],
+            notification.payload['hostname'],
+            notification.payload['metadata'],
+        )
+
+    def test_instance_deleted(self):
+        notification = builder.InstanceNotificationBuilder() \
+            .with_event_type('compute.instance.delete.end') \
+            .with_payload_value('terminated_at', 'a_date') \
+            .build()
+
+        self.instance_handler.handle_events(notification)
+
+        self.controller.delete_instance.assert_called_once_with(
+            notification.payload['instance_id'],
+            notification.payload['terminated_at']
+        )
 
     def test_instance_resized(self):
-        notification = messages.get_instance_rebuild_end_sample()
+        notification = builder.InstanceNotificationBuilder() \
+            .with_event_type('compute.instance.resize.confirm.end') \
+            .with_context_value('timestamp', 'a_date') \
+            .build()
 
-        self.controller.should_receive('resize_instance').once()
-        self.instance_bus_adapter.on_instance_resized(notification)
+        self.instance_handler.handle_events(notification)
+
+        self.controller.resize_instance.assert_called_once_with(
+            notification.payload['instance_id'],
+            notification.payload['instance_type'],
+            notification.context.get("timestamp")
+        )
 
     def test_instance_rebuild(self):
-        notification = messages.get_instance_rebuild_end_sample()
-        self.controller \
-            .should_receive("rebuild_instance") \
-            .once()
-        self.instance_bus_adapter.on_instance_rebuilt(notification)
+        notification = builder.InstanceNotificationBuilder() \
+            .with_event_type('compute.instance.rebuild.end') \
+            .with_context_value('timestamp', 'a_date') \
+            .with_image_meta('os_type', 'linux') \
+            .with_image_meta('distro', 'ubuntu') \
+            .with_image_meta('version', '16.04') \
+            .build()
+
+        self.instance_handler.handle_events(notification)
+
+        self.controller.rebuild_instance.assert_called_once_with(
+            notification.payload['instance_id'],
+            notification.payload['image_meta']['distro'],
+            notification.payload['image_meta']['version'],
+            notification.payload['image_meta']['os_type'],
+            notification.context.get("timestamp")
+        )
