@@ -12,119 +12,127 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from datetime import datetime
-from flexmock import flexmock
-import pytz
+import mock
 
 from almanach.collector.handlers import volume_handler
-from integration_tests.builders import messages
 from tests import base
+from tests.builders import notification as builder
 
 
 class VolumeHandlerTest(base.BaseTestCase):
 
     def setUp(self):
         super(VolumeHandlerTest, self).setUp()
-
-        self.controller = flexmock()
-        self.retry = flexmock()
+        self.controller = mock.Mock()
         self.volume_handler = volume_handler.VolumeHandler(self.controller)
 
-    def test_deleted_volume(self):
-        notification = messages.get_volume_delete_end_sample()
+    def test_volume_created(self):
+        notification = builder.VolumeNotificationBuilder() \
+            .with_event_type('volume.create.end') \
+            .build()
 
-        self.controller.should_receive('delete_volume').once()
-        self.volume_handler.on_volume_deleted(notification)
+        self.volume_handler.handle_events(notification)
 
-    def test_resize_volume(self):
-        notification = messages.get_volume_update_end_sample()
-
-        self.controller.should_receive('resize_volume').once()
-        self.volume_handler.on_volume_resized(notification)
-
-    def test_updated_volume(self):
-        notification = messages.get_volume_update_end_sample()
-
-        self.controller.should_receive('resize_volume').once()
-        self.volume_handler.on_volume_resized(notification)
-
-    def test_attach_volume_with_kilo_payload_and_empty_attachments(self):
-        notification = messages.get_volume_attach_kilo_end_sample(
-            volume_id="my-volume-id",
-            timestamp=datetime(2014, 2, 14, 17, 18, 35, tzinfo=pytz.utc),
-            attached_to=[]
+        self.controller.create_volume.assert_called_once_with(
+            notification.payload['volume_id'],
+            notification.payload['tenant_id'],
+            notification.payload['created_at'],
+            notification.payload['volume_type'],
+            notification.payload['size'],
+            notification.payload['display_name'],
         )
 
-        self.controller \
-            .should_receive('attach_volume') \
-            .with_args("my-volume-id", "2014-02-14T17:18:36.000000Z", []) \
-            .once()
+    def test_volume_deleted(self):
+        notification = builder.VolumeNotificationBuilder() \
+            .with_event_type('volume.delete.end') \
+            .with_context_value('timestamp', 'a_date') \
+            .build()
 
-        self.volume_handler.on_volume_attached(notification)
+        self.volume_handler.handle_events(notification)
 
-    def test_detached_volume(self):
-        notification = messages.get_volume_detach_end_sample()
-
-        (self.controller
-         .should_receive('detach_volume')
-         .once())
-
-        self.volume_handler.on_volume_detached(notification)
-
-    def test_renamed_volume_with_volume_update_end(self):
-        notification = messages.get_volume_update_end_sample()
-
-        self.controller \
-            .should_receive('rename_volume') \
-            .once()
-
-        self.volume_handler.on_volume_renamed(notification)
-
-    def test_renamed_volume_with_volume_exists(self):
-        notification = messages.get_volume_exists_sample()
-
-        self.controller.should_receive('rename_volume').once()
-        self.volume_handler.on_volume_renamed(notification)
-
-    def test_attach_volume_with_icehouse_payload(self):
-        notification = messages.get_volume_attach_icehouse_end_sample(
-            volume_id="my-volume-id",
-            creation_timestamp=datetime(2014, 2, 14, 17, 18, 35, tzinfo=pytz.utc), attached_to="my-instance-id"
+        self.controller.delete_volume.assert_called_once_with(
+            notification.payload['volume_id'],
+            notification.context['timestamp'],
         )
 
-        self.controller \
-            .should_receive('attach_volume') \
-            .with_args("my-volume-id", "2014-02-14T17:18:36.000000Z", ["my-instance-id"]) \
-            .once()
+    def test_volume_renamed(self):
+        notification = builder.VolumeNotificationBuilder() \
+            .with_event_type('volume.update.end') \
+            .build()
 
-        self.volume_handler.on_volume_attached(notification)
+        self.volume_handler.handle_events(notification)
 
-    def test_attach_volume_with_kilo_payload(self):
-        notification = messages.get_volume_attach_kilo_end_sample(
-            volume_id="my-volume-id",
-            timestamp=datetime(2014, 2, 14, 17, 18, 35, tzinfo=pytz.utc),
-            attached_to=["I1"]
+        self.controller.rename_volume.assert_called_once_with(
+            notification.payload['volume_id'],
+            notification.payload['display_name'],
         )
 
-        self.controller \
-            .should_receive('attach_volume') \
-            .with_args("my-volume-id", "2014-02-14T17:18:36.000000Z", ["I1"]) \
-            .once()
+    def test_volume_renamed_with_exists_event(self):
+        notification = builder.VolumeNotificationBuilder() \
+            .with_event_type('volume.exists') \
+            .build()
 
-        self.volume_handler.on_volume_attached(notification)
+        self.volume_handler.handle_events(notification)
 
-    def test_get_attached_instances(self):
-        self.assertEqual(["truc"], self.volume_handler._get_attached_instances({"instance_uuid": "truc"}))
-        self.assertEqual([], self.volume_handler._get_attached_instances({"instance_uuid": None}))
-        self.assertEqual([], self.volume_handler._get_attached_instances({}))
-        self.assertEqual(
-            ["a", "b"],
-            self.volume_handler._get_attached_instances(
-                {"volume_attachment": [{"instance_uuid": "a"}, {"instance_uuid": "b"}]}
-            )
+        self.controller.rename_volume.assert_called_once_with(
+                notification.payload['volume_id'],
+                notification.payload['display_name'],
         )
-        self.assertEqual(
-            ["a"],
-            self.volume_handler._get_attached_instances({"volume_attachment": [{"instance_uuid": "a"}]})
+
+    def test_volume_resized(self):
+        notification = builder.VolumeNotificationBuilder() \
+            .with_event_type('volume.resize.end') \
+            .with_context_value('timestamp', 'a_date') \
+            .build()
+
+        self.volume_handler.handle_events(notification)
+
+        self.controller.resize_volume.assert_called_once_with(
+            notification.payload['volume_id'],
+            notification.payload['size'],
+            notification.context['timestamp'],
         )
-        self.assertEqual([], self.volume_handler._get_attached_instances({"volume_attachment": []}))
+
+    def test_volume_attach_empty(self):
+        notification = builder.VolumeNotificationBuilder() \
+            .with_event_type('volume.attach.end') \
+            .with_context_value('timestamp', 'a_date') \
+            .build()
+
+        self.volume_handler.handle_events(notification)
+
+        self.controller.attach_volume.assert_called_once_with(
+            notification.payload['volume_id'],
+            notification.context['timestamp'],
+            []
+        )
+
+    def test_volume_attach_with_instances(self):
+        notification = builder.VolumeNotificationBuilder() \
+            .with_event_type('volume.attach.end') \
+            .with_context_value('timestamp', 'a_date') \
+            .with_instance_attached('instance_id1') \
+            .with_instance_attached('instance_id2') \
+            .build()
+
+        self.volume_handler.handle_events(notification)
+
+        self.controller.attach_volume.assert_called_once_with(
+            notification.payload['volume_id'],
+            notification.context['timestamp'],
+            ['instance_id1', 'instance_id2']
+        )
+
+    def test_volume_detached(self):
+        notification = builder.VolumeNotificationBuilder() \
+            .with_event_type('volume.detach.end') \
+            .with_context_value('timestamp', 'a_date') \
+            .build()
+
+        self.volume_handler.handle_events(notification)
+
+        self.controller.detach_volume.assert_called_once_with(
+            notification.payload['volume_id'],
+            notification.context['timestamp'],
+            []
+        )

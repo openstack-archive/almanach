@@ -55,7 +55,7 @@ def to_json(api_call):
         except exception.InvalidAttributeException as e:
             LOG.warning(e.get_error_message())
             return send_response({"error": e.get_error_message()}, 400)
-        except exception.AlmanachEntityNotFoundException as e:
+        except (exception.AlmanachEntityNotFoundException, exception.VolumeTypeNotFoundException) as e:
             LOG.warning(e.message)
             return send_response({"error": e.message}, 404)
         except exception.AlmanachException as e:
