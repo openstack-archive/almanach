@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import kombu
 from oslo_log import log
+from oslo_service import service
 import sys
 
-from almanach.collector import bus_adapter
-from almanach.collector import retry_adapter
+from almanach.collector import messaging
+from almanach.collector import notification
+from almanach.collector import service as collector_service
 from almanach.core import controller
 from almanach.core import opts
 from almanach.storage import storage_driver
@@ -29,19 +30,20 @@ def main():
     try:
         opts.CONF(sys.argv[1:])
         config = opts.CONF
+        config.debug = True
 
         database_driver = storage_driver.StorageDriver(config).get_database_driver()
         database_driver.connect()
 
-        application_controller = controller.Controller(config, database_driver)
+        messaging_factory = messaging.MessagingFactory(config)
 
-        connection = kombu.Connection(config.collector.url, heartbeat=config.collector.heartbeat)
-        retry_listener = retry_adapter.RetryAdapter(config, connection)
-        bus_listener = bus_adapter.BusAdapter(config, application_controller,
-                                              connection, retry_listener)
+        app_controller = controller.Controller(config, database_driver)
+        handler = notification.NotificationHandler(config, app_controller, messaging_factory)
 
-        LOG.info('Listening for incoming events')
-        bus_listener.run()
+        listener = messaging_factory.get_listener(handler)
+
+        launcher = service.launch(config, collector_service.CollectorService(listener))
+        launcher.wait()
     except Exception as e:
         LOG.exception(e)
         sys.exit(100)

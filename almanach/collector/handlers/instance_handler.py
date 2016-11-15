@@ -17,53 +17,44 @@ class InstanceHandler(object):
     def __init__(self, controller):
         self.controller = controller
 
-    def handle_events(self, event_type, notification):
-        if event_type == "compute.instance.create.end":
+    def handle_events(self, notification):
+        if notification.event_type == "compute.instance.create.end":
             self.on_instance_created(notification)
-        elif event_type == "compute.instance.delete.end":
+        elif notification.event_type == "compute.instance.delete.end":
             self.on_instance_deleted(notification)
-        elif event_type == "compute.instance.resize.confirm.end":
+        elif notification.event_type == "compute.instance.resize.confirm.end":
             self.on_instance_resized(notification)
-        elif event_type == "compute.instance.rebuild.end":
+        elif notification.event_type == "compute.instance.rebuild.end":
             self.on_instance_rebuilt(notification)
 
     def on_instance_created(self, notification):
-        payload = notification.get("payload")
-        metadata = payload.get("metadata")
-
-        if isinstance(metadata, list):
-            metadata = {}
-
         self.controller.create_instance(
-            payload.get("instance_id"),
-            payload.get("tenant_id"),
-            payload.get("created_at"),
-            payload.get("instance_type"),
-            payload.get("image_meta").get("os_type"),
-            payload.get("image_meta").get("distro"),
-            payload.get("image_meta").get("version"),
-            payload.get("hostname"),
-            metadata
+            notification.payload.get("instance_id"),
+            notification.payload.get("tenant_id"),
+            notification.payload.get("created_at"),
+            notification.payload.get("instance_type"),
+            notification.payload.get("image_meta").get("os_type"),
+            notification.payload.get("image_meta").get("distro"),
+            notification.payload.get("image_meta").get("version"),
+            notification.payload.get("hostname"),
+            notification.metadata
         )
 
     def on_instance_deleted(self, notification):
-        payload = notification.get("payload")
-        date = payload.get("terminated_at")
-        instance_id = payload.get("instance_id")
+        date = notification.payload.get("terminated_at")
+        instance_id = notification.payload.get("instance_id")
         self.controller.delete_instance(instance_id, date)
 
     def on_instance_resized(self, notification):
-        payload = notification.get("payload")
-        date = notification.get("timestamp")
-        flavor = payload.get("instance_type")
-        instance_id = payload.get("instance_id")
+        date = notification.context.get("timestamp")
+        flavor = notification.payload.get("instance_type")
+        instance_id = notification.payload.get("instance_id")
         self.controller.resize_instance(instance_id, flavor, date)
 
     def on_instance_rebuilt(self, notification):
-        payload = notification.get("payload")
-        date = notification.get("timestamp")
-        instance_id = payload.get("instance_id")
-        distro = payload.get("image_meta").get("distro")
-        version = payload.get("image_meta").get("version")
-        os_type = payload.get("image_meta").get("os_type")
+        date = notification.context.get("timestamp")
+        instance_id = notification.payload.get("instance_id")
+        distro = notification.payload.get("image_meta").get("distro")
+        version = notification.payload.get("image_meta").get("version")
+        os_type = notification.payload.get("image_meta").get("os_type")
         self.controller.rebuild_instance(instance_id, distro, version, os_type, date)
