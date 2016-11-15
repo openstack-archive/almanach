@@ -12,12 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import kombu
 from oslo_log import log
+from oslo_service import service
 import sys
 
-from almanach.collector import bus_adapter
-from almanach.collector import retry_adapter
+from almanach.collector.handlers import instance_handler
+from almanach.collector.handlers import volume_handler
+from almanach.collector.handlers import volume_type_handler
+from almanach.collector import messaging
+from almanach.collector import notification
+from almanach.collector import service as collector_service
 from almanach.core import controller
 from almanach.core import opts
 from almanach.storage import storage_driver
@@ -29,19 +33,23 @@ def main():
     try:
         opts.CONF(sys.argv[1:])
         config = opts.CONF
+        config.debug = True
 
         database_driver = storage_driver.StorageDriver(config).get_database_driver()
         database_driver.connect()
 
-        application_controller = controller.Controller(config, database_driver)
+        messaging_factory = messaging.MessagingFactory(config)
+        app_controller = controller.Controller(config, database_driver)
 
-        connection = kombu.Connection(config.collector.url, heartbeat=config.collector.heartbeat)
-        retry_listener = retry_adapter.RetryAdapter(config, connection)
-        bus_listener = bus_adapter.BusAdapter(config, application_controller,
-                                              connection, retry_listener)
+        notification_handler = notification.NotificationHandler(config, messaging_factory)
+        notification_handler.add_event_handler(instance_handler.InstanceHandler(app_controller))
+        notification_handler.add_event_handler(volume_handler.VolumeHandler(app_controller))
+        notification_handler.add_event_handler(volume_type_handler.VolumeTypeHandler(app_controller))
 
-        LOG.info('Listening for incoming events')
-        bus_listener.run()
+        listener = messaging_factory.get_listener(notification_handler)
+
+        launcher = service.launch(config, collector_service.CollectorService(listener))
+        launcher.wait()
     except Exception as e:
         LOG.exception(e)
         sys.exit(100)

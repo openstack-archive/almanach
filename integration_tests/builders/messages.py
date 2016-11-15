@@ -102,25 +102,6 @@ def get_volume_delete_end_sample(volume_id=None, tenant_id=None, volume_type=Non
     return _get_volume_icehouse_payload("volume.delete.end", **kwargs)
 
 
-def get_volume_attach_icehouse_end_sample(volume_id=None, tenant_id=None, volume_type=None, volume_size=None,
-                                          creation_timestamp=None, name=None, attached_to=None):
-    kwargs = {
-        "volume_id": volume_id or "64a0ca7f-5f5a-4dc5-a1e1-e04e89eb95ed",
-        "tenant_id": tenant_id or "46eeb8e44298460899cf4b3554bfe11f",
-        "display_name": name or "mytenant-0001-myvolume",
-        "volume_type": volume_type or DEFAULT_VOLUME_TYPE,
-        "volume_size": volume_size or 50,
-        "attached_to": attached_to or "e7d44dea-21c1-452c-b50c-cbab0d07d7d3",
-        "created_at": creation_timestamp if creation_timestamp else datetime(2014, 2, 14, 17, 18, 35, tzinfo=pytz.utc),
-        "launched_at": creation_timestamp + timedelta(seconds=1) if creation_timestamp else datetime(2014, 2, 14, 17,
-                                                                                                     18, 40,
-                                                                                                     tzinfo=pytz.utc),
-        "timestamp": creation_timestamp + timedelta(seconds=1) if creation_timestamp else datetime(2014, 2, 14, 17, 18,
-                                                                                                   40, tzinfo=pytz.utc),
-    }
-    return _get_volume_icehouse_payload("volume.attach.end", **kwargs)
-
-
 def get_volume_attach_kilo_end_sample(volume_id=None, tenant_id=None, volume_type=None, volume_size=None,
                                       timestamp=None, name=None, attached_to=None):
     kwargs = {
@@ -166,63 +147,6 @@ def get_volume_resize_end_sample(volume_id=None, tenant_id=None, volume_type=Non
     return _get_volume_kilo_payload("volume.resize.end", **kwargs)
 
 
-def get_volume_detach_end_sample(volume_id=None, tenant_id=None, volume_type=None, volume_size=None,
-                                 creation_timestamp=None, deletion_timestamp=None, name=None):
-    kwargs = {
-        "volume_id": volume_id or "64a0ca7f-5f5a-4dc5-a1e1-e04e89eb95ed",
-        "tenant_id": tenant_id or "46eeb8e44298460899cf4b3554bfe11f",
-        "display_name": name or "mytenant-0001-myvolume",
-        "volume_type": volume_type or DEFAULT_VOLUME_TYPE,
-        "volume_size": volume_size or 50,
-        "attached_to": None,
-        "created_at": creation_timestamp if creation_timestamp else datetime(2014, 2, 14, 17, 18, 35, tzinfo=pytz.utc),
-        "launched_at": creation_timestamp + timedelta(seconds=1) if creation_timestamp else datetime(2014, 2, 14, 17,
-                                                                                                     18, 40,
-                                                                                                     tzinfo=pytz.utc),
-        "timestamp": deletion_timestamp if deletion_timestamp else datetime(2014, 2, 23, 8, 1, 58, tzinfo=pytz.utc),
-        "status": "detach"
-    }
-    return _get_volume_icehouse_payload("volume.detach.end", **kwargs)
-
-
-def get_volume_rename_end_sample(volume_id=None, tenant_id=None, volume_type=None, volume_size=None,
-                                 creation_timestamp=None, deletion_timestamp=None, name=None):
-    kwargs = {
-        "volume_id": volume_id or "64a0ca7f-5f5a-4dc5-a1e1-e04e89eb95ed",
-        "tenant_id": tenant_id or "46eeb8e44298460899cf4b3554bfe11f",
-        "display_name": name or "mytenant-0001-mysnapshot01",
-        "volume_type": volume_type or DEFAULT_VOLUME_TYPE,
-        "volume_size": volume_size or 50,
-        "attached_to": None,
-        "created_at": creation_timestamp if creation_timestamp else datetime(2014, 2, 14, 17, 18, 35, tzinfo=pytz.utc),
-        "launched_at": creation_timestamp + timedelta(seconds=1) if creation_timestamp else datetime(2014, 2, 14, 17,
-                                                                                                     18, 40,
-                                                                                                     tzinfo=pytz.utc),
-        "timestamp": deletion_timestamp if deletion_timestamp else datetime(2014, 2, 23, 8, 1, 58, tzinfo=pytz.utc),
-        "status": "detach"
-    }
-    return _get_volume_icehouse_payload("volume.update.end", **kwargs)
-
-
-def get_volume_exists_sample(volume_id=None, tenant_id=None, volume_type=None, volume_size=None,
-                             creation_timestamp=None, deletion_timestamp=None, name=None):
-    kwargs = {
-        "volume_id": volume_id or "64a0ca7f-5f5a-4dc5-a1e1-e04e89eb95ed",
-        "tenant_id": tenant_id or "46eeb8e44298460899cf4b3554bfe11f",
-        "display_name": name or "mytenant-0001-mysnapshot",
-        "volume_type": volume_type or DEFAULT_VOLUME_TYPE,
-        "volume_size": volume_size or 50,
-        "attached_to": None,
-        "created_at": creation_timestamp if creation_timestamp else datetime(2014, 2, 14, 17, 18, 35, tzinfo=pytz.utc),
-        "launched_at": creation_timestamp + timedelta(seconds=1) if creation_timestamp else datetime(2014, 2, 14, 17,
-                                                                                                     18, 40,
-                                                                                                     tzinfo=pytz.utc),
-        "timestamp": deletion_timestamp if deletion_timestamp else datetime(2014, 2, 23, 8, 1, 58, tzinfo=pytz.utc),
-        "status": "detach"
-    }
-    return _get_volume_icehouse_payload("volume.exists", **kwargs)
-
-
 def _format_date(datetime_obj):
     return datetime_obj.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
@@ -247,7 +171,6 @@ def _get_instance_payload(event_type, instance_id=None, tenant_id=None, hostname
     deleted_at = _format_date(deleted_at) if deleted_at else ""
     terminated_at = _format_date(terminated_at) if terminated_at else ""
     state = state or "active"
-    metadata = metadata
 
     if not isinstance(timestamp, datetime):
         timestamp = dateutil.parser.parse(timestamp)
@@ -301,8 +224,9 @@ def _get_instance_payload(event_type, instance_id=None, tenant_id=None, hostname
             "instance_flavor_id": instance_flavor_id,
             "metadata": metadata
         },
-        "timestamp": timestamp.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+        "_context_timestamp": timestamp.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
         "updated_at": _format_date(timestamp - timedelta(seconds=10)),
+        "priority": "INFO",
     }
 
 
@@ -325,7 +249,7 @@ def _get_volume_icehouse_payload(event_type, volume_id=None, tenant_id=None, dis
 
     return {
         "event_type": event_type,
-        "timestamp": launched_at,
+        "_context_timestamp": launched_at,
         "publisher_id": "volume.cinder01",
         "payload": {
             "instance_uuid": attached_to,
@@ -343,7 +267,6 @@ def _get_volume_icehouse_payload(event_type, volume_id=None, tenant_id=None, dis
         },
         "priority": "INFO",
         "updated_at": _format_date(timestamp - timedelta(seconds=10)),
-
     }
 
 
@@ -380,7 +303,7 @@ def _get_volume_kilo_payload(event_type, volume_id=None, tenant_id=None, display
 
     return {
         "event_type": event_type,
-        "timestamp": _format_date(timestamp),
+        "_context_timestamp": _format_date(timestamp),
         "publisher_id": "volume.cinder01",
         "payload": {
             "status": "in-use",
@@ -403,32 +326,9 @@ def _get_volume_kilo_payload(event_type, volume_id=None, tenant_id=None, display
     }
 
 
-def get_instance_rebuild_end_sample():
-    return _get_instance_payload("compute.instance.rebuild.end")
-
-
-def get_instance_resized_end_sample():
-    return _get_instance_payload("compute.instance.resize.confirm.end")
-
-
-def get_volume_update_end_sample(volume_id=None, tenant_id=None, volume_type=None, volume_size=None,
-                                 creation_timestamp=None, deletion_timestamp=None, name=None):
-    kwargs = {
-        "volume_id": volume_id or "64a0ca7f-5f5a-4dc5-a1e1-e04e89eb95ed",
-        "tenant_id": tenant_id or "46eeb8e44298460899cf4b3554bfe11f",
-        "display_name": name or "mytenant-0001-myvolume",
-        "volume_type": volume_type or DEFAULT_VOLUME_TYPE,
-        "volume_size": volume_size or 50,
-        "created_at": creation_timestamp if creation_timestamp else datetime(2014, 2, 14, 17, 18, 35, tzinfo=pytz.utc),
-        "launched_at": deletion_timestamp if deletion_timestamp else datetime(2014, 2, 23, 8, 1, 58, tzinfo=pytz.utc),
-        "timestamp": deletion_timestamp if deletion_timestamp else datetime(2014, 2, 23, 8, 1, 58, tzinfo=pytz.utc),
-        "status": "deleting"
-    }
-    return _get_volume_icehouse_payload("volume.resize.end", **kwargs)
-
-
 def get_volume_type_create_sample(volume_type_id, volume_type_name):
     return {
+        "priority": "INFO",
         "event_type": "volume_type.create",
         "publisher_id": "volume.cinder01",
         "payload": {
