@@ -5,6 +5,7 @@
 *.coverage
 *.egg*
 .DS_Store
+.testrepository
 AUTHORS
 ChangeLog
 doc/build
