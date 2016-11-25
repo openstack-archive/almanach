@@ -1,0 +1,95 @@
+# Copyright 2016 Internap.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import mock
+
+from almanach.collector.handlers import instance_handler
+from almanach.tests.unit import base
+from almanach.tests.unit.builders import notification as builder
+
+
+class InstanceHandlerTest(base.BaseTestCase):
+
+    def setUp(self):
+        super(InstanceHandlerTest, self).setUp()
+        self.controller = mock.Mock()
+        self.instance_handler = instance_handler.InstanceHandler(self.controller)
+
+    def test_instance_created(self):
+        notification = builder.InstanceNotificationBuilder()\
+            .with_event_type('compute.instance.create.end')\
+            .with_image_meta('os_type', 'linux')\
+            .with_image_meta('distro', 'ubuntu')\
+            .with_image_meta('version', '16.04')\
+            .build()
+
+        self.instance_handler.handle_events(notification)
+
+        self.controller.create_instance.assert_called_once_with(
+            notification.payload['instance_id'],
+            notification.payload['tenant_id'],
+            notification.payload['created_at'],
+            notification.payload['instance_type'],
+            notification.payload['image_meta']['os_type'],
+            notification.payload['image_meta']['distro'],
+            notification.payload['image_meta']['version'],
+            notification.payload['hostname'],
+            notification.payload['metadata'],
+        )
+
+    def test_instance_deleted(self):
+        notification = builder.InstanceNotificationBuilder() \
+            .with_event_type('compute.instance.delete.end') \
+            .with_payload_value('terminated_at', 'a_date') \
+            .build()
+
+        self.instance_handler.handle_events(notification)
+
+        self.controller.delete_instance.assert_called_once_with(
+            notification.payload['instance_id'],
+            notification.payload['terminated_at']
+        )
+
+    def test_instance_resized(self):
+        notification = builder.InstanceNotificationBuilder() \
+            .with_event_type('compute.instance.resize.confirm.end') \
+            .with_context_value('timestamp', 'a_date') \
+            .build()
+
+        self.instance_handler.handle_events(notification)
+
+        self.controller.resize_instance.assert_called_once_with(
+            notification.payload['instance_id'],
+            notification.payload['instance_type'],
+            notification.context.get("timestamp")
+        )
+
+    def test_instance_rebuild(self):
+        notification = builder.InstanceNotificationBuilder() \
+            .with_event_type('compute.instance.rebuild.end') \
+            .with_context_value('timestamp', 'a_date') \
+            .with_image_meta('os_type', 'linux') \
+            .with_image_meta('distro', 'ubuntu') \
+            .with_image_meta('version', '16.04') \
+            .build()
+
+        self.instance_handler.handle_events(notification)
+
+        self.controller.rebuild_instance.assert_called_once_with(
+            notification.payload['instance_id'],
+            notification.payload['image_meta']['distro'],
+            notification.payload['image_meta']['version'],
+            notification.payload['image_meta']['os_type'],
+            notification.context.get("timestamp")
+        )
