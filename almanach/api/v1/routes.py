@@ -87,6 +87,11 @@ def get_info():
     """Display information about the current version and counts of entities in the database.
 
     :code 200 OK: Service is available
+
+    Example output:
+
+    .. literalinclude:: ../api_examples/output/info.json
+        :language: json
     """
     return controller.get_application_info()
 
@@ -109,6 +114,11 @@ def create_instance(project_id):
     :code 201 Created: Instance successfully created
     :code 400 Bad Request: If request data has an invalid or missing field
     :code 404 Not Found: If tenant does not exist
+
+    Example input:
+
+    .. literalinclude:: ../api_examples/input/create_instance-body.json
+        :language: json
     """
     instance = jsonutils.loads(flask.request.data)
     LOG.info("Creating instance for tenant %s with data %s", project_id, instance)
@@ -139,6 +149,11 @@ def delete_instance(instance_id):
     :code 202 Accepted: Instance successfully deleted
     :code 400 Bad Request: If request data has an invalid or missing field
     :code 404 Not Found: If instance does not exist
+
+    Example input:
+
+    .. literalinclude:: ../api_examples/input/delete_instance-body.json
+        :language: json
     """
     data = jsonutils.loads(flask.request.data)
     LOG.info("Deleting instance with id %s with data %s", instance_id, data)
@@ -163,6 +178,11 @@ def resize_instance(instance_id):
     :code 200 OK:  Instance successfully re-sized
     :code 400 Bad Request: If request data has an invalid or missing field
     :code 404 Not Found: If instance does not exist
+
+    Example input:
+
+    .. literalinclude:: ../api_examples/input/resize_instance-body.json
+        :language: json
     """
     instance = jsonutils.loads(flask.request.data)
     LOG.info("Resizing instance with id %s with data %s", instance_id, instance)
@@ -190,6 +210,11 @@ def rebuild_instance(instance_id):
     :code 200 OK:  Instance successfully rebuilt
     :code 400 Bad Request: If request data has an invalid or missing field
     :code 404 Not Found: If instance does not exist
+
+    Example input:
+
+    .. literalinclude:: ../api_examples/input/rebuild_instance-body.json
+        :language: json
     """
     instance = jsonutils.loads(flask.request.data)
     LOG.info("Rebuilding instance with id %s with data %s", instance_id, instance)
@@ -217,6 +242,11 @@ def list_instances(project_id):
     :code 200 OK: instance list exists
     :code 400 Bad Request: If request data has an invalid or missing field
     :code 404 Not Found: If tenant does not exist.
+
+    Example output:
+
+    .. literalinclude:: ../api_examples/output/instances.json
+        :language: json
     """
     start, end = get_period()
     LOG.info("Listing instances between %s and %s", start, end)
@@ -240,6 +270,11 @@ def create_volume(project_id):
     :code 201 Created:  Volume successfully created
     :code 400 Bad Request: If request data has an invalid or missing field
     :code 404 Not Found: If tenant does not exist.
+
+    Example input:
+
+    .. literalinclude:: ../api_examples/input/create_volume-body.json
+        :language: json
     """
     volume = jsonutils.loads(flask.request.data)
     LOG.info("Creating volume for tenant %s with data %s", project_id, volume)
@@ -292,6 +327,11 @@ def resize_volume(volume_id):
     :code 200 OK: Volume successfully re-sized
     :code 400 Bad Request: If request data has an invalid or missing field
     :code 404 Not Found: If volume does not exist.
+
+    Example input:
+
+    .. literalinclude:: ../api_examples/input/resize_volume-body.json
+        :language: json
     """
     volume = jsonutils.loads(flask.request.data)
     LOG.info("Resizing volume with id %s with data %s", volume_id, volume)
@@ -317,6 +357,11 @@ def attach_volume(volume_id):
     :code 200 OK: Volume successfully attached
     :code 400 Bad Request: If request data has an invalid or missing field
     :code 404 Not Found: If volume does not exist.
+
+    Example input:
+
+    .. literalinclude:: ../api_examples/input/attach_volume-body.json
+        :language: json
     """
     volume = jsonutils.loads(flask.request.data)
     LOG.info("Attaching volume with id %s with data %s", volume_id, volume)
@@ -336,12 +381,15 @@ def detach_volume(volume_id):
     """Detaches a volume when the volume is detached in OpenStack.
 
     :arg uuid volume_id: Volume Uuid
-    :arg datetime date: Y-m-d H:M:S.f
-    :arg dict attachments: The volume attachments
 
     :code 200 OK: Volume successfully detached
     :code 400 Bad Request: If request data has an invalid or missing field
     :code 404 Not Found: If volume does not exist.
+
+    Example input:
+
+    .. literalinclude:: ../api_examples/input/detach_volume-body.json
+        :language: json
     """
     volume = jsonutils.loads(flask.request.data)
     LOG.info("Detaching volume with id %s with data %s", volume_id, volume)
@@ -367,6 +415,11 @@ def list_volumes(project_id):
     :code 200 OK: volume list exists
     :code 400 Bad Request: If request data has an invalid or missing field
     :code 404 Not Found: If tenant does not exist.
+
+    Example output:
+
+    .. literalinclude:: ../api_examples/output/volumes.json
+        :language: json
     """
     start, end = get_period()
     LOG.info("Listing volumes between %s and %s", start, end)
@@ -386,6 +439,12 @@ def list_entity(project_id):
     :code 200 OK: instances and volumes list exists
     :code 400 Bad Request: If request data has an invalid or missing field
     :code 404 Not Found: If tenant does not exist.
+
+
+    Example output:
+
+    .. literalinclude:: ../api_examples/output/entities.json
+        :language: json
     """
     start, end = get_period()
     LOG.info("Listing entities between %s and %s", start, end)
@@ -405,6 +464,16 @@ def update_instance_entity(instance_id):
     :code 200 OK: Entity successfully updated
     :code 400 Bad Request: If request data has an invalid or missing field
     :code 404 Not Found: If instance does not exist.
+
+    Example input:
+
+    .. literalinclude:: ../api_examples/input/update_instance_entity-body.json
+        :language: json
+
+    Example output:
+
+    .. literalinclude:: ../api_examples/output/update_instance_entity.json
+        :language: json
     """
     data = jsonutils.loads(flask.request.data)
     LOG.info("Updating instance entity with id %s with data %s", instance_id, data)
@@ -443,6 +512,11 @@ def get_entity(entity_id):
 
     :code 200 OK: Entity exists
     :code 404 Not Found: If the entity does not exist
+
+    Example output:
+
+    .. literalinclude:: ../api_examples/output/entity.json
+        :language: json
     """
     return controller.get_all_entities_by_id(entity_id)
 
@@ -454,6 +528,11 @@ def list_volume_types():
     """List volume types.
 
     :code 200 OK: Volume types exist
+
+    Example output:
+
+    .. literalinclude:: ../api_examples/output/volume_types.json
+        :language: json
     """
     LOG.info("Listing volumes types")
     return controller.list_volume_types()
@@ -470,6 +549,11 @@ def get_volume_type(type_id):
     :code 200 OK: Volume type exists
     :code 400 Bad Request: If request data has an invalid or missing field
     :code 404 Not Found: If the volume type does not exist
+
+    Example output:
+
+    .. literalinclude:: ../api_examples/output/volume_type.json
+        :language: json
     """
     LOG.info("Get volumes type for id %s", type_id)
     return controller.get_volume_type(type_id)
@@ -486,6 +570,11 @@ def create_volume_type():
 
     :code 201 Created: Volume successfully created
     :code 400 Bad Request: If request data has an invalid or missing field
+
+    Example input:
+
+    .. literalinclude:: ../api_examples/input/create_volume_type-body.json
+        :language: json
     """
     volume_type = jsonutils.loads(flask.request.data)
     LOG.info("Creating volume type with data '%s'", volume_type)

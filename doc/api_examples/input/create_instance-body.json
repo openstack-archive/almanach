@@ -1,0 +1,10 @@
+{
+  "project_id": "ce2d9f6bde52447a831887aac8b7ec98",
+  "id": "460bb2b6-28d6-42c0-9da4-4288dc3025cc",
+  "created_at": "2016-11-24 15:15:05+00:00",
+  "flavor": "my_flavor_name",
+  "os_type": "linux",
+  "os_version": "7",
+  "os_distro": "centos",
+  "name": "created_instance1"
+}

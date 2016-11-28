@@ -1,0 +1,10 @@
+[
+  {
+    "volume_type_id": "8b2944c2-9268-4fca-a5df-b4f23a7af1ba",
+    "volume_type_name": "my_volume_type1"
+  },
+  {
+    "volume_type_id": "a1c73195-d54e-4aea-8c3e-3df017b7a44a",
+    "volume_type_name": "my_volume_type2"
+  }
+]

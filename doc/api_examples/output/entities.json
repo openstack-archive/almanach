@@ -1,0 +1,30 @@
+[
+  {
+    "entity_id": "b5a4b119-7444-4993-afda-89b8f8f70147",
+    "end": null,
+    "name": "my.host.name.com",
+    "last_event": "2016-11-24 21:15:35+00:00",
+    "entity_type": "instance",
+    "start": "2016-11-24 21:15:35+00:00",
+    "flavor": "my_flavor_name",
+    "project_id": "ce2d9f6bde52447a831887aac8b7ec98",
+    "os": {
+      "os_type": "linux",
+      "version": "7",
+      "distro": "centos"
+    },
+    "metadata": {}
+  },
+  {
+    "entity_id": "020f3636-6a8a-4a37-beb0-0735074175a9",
+    "attached_to": ["b5a4b119-7444-4993-afda-89b8f8f70147"],
+    "end": null,
+    "name": "my.host.name.com-volume",
+    "last_event": "2016-11-24 21:16:47.106000+00:00",
+    "entity_type": "volume",
+    "volume_type": "my_volume_type1",
+    "start": "2016-11-24 21:16:47.106000+00:00",
+    "project_id": "ce2d9f6bde52447a831887aac8b7ec98",
+    "size": 20
+  }
+]

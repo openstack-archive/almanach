@@ -1,0 +1,18 @@
+[
+  {
+    "entity_id": "7f8284db-c955-4383-b253-d54cbc8c4364",
+    "end": null,
+    "name": "host1.com",
+    "last_event": "2016-11-24 15:14:08+00:00",
+    "entity_type": "instance",
+    "start": "2016-11-24 15:14:08+00:00",
+    "flavor": "my_flavor_name",
+    "project_id": "ce2d9f6bde52447a831887aac8b7ec98",
+    "os": {
+      "os_type": "linux",
+      "version": "7",
+      "distro": "centos"
+    },
+    "metadata": {}
+  }
+]

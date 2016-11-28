@@ -1,0 +1,16 @@
+{
+  "entity_id": "460bb2b6-28d6-42c0-9da4-4288dc3025cc",
+  "end": "2016-11-24 17:35:05+00:00",
+  "name": "my_instance_name",
+  "last_event": "2016-11-24 17:25:05+00:00",
+  "entity_type": "instance",
+  "start": "2016-11-24 17:25:05+00:00",
+  "flavor": "my_flavor_name",
+  "project_id": "ce2d9f6bde52447a831887aac8b7ec98",
+  "os": {
+    "os_type": "linux",
+    "version": "7",
+    "distro": "centos"
+  },
+  "metadata": {}
+}
