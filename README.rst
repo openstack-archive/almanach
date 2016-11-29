@@ -23,6 +23,11 @@ At the moment, Almanach is only able to record the usage of instances and volume
 Resources
 ---------
 
+Documentation
+~~~~~~~~~~~~~
+
+- https://almanach.readthedocs.io/
+
 Launchpad Projects
 ~~~~~~~~~~~~~~~~~~
 
