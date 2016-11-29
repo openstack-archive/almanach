@@ -1,0 +1,9 @@
+Code-Review+1: Paul Millette <paulmillette@gmail.com>
+Code-Review+2: Olivier Cartier <ocartier@internap.com>
+Workflow+1: Frédéric Guillot <fguillot@internap.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Tue, 29 Nov 2016 17:59:23 +0000
+Reviewed-on: https://review.openstack.org/404349
+Project: openstack/almanach
+Branch: refs/heads/master
