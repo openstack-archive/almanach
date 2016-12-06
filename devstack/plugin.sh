@@ -41,6 +41,16 @@ function almanach_configure {
     iniset $ALMANACH_CONF database connection_url mongodb://localhost/almanach
 }
 
+function almanach_configure_external_services {
+    if is_service_enabled nova; then
+        iniset $NOVA_CONF DEFAULT notification_topics "almanach,notifications"
+    fi
+
+    if is_service_enabled cinder; then
+        iniset $CINDER_CONF DEFAULT notification_topics "almanach,notifications"
+    fi
+}
+
 # Create almanach related accounts in Keystone
 function almanach_create_accounts {
     OLD_OS_CLOUD=$OS_CLOUD
@@ -89,6 +99,7 @@ if is_service_enabled almanach-api almanach-collector; then
     elif [[ "$1" == "stack" && "$2" == "post-config" ]]; then
         echo_summary "Configuring Almanach"
         almanach_configure
+        almanach_configure_external_services
         almanach_create_accounts
     elif [[ "$1" == "stack" && "$2" == "extra" ]]; then
         echo_summary "Initializing Almanach"

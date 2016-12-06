@@ -76,7 +76,7 @@ Protocol
 The authentication mechanism use the HTTP header :code:`X-Auth-Token` to send a token.
 This token is validated through Keystone or with the config file (private secret key).
 
-::
+:: code:: raw
 
     GET /volume_types HTTP/1.1
     X-Auth-Token: secret
@@ -93,7 +93,7 @@ Private Key Authentication
 The private secret key authentication is the default method.
 In your config file, you have to define your private key in the field :code:`auth_token`:
 
-::
+:: code:: raw
 
     [auth]
     strategy = private_key
@@ -106,7 +106,7 @@ Keystone Authentication
 The token will be validated with Keystone.
 To use this authentication backend you have to define the authentication strategy to :code:`keystone`.
 
-::
+:: code:: raw
 
     [auth]
     strategy = keystone
@@ -123,7 +123,7 @@ Each OpenStack services (Nova, Cinder, Neutron) need to be configured to send no
 
 For example with Nova, add the topic "almanach" in the config file :code:`/etc/nova.conf`:
 
-.. code:: bash
+.. code:: raw
 
     notification_topics=almanach
 
@@ -152,14 +152,6 @@ Devstack configuration
     SERVICE_PASSWORD=$ADMIN_PASSWORD
 
     enable_plugin almanach https://git.openstack.org/openstack/almanach
-
-    [[post-config|$NOVA_CONF]]
-    [DEFAULT]
-    notification_topics=almanach,notifications
-
-    [[post-config|$CINDER_CONF]]
-    [DEFAULT]
-    notification_topics=almanach,notifications
 
 
 Database entities
