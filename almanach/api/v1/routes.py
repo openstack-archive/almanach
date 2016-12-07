@@ -75,7 +75,7 @@ def authenticated(api_call):
             auth_adapter.validate(flask.request.headers.get('X-Auth-Token'))
             return api_call(*args, **kwargs)
         except exception.AuthenticationFailureException as e:
-            LOG.error("Authentication failure: %s", e)
+            LOG.error("Authentication failure: %s", e.message)
             return flask.Response('Unauthorized', 401)
 
     return decorator

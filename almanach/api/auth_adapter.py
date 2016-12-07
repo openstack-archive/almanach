@@ -39,5 +39,4 @@ class AuthenticationAdapter(object):
 
     def _get_keystone_auth(self):
         LOG.info('Loading Keystone authentication backend')
-        token_manager = keystone_auth.KeystoneTokenManagerFactory(self.config)
-        return keystone_auth.KeystoneAuthentication(token_manager)
+        return keystone_auth.KeystoneAuthentication(self.config)

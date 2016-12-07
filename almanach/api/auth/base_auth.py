@@ -13,9 +13,12 @@
 # limitations under the License.
 
 import abc
+import six
 
 
+@six.add_metaclass(abc.ABCMeta)
 class BaseAuth(object):
+
     @abc.abstractmethod
     def validate(self, token):
         return True
