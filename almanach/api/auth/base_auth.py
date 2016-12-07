@@ -16,6 +16,7 @@ import abc
 
 
 class BaseAuth(object):
+
     @abc.abstractmethod
     def validate(self, token):
         return True

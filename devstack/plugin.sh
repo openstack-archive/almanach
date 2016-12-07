@@ -33,8 +33,12 @@ function almanach_configure {
     iniset $ALMANACH_CONF api bind_ip $ALMANACH_SERVICE_HOST
     iniset $ALMANACH_CONF api bind_port $ALMANACH_SERVICE_PORT
 
-    iniset $ALMANACH_CONF auth auth_token secret
-    iniset $ALMANACH_CONF auth auth_strategy private_key
+    iniset $ALMANACH_CONF auth strategy keystone
+
+    iniset $ALMANACH_CONF auth keystone_username almanach
+    iniset $ALMANACH_CONF auth keystone_password $SERVICE_PASSWORD
+    iniset $ALMANACH_CONF auth keystone_tenant $SERVICE_PROJECT_NAME
+    iniset $ALMANACH_CONF auth keystone_url $KEYSTONE_SERVICE_URI/v2.0
 
     iniset $ALMANACH_CONF collector transport_url rabbit://stackrabbit:secret@localhost:5672
 
@@ -47,7 +51,8 @@ function almanach_configure_external_services {
     fi
 
     if is_service_enabled cinder; then
-        iniset $CINDER_CONF DEFAULT notification_topics "almanach,notifications"
+        iniset $CINDER_CONF oslo_messaging_notifications topics "almanach,notifications"
+        iniset $CINDER_CONF oslo_messaging_notifications driver "messagingv2"
     fi
 }
 
