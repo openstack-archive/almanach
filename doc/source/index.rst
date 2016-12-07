@@ -112,8 +112,7 @@ To use this authentication backend you have to define the authentication strateg
     strategy = keystone
     keystone_username = my_service_username
     keystone_password = my_service_password
-    keystone_tenant = my_service_tenant_name
-    keystone_url = http://keystone_url:5000/v2.0
+    keystone_url = http://keystone_url:5000/v3
 
 
 RabbitMQ configuration

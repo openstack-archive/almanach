@@ -67,10 +67,8 @@ auth_opts = [
     cfg.StrOpt('keystone_password',
                secret=True,
                help='Keystone service password'),
-    cfg.StrOpt('keystone_tenant',
-               help='Keystone service tenant'),
     cfg.StrOpt('keystone_url',
-               default='http://keystone_url:5000/v2.0',
+               default='http://keystone_url:5000/v3',
                help='Keystone URL'),
 ]
 

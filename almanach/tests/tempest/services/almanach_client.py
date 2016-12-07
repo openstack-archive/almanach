@@ -30,3 +30,7 @@ class AlmanachClient(rest_client.RestClient):
     def get_version(self):
         resp, response_body = self.get('info')
         return resp, response_body
+
+    def get_volume_type(self, volume_type_id):
+        resp, response_body = self.get('volume_type/{}'.format(volume_type_id))
+        return resp, response_body
