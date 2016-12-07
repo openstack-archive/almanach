@@ -12,11 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from flexmock import flexmock
-from hamcrest import assert_that
-from hamcrest import calling
-from hamcrest import equal_to
-from hamcrest import raises
+import mock
 
 from almanach.api.auth import keystone_auth
 from almanach.core import exception
@@ -27,23 +23,26 @@ class KeystoneAuthenticationTest(base.BaseTestCase):
 
     def setUp(self):
         super(KeystoneAuthenticationTest, self).setUp()
-        self.token_manager_factory = flexmock()
-        self.keystone_token_manager = flexmock()
-        self.auth_backend = keystone_auth.KeystoneAuthentication(self.token_manager_factory)
+        self.session_mock = mock.patch('keystoneauth1.session.Session').start()
+        self.keystone_mock = mock.patch('keystoneclient.v3.client.Client').start()
+
+        self.validation_mock = mock.Mock()
+        self.keystone_mock.return_value.tokens.validate = self.validation_mock
+
+        self.driver = keystone_auth.KeystoneAuthentication(self.config)
 
     def test_with_correct_token(self):
-        token = "my token"
-        self.token_manager_factory.should_receive("get_manager").and_return(self.keystone_token_manager)
-        self.keystone_token_manager.should_receive("validate").with_args(token)
-        assert_that(self.auth_backend.validate(token), equal_to(True))
+        token = 'some keystone token'
+        self.validation_mock.return_value = True
+        self.driver.validate(token)
+        self.validation_mock.assert_called_once_with(token)
 
     def test_with_invalid_token(self):
-        token = "bad token"
-        self.token_manager_factory.should_receive("get_manager").and_return(self.keystone_token_manager)
-        self.keystone_token_manager.should_receive("validate").with_args(token).and_raise(Exception)
-        assert_that(calling(self.auth_backend.validate)
-                    .with_args(token), raises(exception.AuthenticationFailureException))
+        token = 'some keystone token'
+        self.validation_mock.return_value = False
+        self.assertRaises(exception.AuthenticationFailureException, self.driver.validate, token)
+        self.validation_mock.assert_called_once_with(token)
 
     def test_with_empty_token(self):
-        assert_that(calling(self.auth_backend.validate)
-                    .with_args(None), raises(exception.AuthenticationFailureException))
+        token = None
+        self.assertRaises(exception.AuthenticationFailureException, self.driver.validate, token)
