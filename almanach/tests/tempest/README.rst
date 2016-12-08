@@ -13,7 +13,7 @@ Example of config file for devstack:
     [DEFAULT]
 
     [identity]
-    auth_version = v2
+    auth_version = v3
     uri = http://192.168.50.50:5000/v2.0
     uri_v3 = http://192.168.50.50:5000/v3
 

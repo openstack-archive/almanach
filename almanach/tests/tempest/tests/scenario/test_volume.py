@@ -17,15 +17,18 @@ from oslo_serialization import jsonutils as json
 from almanach.tests.tempest.tests.scenario import base
 
 
-class TestVolumeTypeScenario(base.BaseAlmanachScenarioTest):
+class TestVolumeScenario(base.BaseAlmanachScenarioTest):
 
-    def test_create_volume_type(self):
-        volume_type = self.create_volume_type(name='my_custom_volume_type')
+    def test_create_volume(self):
+        volume = self.create_volume()
 
-        resp, response_body = self.almanach_client.get_volume_type(volume_type['id'])
+        resp, response_body = self.almanach_client.get_tenant_entities(volume['os-vol-tenant-attr:tenant_id'])
         self.assertEqual(resp.status, 200)
 
         response_body = json.loads(response_body)
-        self.assertIsInstance(response_body, dict)
-        self.assertEqual(volume_type['id'], response_body['volume_type_id'])
-        self.assertEqual(volume_type['name'], response_body['volume_type_name'])
+        self.assertIsInstance(response_body, list)
+        self.assertEqual(1, len(response_body))
+        self.assertEqual(volume['id'], response_body[0]['entity_id'])
+        self.assertEqual(volume['volume_type'], response_body[0]['volume_type'])
+        self.assertIsNotNone(response_body[0]['start'])
+        self.assertIsNone(response_body[0]['end'])

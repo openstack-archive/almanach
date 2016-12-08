@@ -34,3 +34,8 @@ class AlmanachClient(rest_client.RestClient):
     def get_volume_type(self, volume_type_id):
         resp, response_body = self.get('volume_type/{}'.format(volume_type_id))
         return resp, response_body
+
+    def get_tenant_entities(self, tenant_id):
+        url = 'project/{}/entities?start=2016-01-01%2000:00:00.000'.format(tenant_id)
+        resp, response_body = self.get(url)
+        return resp, response_body
