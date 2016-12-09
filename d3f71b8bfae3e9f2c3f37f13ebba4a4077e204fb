@@ -1,0 +1,8 @@
+Code-Review+2: Marc Aubry <maubry@internap.com>
+Workflow+1: Olivier Cartier <ocartier@internap.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Fri, 09 Dec 2016 21:02:58 +0000
+Reviewed-on: https://review.openstack.org/409311
+Project: openstack/almanach
+Branch: refs/heads/master
