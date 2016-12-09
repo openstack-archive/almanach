@@ -14,6 +14,7 @@
 
 from oslo_log import log
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest.scenario import manager
 
@@ -42,11 +43,31 @@ class BaseAlmanachScenarioTest(manager.ScenarioTest):
             name = 'generic'
 
         randomized_name = data_utils.rand_name('scenario-type-' + name)
-        LOG.info("Creating a volume type with name: %s", randomized_name)
+        LOG.info('Creating a volume type with name: %s', randomized_name)
 
         body = client.create_volume_type(name=randomized_name)['volume_type']
         self.assertIn('id', body)
         self.addCleanup(client.delete_volume_type, body['id'])
 
-        LOG.info("Created volume type with ID: %s", body['id'])
+        LOG.info('Created volume type with ID: %s', body['id'])
         return body
+
+    def create_volume_without_cleanup(self, size=None, name=None, snapshot_id=None,
+                                      imageRef=None, volume_type=None):
+        if size is None:
+            size = CONF.volume.volume_size
+        if name is None:
+            name = data_utils.rand_name(self.__class__.__name__)
+        kwargs = {'display_name': name,
+                  'snapshot_id': snapshot_id,
+                  'imageRef': imageRef,
+                  'volume_type': volume_type,
+                  'size': size}
+        volume = self.volumes_client.create_volume(**kwargs)['volume']
+
+        waiters.wait_for_volume_status(self.volumes_client,
+                                       volume['id'], 'available')
+
+        volume = self.volumes_client.show_volume(volume['id'])['volume']
+        LOG.info('Created volume %s with name: %s', volume['id'], volume['display_name'])
+        return volume

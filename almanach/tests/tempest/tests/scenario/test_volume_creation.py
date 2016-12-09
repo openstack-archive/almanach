@@ -17,7 +17,7 @@ from oslo_serialization import jsonutils as json
 from almanach.tests.tempest.tests.scenario import base
 
 
-class TestVolumeScenario(base.BaseAlmanachScenarioTest):
+class TestVolumeCreationScenario(base.BaseAlmanachScenarioTest):
 
     def test_create_volume(self):
         volume = self.create_volume()
