@@ -76,7 +76,7 @@ Protocol
 The authentication mechanism use the HTTP header :code:`X-Auth-Token` to send a token.
 This token is validated through Keystone or with the config file (private secret key).
 
-:: code:: raw
+.. code:: raw
 
     GET /volume_types HTTP/1.1
     X-Auth-Token: secret
@@ -93,7 +93,7 @@ Private Key Authentication
 The private secret key authentication is the default method.
 In your config file, you have to define your private key in the field :code:`auth_token`:
 
-:: code:: raw
+.. code:: raw
 
     [auth]
     strategy = private_key
@@ -106,13 +106,34 @@ Keystone Authentication
 The token will be validated with Keystone.
 To use this authentication backend you have to define the authentication strategy to :code:`keystone`.
 
-:: code:: raw
+.. code:: raw
 
     [auth]
     strategy = keystone
-    keystone_username = my_service_username
-    keystone_password = my_service_password
-    keystone_url = http://keystone_url:5000/v3
+
+    [keystone_authtoken]
+
+    # Keystone service username (string value)
+    username = almanach
+
+    # Keystone service password (string value)
+    password = secret
+
+    # Keystone service user domain ID (string value)
+    user_domain_id = default
+
+    # Keystone service user domain name (string value)
+    user_domain_name = Default
+
+    # Keystone service project domain name (string value)
+    project_domain_name = Default
+
+    # Keystone service project name (string value)
+    project_name = service
+
+    # Keystone API V3 admin endpoint (string value)
+    auth_url = http://127.0.0.1:35357/v3
+
 
 
 RabbitMQ configuration

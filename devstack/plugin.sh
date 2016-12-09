@@ -35,9 +35,13 @@ function almanach_configure {
 
     iniset $ALMANACH_CONF auth strategy keystone
 
-    iniset $ALMANACH_CONF auth keystone_username almanach
-    iniset $ALMANACH_CONF auth keystone_password $SERVICE_PASSWORD
-    iniset $ALMANACH_CONF auth keystone_url $KEYSTONE_SERVICE_URI/v2.0
+    iniset $ALMANACH_CONF keystone_authtoken username almanach
+    iniset $ALMANACH_CONF keystone_authtoken password $SERVICE_PASSWORD
+    iniset $ALMANACH_CONF keystone_authtoken user_domain_id default
+    iniset $ALMANACH_CONF keystone_authtoken user_domain_name $SERVICE_DOMAIN_NAME
+    iniset $ALMANACH_CONF keystone_authtoken project_domain_name $SERVICE_DOMAIN_NAME
+    iniset $ALMANACH_CONF keystone_authtoken project_name $SERVICE_PROJECT_NAME
+    iniset $ALMANACH_CONF keystone_authtoken auth_url $KEYSTONE_SERVICE_URI_V3
 
     iniset $ALMANACH_CONF collector transport_url rabbit://stackrabbit:secret@localhost:5672
 
