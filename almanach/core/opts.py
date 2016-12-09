@@ -54,22 +54,37 @@ collector_opts = [
                help='Delay in seconds between retries'),
 ]
 
+keystone_opts = [
+    cfg.StrOpt('username',
+               help='Keystone service username'),
+    cfg.StrOpt('password',
+               secret=True,
+               help='Keystone service password'),
+    cfg.StrOpt('user_domain_id',
+               default='default',
+               help='Keystone service user domain ID'),
+    cfg.StrOpt('user_domain_name',
+               default='Default',
+               help='Keystone service user domain name'),
+    cfg.StrOpt('project_domain_name',
+               default='Default',
+               help='Keystone service project domain name'),
+    cfg.StrOpt('project_name',
+               default='service',
+               help='Keystone service project name'),
+    cfg.StrOpt('auth_url',
+               default='http://127.0.0.1:35357/v3',
+               help='Keystone API V3 admin endpoint'),
+]
+
 auth_opts = [
     cfg.StrOpt('strategy',
                default='private_key',
-               help='Authentication driver for the API'),
+               help='Authentication driver for the API: private_key or keystone'),
     cfg.StrOpt('private_key',
                secret=True,
                default='secret',
                help='Private key for private key authentication'),
-    cfg.StrOpt('keystone_username',
-               help='Keystone service username'),
-    cfg.StrOpt('keystone_password',
-               secret=True,
-               help='Keystone service password'),
-    cfg.StrOpt('keystone_url',
-               default='http://keystone_url:5000/v3',
-               help='Keystone URL'),
 ]
 
 resource_opts = [
@@ -86,6 +101,7 @@ CONF.register_opts(database_opts, group='database')
 CONF.register_opts(api_opts, group='api')
 CONF.register_opts(collector_opts, group='collector')
 CONF.register_opts(auth_opts, group='auth')
+CONF.register_opts(keystone_opts, group='keystone_authtoken')
 CONF.register_opts(resource_opts, group='resources')
 
 logging.register_options(CONF)
@@ -97,6 +113,7 @@ def list_opts():
         ('database', database_opts),
         ('api', api_opts),
         ('collector', collector_opts),
-        ('api.auth', auth_opts),
+        ('auth', auth_opts),
+        ('keystone_authtoken', keystone_opts),
         ('resources', resource_opts),
     ]
