@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from oslo_log import log
+from tempest.common import compute
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
@@ -71,3 +72,21 @@ class BaseAlmanachScenarioTest(manager.ScenarioTest):
         volume = self.volumes_client.show_volume(volume['id'])['volume']
         LOG.info('Created volume %s with name: %s', volume['id'], volume['display_name'])
         return volume
+
+    def create_test_server(self, wait_until=None):
+        flavors = self.flavors_client.list_flavors()['flavors']
+        images = self.image_client.list_images()['images']
+        tenant_network = self.get_tenant_network()
+        body, servers = compute.create_test_server(
+            self.os,
+            wait_until=wait_until,
+            image_id=images[0]['id'],
+            flavor=flavors[0]['id'],
+            tenant_network=tenant_network)
+
+        server = self.os.servers_client.show_server(body['id'])['server']
+        return server, flavors[0]
+
+    def delete_test_server(self, server):
+        self.os.servers_client.delete_server(server['id'])
+        waiters.wait_for_server_termination(self.os.servers_client, server['id'])
