@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from oslo_log import log
+from oslo_serialization import jsonutils as json
 from tempest.common import compute
 from tempest.common.utils import data_utils
 from tempest.common import waiters
@@ -22,7 +22,6 @@ from tempest.scenario import manager
 from almanach.tests.tempest import clients
 
 CONF = config.CONF
-LOG = log.getLogger(__name__)
 
 
 class BaseAlmanachScenarioTest(manager.ScenarioTest):
@@ -37,41 +36,42 @@ class BaseAlmanachScenarioTest(manager.ScenarioTest):
         cls.os = clients.Manager(credentials=credentials)
         cls.almanach_client = cls.os.almanach_client
 
-    def create_volume_type(self, name=None):
+    def get_tenant_entities(self, tenant_id):
+        resp, response_body = self.almanach_client.get_tenant_entities(tenant_id)
+        self.assertEqual(resp.status, 200)
+
+        response_body = json.loads(response_body)
+        self.assertIsInstance(response_body, list)
+        return response_body
+
+    def create_test_volume_type(self):
         client = self.os_adm.volume_types_v2_client
+        randomized_name = data_utils.rand_name('scenario-volume-type')
 
-        if not name:
-            name = 'generic'
+        volume_type = client.create_volume_type(name=randomized_name)['volume_type']
 
-        randomized_name = data_utils.rand_name('scenario-type-' + name)
-        LOG.info('Creating a volume type with name: %s', randomized_name)
+        self.assertIn('id', volume_type)
+        self.addCleanup(client.delete_volume_type, volume_type['id'])
 
-        body = client.create_volume_type(name=randomized_name)['volume_type']
-        self.assertIn('id', body)
-        self.addCleanup(client.delete_volume_type, body['id'])
+        return volume_type
 
-        LOG.info('Created volume type with ID: %s', body['id'])
-        return body
+    def create_test_volume(self, size=None, volume_type=None):
+        name = data_utils.rand_name(self.__class__.__name__)
 
-    def create_volume_without_cleanup(self, size=None, name=None, snapshot_id=None,
-                                      imageRef=None, volume_type=None):
         if size is None:
             size = CONF.volume.volume_size
-        if name is None:
-            name = data_utils.rand_name(self.__class__.__name__)
-        kwargs = {'display_name': name,
-                  'snapshot_id': snapshot_id,
-                  'imageRef': imageRef,
-                  'volume_type': volume_type,
-                  'size': size}
-        volume = self.volumes_client.create_volume(**kwargs)['volume']
 
+        kwargs = {
+            'display_name': name,
+            'volume_type': volume_type,
+            'size': size
+        }
+
+        volume = self.volumes_client.create_volume(**kwargs)['volume']
         waiters.wait_for_volume_status(self.volumes_client,
                                        volume['id'], 'available')
 
-        volume = self.volumes_client.show_volume(volume['id'])['volume']
-        LOG.info('Created volume %s with name: %s', volume['id'], volume['display_name'])
-        return volume
+        return self.volumes_client.show_volume(volume['id'])['volume']
 
     def create_test_server(self, wait_until=None):
         flavors = self.flavors_client.list_flavors()['flavors']

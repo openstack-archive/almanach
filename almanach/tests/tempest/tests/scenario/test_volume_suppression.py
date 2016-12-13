@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from oslo_serialization import jsonutils as json
-
 from almanach.tests.tempest.tests.scenario import base
 
 
@@ -21,21 +19,16 @@ class TestVolumeSuppressionScenario(base.BaseAlmanachScenarioTest):
 
     def test_delete_volume(self):
         volume = self._delete_volume()
+        entities = self.get_tenant_entities(volume['os-vol-tenant-attr:tenant_id'])
 
-        resp, response_body = self.almanach_client.get_tenant_entities(volume['os-vol-tenant-attr:tenant_id'])
-        self.assertEqual(resp.status, 200)
-
-        response_body = json.loads(response_body)
-        self.assertIsInstance(response_body, list)
-        self.assertEqual(1, len(response_body))
-
-        self.assertEqual(volume['id'], response_body[0]['entity_id'])
-        self.assertEqual(volume['volume_type'], response_body[0]['volume_type'])
-        self.assertIsNotNone(response_body[0]['start'])
-        self.assertIsNotNone(response_body[0]['end'])
+        self.assertEqual(1, len(entities))
+        self.assertEqual(volume['id'], entities[0]['entity_id'])
+        self.assertEqual(volume['volume_type'], entities[0]['volume_type'])
+        self.assertIsNotNone(entities[0]['start'])
+        self.assertIsNotNone(entities[0]['end'])
 
     def _delete_volume(self):
-        volume = self.create_volume_without_cleanup()
+        volume = self.create_test_volume()
         self.volumes_client.delete_volume(volume['id'])
         self.volumes_client.wait_for_resource_deletion(volume['id'])
         return volume

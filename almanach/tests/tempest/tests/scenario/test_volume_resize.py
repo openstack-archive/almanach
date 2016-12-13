@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from oslo_serialization import jsonutils as json
 from tempest.common import waiters
 from tempest.lib.common.utils import test_utils
 
@@ -24,27 +23,23 @@ class TestVolumeResizeScenario(base.BaseAlmanachScenarioTest):
     def test_resize_volume(self):
         volume = self._resize_volume()
 
-        resp, response_body = self.almanach_client.get_tenant_entities(volume['os-vol-tenant-attr:tenant_id'])
-        self.assertEqual(resp.status, 200)
+        entities = self.get_tenant_entities(volume['os-vol-tenant-attr:tenant_id'])
+        self.assertEqual(2, len(entities))
 
-        response_body = json.loads(response_body)
-        self.assertIsInstance(response_body, list)
-        self.assertEqual(2, len(response_body))
+        self.assertEqual(volume['id'], entities[0]['entity_id'])
+        self.assertEqual(volume['volume_type'], entities[0]['volume_type'])
+        self.assertEqual(1, entities[0]['size'])
+        self.assertIsNotNone(entities[0]['start'])
+        self.assertIsNotNone(entities[0]['end'])
 
-        self.assertEqual(volume['id'], response_body[0]['entity_id'])
-        self.assertEqual(volume['volume_type'], response_body[0]['volume_type'])
-        self.assertEqual(1, response_body[0]['size'])
-        self.assertIsNotNone(response_body[0]['start'])
-        self.assertIsNotNone(response_body[0]['end'])
-
-        self.assertEqual(volume['id'], response_body[1]['entity_id'])
-        self.assertEqual(volume['volume_type'], response_body[1]['volume_type'])
-        self.assertEqual(2, response_body[1]['size'])
-        self.assertIsNotNone(response_body[1]['start'])
-        self.assertIsNone(response_body[1]['end'])
+        self.assertEqual(volume['id'], entities[1]['entity_id'])
+        self.assertEqual(volume['volume_type'], entities[1]['volume_type'])
+        self.assertEqual(2, entities[1]['size'])
+        self.assertIsNotNone(entities[1]['start'])
+        self.assertIsNone(entities[1]['end'])
 
     def _resize_volume(self):
-        volume = self.create_volume_without_cleanup(size=1)
+        volume = self.create_test_volume(size=1)
         self.volumes_client.extend_volume(volume['id'], new_size=2)
 
         waiters.wait_for_volume_status(self.volumes_client,

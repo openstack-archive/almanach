@@ -20,7 +20,7 @@ from almanach.tests.tempest.tests.scenario import base
 class TestVolumeTypeScenario(base.BaseAlmanachScenarioTest):
 
     def test_create_volume_type(self):
-        volume_type = self.create_volume_type(name='my_custom_volume_type')
+        volume_type = self.create_test_volume_type()
 
         resp, response_body = self.almanach_client.get_volume_type(volume_type['id'])
         self.assertEqual(resp.status, 200)

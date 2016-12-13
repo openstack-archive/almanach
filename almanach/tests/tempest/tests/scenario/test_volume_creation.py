@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from oslo_serialization import jsonutils as json
-
 from almanach.tests.tempest.tests.scenario import base
 
 
@@ -22,13 +20,9 @@ class TestVolumeCreationScenario(base.BaseAlmanachScenarioTest):
     def test_create_volume(self):
         volume = self.create_volume()
 
-        resp, response_body = self.almanach_client.get_tenant_entities(volume['os-vol-tenant-attr:tenant_id'])
-        self.assertEqual(resp.status, 200)
-
-        response_body = json.loads(response_body)
-        self.assertIsInstance(response_body, list)
-        self.assertEqual(1, len(response_body))
-        self.assertEqual(volume['id'], response_body[0]['entity_id'])
-        self.assertEqual(volume['volume_type'], response_body[0]['volume_type'])
-        self.assertIsNotNone(response_body[0]['start'])
-        self.assertIsNone(response_body[0]['end'])
+        entities = self.get_tenant_entities(volume['os-vol-tenant-attr:tenant_id'])
+        self.assertEqual(1, len(entities))
+        self.assertEqual(volume['id'], entities[0]['entity_id'])
+        self.assertEqual(volume['volume_type'], entities[0]['volume_type'])
+        self.assertIsNotNone(entities[0]['start'])
+        self.assertIsNone(entities[0]['end'])

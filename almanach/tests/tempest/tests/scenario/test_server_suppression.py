@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from oslo_serialization import jsonutils as json
-
 from almanach.tests.tempest.tests.scenario import base
 
 
@@ -23,16 +21,12 @@ class TestServerSuppressionScenario(base.BaseAlmanachScenarioTest):
         server, flavor = self.create_test_server(wait_until='ACTIVE')
         self.delete_test_server(server)
 
-        resp, response_body = self.almanach_client.get_tenant_entities(server['tenant_id'])
-        self.assertEqual(resp.status, 200)
+        entities = self.get_tenant_entities(server['tenant_id'])
 
-        response_body = json.loads(response_body)
-        self.assertIsInstance(response_body, list)
-        self.assertEqual(1, len(response_body))
-
-        self.assertEqual(server['id'], response_body[0]['entity_id'])
-        self.assertEqual('instance', response_body[0]['entity_type'])
-        self.assertEqual(server['name'], response_body[0]['name'])
-        self.assertEqual(flavor['name'], response_body[0]['flavor'])
-        self.assertIsNotNone(response_body[0]['start'])
-        self.assertIsNotNone(response_body[0]['end'])
+        self.assertEqual(1, len(entities))
+        self.assertEqual(server['id'], entities[0]['entity_id'])
+        self.assertEqual('instance', entities[0]['entity_type'])
+        self.assertEqual(server['name'], entities[0]['name'])
+        self.assertEqual(flavor['name'], entities[0]['flavor'])
+        self.assertIsNotNone(entities[0]['start'])
+        self.assertIsNotNone(entities[0]['end'])
