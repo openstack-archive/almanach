@@ -13,21 +13,15 @@
 # limitations under the License.
 
 from oslo_serialization import jsonutils as json
-from tempest.common import waiters
-from tempest.lib.common.utils import test_utils
 
 from almanach.tests.tempest.tests.scenario import base
 
 
-class TestServerCreationScenario(base.BaseAlmanachScenarioTest):
+class TestServerSuppressionScenario(base.BaseAlmanachScenarioTest):
 
-    def test_create_server(self):
+    def test_delete_server(self):
         server, flavor = self.create_test_server(wait_until='ACTIVE')
-
-        self.addCleanup(waiters.wait_for_server_termination,
-                        self.os.servers_client, server['id'])
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.os.servers_client.delete_server, server['id'])
+        self.delete_test_server(server)
 
         resp, response_body = self.almanach_client.get_tenant_entities(server['tenant_id'])
         self.assertEqual(resp.status, 200)
@@ -41,4 +35,4 @@ class TestServerCreationScenario(base.BaseAlmanachScenarioTest):
         self.assertEqual(server['name'], response_body[0]['name'])
         self.assertEqual(flavor['name'], response_body[0]['flavor'])
         self.assertIsNotNone(response_body[0]['start'])
-        self.assertIsNone(response_body[0]['end'])
+        self.assertIsNotNone(response_body[0]['end'])
