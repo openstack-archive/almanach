@@ -10,6 +10,7 @@ Tempest Configuration File
 Example of config file for devstack:
 
 .. code:: bash
+
     [DEFAULT]
 
     [identity]
@@ -36,6 +37,13 @@ Run tests on your local machine
 4. Run the tests with testr or tempest:
     - :code:`testr run`
     - :code:`tempest run`
+
+Note: you can overwrite the default folder of the configuration by setting two environment variables
+
+.. code:: bash
+
+    export TEMPEST_CONFIG=tempest.conf
+    export TEMPEST_CONFIG_DIR=/tmp/
 
 
 Run tests in devstack
