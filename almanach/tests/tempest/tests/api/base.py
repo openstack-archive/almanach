@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from uuid import uuid4
+import oslo_serialization
 
 from tempest import config
 import tempest.test
@@ -38,3 +40,19 @@ class BaseAlmanachTest(tempest.test.BaseTestCase):
         credentials = cred_provider.get_creds_by_roles(['admin']).credentials
         cls.os = clients.Manager(credentials=credentials)
         cls.almanach_client = cls.os.almanach_client
+
+    @classmethod
+    def create_server_through_api(cls, tenant_id, server):
+        resp, _ = cls.almanach_client.create_server(tenant_id, oslo_serialization.jsonutils.dumps(server))
+        return resp
+
+    @staticmethod
+    def get_server_creation_payload():
+        server = {'id': str(uuid4()),
+                  'created_at': '2016-01-01T18:30:00Z',
+                  'name': 'api_test_instance_create',
+                  'flavor': 'api_flavor',
+                  'os_type': 'linux',
+                  'os_distro': 'ubuntu',
+                  'os_version': '14.04'}
+        return server
