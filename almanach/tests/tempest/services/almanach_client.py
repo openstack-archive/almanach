@@ -31,6 +31,14 @@ class AlmanachClient(rest_client.RestClient):
         resp, response_body = self.get('info')
         return resp, response_body
 
+    def create_server(self, tenant_id, body):
+        resp, response_body = self.post('/project/{}/instance'.format(tenant_id), body=body)
+        return resp, response_body
+
+    def delete_server(self, instance_id, body):
+        resp, response_body = self.delete('/instance/{}'.format(instance_id), body=body)
+        return resp, response_body
+
     def get_volume_type(self, volume_type_id):
         resp, response_body = self.get('volume_type/{}'.format(volume_type_id))
         return resp, response_body
@@ -38,4 +46,19 @@ class AlmanachClient(rest_client.RestClient):
     def get_tenant_entities(self, tenant_id):
         url = 'project/{}/entities?start=2016-01-01%2000:00:00.000'.format(tenant_id)
         resp, response_body = self.get(url)
+        return resp, response_body
+
+    def update_server(self, instance_id, body):
+        url = '/entity/instance/{}'.format(instance_id)
+        resp, response_body = self.put(url, body)
+        return resp, response_body
+
+    def rebuild(self, instance_id, body):
+        update_instance_rebuild_query = "/instance/{}/rebuild".format(instance_id)
+        resp, response_body = self.put(update_instance_rebuild_query, body)
+        return resp, response_body
+
+    def resize(self, instance_id, body):
+        url = "/instance/{}/resize".format(instance_id)
+        resp, response_body = self.put(url, body)
         return resp, response_body
