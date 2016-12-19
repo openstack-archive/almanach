@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import almanach
 import os
 
 from tempest import config
@@ -24,8 +25,8 @@ class AlmanachTempestPlugin(plugins.TempestPlugin):
 
     def load_tests(self):
         base_path = os.path.split(os.path.dirname(
-            os.path.abspath(__file__)))[0]
-        test_dir = "tempest/tests"
+                os.path.abspath(almanach.__file__)))[0]
+        test_dir = "almanach/tests/tempest/tests"
         full_test_dir = os.path.join(base_path, test_dir)
         return full_test_dir, base_path
 
