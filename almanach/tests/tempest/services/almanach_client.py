@@ -43,6 +43,31 @@ class AlmanachClient(rest_client.RestClient):
         resp, response_body = self.get('volume_type/{}'.format(volume_type_id))
         return resp, response_body
 
+    def create_volume_type(self, body):
+        resp, response_body = self.post('/volume_type', body)
+        return resp, response_body
+
+    def create_volume(self, tenant_id, body):
+        url = '/project/{}/volume'.format(tenant_id)
+        resp, response_body = self.post(url, body)
+        return resp, response_body
+
+    def delete_volume(self, volume_id, body):
+        resp, response_body = self.delete('/volume/{}'.format(volume_id), body=body)
+        return resp, response_body
+
+    def resize_volume(self, volume_id, body):
+        resp, response_body = self.put('/volume/{}/resize'.format(volume_id), body)
+        return resp, response_body
+
+    def attach_volume(self, volume_id, body):
+        resp, response_body = self.put('/volume/{}/attach'.format(volume_id), body)
+        return resp, response_body
+
+    def detach_volume(self, volume_id, body):
+        resp, response_body = self.put('/volume/{}/detach'.format(volume_id), body)
+        return resp, response_body
+
     def get_tenant_entities(self, tenant_id):
         url = 'project/{}/entities?start=2016-01-01%2000:00:00.000'.format(tenant_id)
         resp, response_body = self.get(url)
