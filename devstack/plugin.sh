@@ -43,7 +43,7 @@ function almanach_configure {
     iniset $ALMANACH_CONF keystone_authtoken project_name $SERVICE_PROJECT_NAME
     iniset $ALMANACH_CONF keystone_authtoken auth_url $KEYSTONE_SERVICE_URI_V3
 
-    iniset $ALMANACH_CONF collector transport_url rabbit://stackrabbit:secret@localhost:5672
+    iniset $ALMANACH_CONF collector transport_url rabbit://$RABBIT_USERID:$RABBIT_PASSWORD@$RABBIT_HOST:5672
 
     iniset $ALMANACH_CONF database connection_url mongodb://localhost/almanach
 }
