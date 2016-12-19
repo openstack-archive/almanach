@@ -14,6 +14,7 @@
 from uuid import uuid4
 
 from oslo_serialization import jsonutils as json
+from tempest.common.utils import data_utils
 from tempest import config
 import tempest.test
 
@@ -55,3 +56,25 @@ class BaseAlmanachTest(tempest.test.BaseTestCase):
                   'os_distro': 'ubuntu',
                   'os_version': '14.04'}
         return server
+
+    @staticmethod
+    def get_volume_creation_payload(volume_type_name):
+        return {'volume_id': str(uuid4()),
+                'attached_to': [],
+                'volume_name': 'a-test-volume',
+                'volume_type': volume_type_name,
+                'start': '2016-01-01T18:00:00Z',
+                'size': 100}
+
+    def create_volume_type(self):
+        volume_type = {'type_id': str(uuid4()),
+                       'type_name': data_utils.rand_name('scenario-volume-type')}
+        volume_type_body = json.dumps(volume_type)
+        return volume_type, self.almanach_client.create_volume_type(volume_type_body)
+
+    def create_volume(self):
+        volume_type, _ = self.create_volume_type()
+        tenant_id = str(uuid4())
+        volume = self.get_volume_creation_payload(volume_type['type_id'])
+        resp, response_body = self.almanach_client.create_volume(tenant_id, json.dumps(volume))
+        return resp, tenant_id, volume
