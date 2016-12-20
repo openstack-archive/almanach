@@ -17,21 +17,19 @@ from hamcrest import equal_to
 from hamcrest import has_entries
 from hamcrest import has_key
 from hamcrest import has_length
-from hamcrest import is_
 
 from almanach.core import exception
-from almanach.tests.unit.api.base_api import a_date_matching
-from almanach.tests.unit.api.base_api import BaseApi
+from almanach.tests.unit.api import base_api
 from almanach.tests.unit.builder import a
 from almanach.tests.unit.builder import instance
 
 
-class ApiInstanceTest(BaseApi):
+class ApiInstanceTest(base_api.BaseApi):
 
     def test_get_instances(self):
-        self.controller.should_receive('list_instances') \
-            .with_args('TENANT_ID', a_date_matching("2014-01-01 00:00:00.0000"),
-                       a_date_matching("2014-02-01 00:00:00.0000")) \
+        self.instance_ctl.should_receive('list_instances') \
+            .with_args('TENANT_ID', base_api.a_date_matching("2014-01-01 00:00:00.0000"),
+                       base_api.a_date_matching("2014-02-01 00:00:00.0000")) \
             .and_return([a(instance().with_id('123'))])
 
         code, result = self.api_get('/project/TENANT_ID/instances',
@@ -46,40 +44,6 @@ class ApiInstanceTest(BaseApi):
         assert_that(result[0], has_key('entity_id'))
         assert_that(result[0]['entity_id'], equal_to('123'))
 
-    def test_update_instance_flavor_for_terminated_instance(self):
-        some_new_flavor = 'some_new_flavor'
-        data = dict(flavor=some_new_flavor)
-        start = '2016-03-01 00:00:00.000000'
-        end = '2016-03-03 00:00:00.000000'
-
-        self.controller.should_receive('update_inactive_entity') \
-            .with_args(
-            instance_id="INSTANCE_ID",
-            start=a_date_matching(start),
-            end=a_date_matching(end),
-            flavor=some_new_flavor,
-        ).and_return(a(
-            instance().
-            with_id('INSTANCE_ID').
-            with_start(2016, 3, 1, 0, 0, 0).
-            with_end(2016, 3, 3, 0, 0, 0).
-            with_flavor(some_new_flavor))
-        )
-
-        code, result = self.api_put(
-            '/entity/instance/INSTANCE_ID',
-            headers={'X-Auth-Token': 'some token value'},
-            query_string={
-                'start': start,
-                'end': end,
-            },
-            data=data,
-        )
-        assert_that(code, equal_to(200))
-        assert_that(result, has_key('entity_id'))
-        assert_that(result, has_key('flavor'))
-        assert_that(result['flavor'], is_(some_new_flavor))
-
     def test_successful_instance_create(self):
         data = dict(id="INSTANCE_ID",
                     created_at="CREATED_AT",
@@ -89,7 +53,7 @@ class ApiInstanceTest(BaseApi):
                     os_distro="A_DISTRIBUTION",
                     os_version="AN_OS_VERSION")
 
-        self.controller.should_receive('create_instance') \
+        self.instance_ctl.should_receive('create_instance') \
             .with_args(tenant_id="PROJECT_ID",
                        instance_id=data["id"],
                        create_date=data["created_at"],
@@ -116,7 +80,7 @@ class ApiInstanceTest(BaseApi):
                     os_type="AN_OS_TYPE",
                     os_version="AN_OS_VERSION")
 
-        self.controller.should_receive('create_instance') \
+        self.instance_ctl.should_receive('create_instance') \
             .never()
 
         code, result = self.api_post(
@@ -136,7 +100,7 @@ class ApiInstanceTest(BaseApi):
                     os_distro="A_DISTRIBUTION",
                     os_version="AN_OS_VERSION")
 
-        self.controller.should_receive('create_instance') \
+        self.instance_ctl.should_receive('create_instance') \
             .with_args(tenant_id="PROJECT_ID",
                        instance_id=data["id"],
                        create_date=data["created_at"],
@@ -166,7 +130,7 @@ class ApiInstanceTest(BaseApi):
         data = dict(date="UPDATED_AT",
                     flavor="A_FLAVOR")
 
-        self.controller.should_receive('resize_instance') \
+        self.instance_ctl.should_receive('resize_instance') \
             .with_args(instance_id="INSTANCE_ID",
                        flavor=data['flavor'],
                        resize_date=data['date']) \
@@ -182,7 +146,7 @@ class ApiInstanceTest(BaseApi):
     def test_successfull_instance_delete(self):
         data = dict(date="DELETE_DATE")
 
-        self.controller.should_receive('delete_instance') \
+        self.instance_ctl.should_receive('delete_instance') \
             .with_args(instance_id="INSTANCE_ID",
                        delete_date=data['date']) \
             .once()
@@ -191,7 +155,7 @@ class ApiInstanceTest(BaseApi):
         assert_that(code, equal_to(202))
 
     def test_instance_delete_missing_a_param_returns_bad_request_code(self):
-        self.controller.should_receive('delete_instance') \
+        self.instance_ctl.should_receive('delete_instance') \
             .never()
 
         code, result = self.api_delete(
@@ -203,7 +167,7 @@ class ApiInstanceTest(BaseApi):
         assert_that(code, equal_to(400))
 
     def test_instance_delete_no_data_bad_request_code(self):
-        self.controller.should_receive('delete_instance') \
+        self.instance_ctl.should_receive('delete_instance') \
             .never()
 
         code, result = self.api_delete('/instance/INSTANCE_ID', headers={'X-Auth-Token': 'some token value'})
@@ -213,7 +177,7 @@ class ApiInstanceTest(BaseApi):
     def test_instance_delete_bad_date_format_returns_bad_request_code(self):
         data = dict(date="A_BAD_DATE")
 
-        self.controller.should_receive('delete_instance') \
+        self.instance_ctl.should_receive('delete_instance') \
             .with_args(instance_id="INSTANCE_ID",
                        delete_date=data['date']) \
             .once() \
@@ -231,7 +195,7 @@ class ApiInstanceTest(BaseApi):
     def test_instance_resize_missing_a_param_returns_bad_request_code(self):
         data = dict(date="UPDATED_AT")
 
-        self.controller.should_receive('resize_instance') \
+        self.instance_ctl.should_receive('resize_instance') \
             .never()
 
         code, result = self.api_put(
@@ -246,7 +210,7 @@ class ApiInstanceTest(BaseApi):
         data = dict(date="A_BAD_DATE",
                     flavor="A_FLAVOR")
 
-        self.controller.should_receive('resize_instance') \
+        self.instance_ctl.should_receive('resize_instance') \
             .with_args(instance_id="INSTANCE_ID",
                        flavor=data['flavor'],
                        resize_date=data['date']) \
@@ -274,7 +238,7 @@ class ApiInstanceTest(BaseApi):
             'os_type': 'AN_OS_TYPE',
             'rebuild_date': 'UPDATE_DATE',
         }
-        self.controller.should_receive('rebuild_instance') \
+        self.instance_ctl.should_receive('rebuild_instance') \
             .with_args(
             instance_id=instance_id,
             distro=data.get('distro'),
@@ -297,7 +261,7 @@ class ApiInstanceTest(BaseApi):
             'rebuild_date': 'UPDATE_DATE',
         }
 
-        self.controller.should_receive('rebuild_instance') \
+        self.instance_ctl.should_receive('rebuild_instance') \
             .never()
 
         code, result = self.api_put(
@@ -317,7 +281,7 @@ class ApiInstanceTest(BaseApi):
             'rebuild_date': 'A_BAD_UPDATE_DATE',
         }
 
-        self.controller.should_receive('rebuild_instance') \
+        self.instance_ctl.should_receive('rebuild_instance') \
             .with_args(instance_id=instance_id, **data) \
             .once() \
             .and_raise(exception.DateFormatException)

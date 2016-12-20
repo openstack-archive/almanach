@@ -20,19 +20,50 @@ from hamcrest import is_
 from voluptuous import Invalid
 
 from almanach.core import exception
-from almanach.tests.unit.api.base_api import BaseApi
+from almanach.tests.unit.api import base_api
 from almanach.tests.unit.builder import a
 from almanach.tests.unit.builder import instance
 
 
-class ApiEntityTest(BaseApi):
+class ApiEntityTest(base_api.BaseApi):
+
+    def test_update_instance_flavor_for_terminated_instance(self):
+        some_new_flavor = 'some_new_flavor'
+        data = dict(flavor=some_new_flavor)
+        start = '2016-03-01 00:00:00.000000'
+        end = '2016-03-03 00:00:00.000000'
+
+        self.entity_ctl.should_receive('update_inactive_entity').with_args(
+            instance_id="INSTANCE_ID",
+            start=base_api.a_date_matching(start),
+            end=base_api.a_date_matching(end),
+            flavor=some_new_flavor,
+        ).and_return(a(instance().
+                       with_id('INSTANCE_ID').
+                       with_start(2016, 3, 1, 0, 0, 0).
+                       with_end(2016, 3, 3, 0, 0, 0).
+                       with_flavor(some_new_flavor)))
+
+        code, result = self.api_put(
+            '/entity/instance/INSTANCE_ID',
+            headers={'X-Auth-Token': 'some token value'},
+            query_string={
+                'start': start,
+                'end': end,
+            },
+            data=data,
+        )
+        assert_that(code, equal_to(200))
+        assert_that(result, has_key('entity_id'))
+        assert_that(result, has_key('flavor'))
+        assert_that(result['flavor'], is_(some_new_flavor))
 
     def test_update_instance_entity_with_a_new_start_date(self):
         data = {
             "start_date": "2014-01-01 00:00:00.0000",
         }
 
-        self.controller.should_receive('update_active_instance_entity') \
+        self.entity_ctl.should_receive('update_active_instance_entity') \
             .with_args(
             instance_id="INSTANCE_ID",
             start_date=data["start_date"],
@@ -56,7 +87,7 @@ class ApiEntityTest(BaseApi):
             'flavor': 'A_FLAVOR',
         }
 
-        self.controller.should_receive('update_active_instance_entity') \
+        self.entity_ctl.should_receive('update_active_instance_entity') \
             .with_args(instance_id=instance_id, **data) \
             .once() \
             .and_raise(ValueError('Expecting object: line 1 column 15 (char 14)'))
@@ -87,7 +118,7 @@ class ApiEntityTest(BaseApi):
             'flavor': 'A_FLAVOR',
         }
 
-        self.controller.should_receive('update_active_instance_entity') \
+        self.entity_ctl.should_receive('update_active_instance_entity') \
             .with_args(instance_id=instance_id, **data) \
             .once() \
             .and_raise(exception.InvalidAttributeException(errors))
@@ -104,7 +135,7 @@ class ApiEntityTest(BaseApi):
 
     def test_entity_head_with_existing_entity(self):
         entity_id = "entity_id"
-        self.controller.should_receive('entity_exists') \
+        self.entity_ctl.should_receive('entity_exists') \
             .and_return(True)
 
         code, result = self.api_head('/entity/{id}'.format(id=entity_id), headers={'X-Auth-Token': 'some token value'})
@@ -113,7 +144,7 @@ class ApiEntityTest(BaseApi):
 
     def test_entity_head_with_nonexistent_entity(self):
         entity_id = "entity_id"
-        self.controller.should_receive('entity_exists') \
+        self.entity_ctl.should_receive('entity_exists') \
             .and_return(False)
 
         code, result = self.api_head('/entity/{id}'.format(id=entity_id), headers={'X-Auth-Token': 'some token value'})

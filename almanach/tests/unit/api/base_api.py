@@ -15,8 +15,7 @@
 from datetime import datetime
 import flask
 from flexmock import flexmock
-import json
-import oslo_serialization
+from oslo_serialization import jsonutils as json
 
 from almanach.api.v1 import routes
 from almanach.core import exception
@@ -31,9 +30,17 @@ class BaseApi(base.BaseTestCase):
         self.prepare_with_successful_authentication()
 
     def prepare(self):
-        self.controller = flexmock()
+        self.instance_ctl = flexmock()
+        self.volume_ctl = flexmock()
+        self.volume_type_ctl = flexmock()
+        self.entity_ctl = flexmock()
+        self.app_ctl = flexmock()
         self.auth_adapter = flexmock()
-        routes.controller = self.controller
+        routes.instance_ctl = self.instance_ctl
+        routes.volume_ctl = self.volume_ctl
+        routes.volume_type_ctl = self.volume_type_ctl
+        routes.entity_ctl = self.entity_ctl
+        routes.app_ctl = self.app_ctl
         routes.auth_adapter = self.auth_adapter
 
         self.app = flask.Flask("almanach")
@@ -67,7 +74,7 @@ class BaseApi(base.BaseTestCase):
                 headers = {}
         headers['Accept'] = accept
         result = getattr(http_client, method)(url, data=json.dumps(data), query_string=query_string, headers=headers)
-        return_data = oslo_serialization.jsonutils.loads(result.data) \
+        return_data = json.loads(result.data) \
             if result.headers.get('Content-Type') == 'application/json' \
             else result.data
         return result.status_code, return_data

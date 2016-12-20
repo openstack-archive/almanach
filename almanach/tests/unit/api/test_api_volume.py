@@ -12,17 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from uuid import uuid4
-
 from hamcrest import assert_that
 from hamcrest import equal_to
 from hamcrest import has_entries
+from uuid import uuid4
 
 from almanach.core import exception
-from almanach.tests.unit.api.base_api import BaseApi
+from almanach.tests.unit.api import base_api
 
 
-class ApiVolumeTest(BaseApi):
+class ApiVolumeTest(base_api.BaseApi):
 
     def test_successful_volume_create(self):
         data = dict(volume_id="VOLUME_ID",
@@ -32,7 +31,7 @@ class ApiVolumeTest(BaseApi):
                     volume_name="VOLUME_NAME",
                     attached_to=["INSTANCE_ID"])
 
-        self.controller.should_receive('create_volume') \
+        self.volume_ctl.should_receive('create_volume') \
             .with_args(project_id="PROJECT_ID",
                        **data) \
             .once()
@@ -51,7 +50,7 @@ class ApiVolumeTest(BaseApi):
                     volume_name="VOLUME_NAME",
                     attached_to=[])
 
-        self.controller.should_receive('create_volume') \
+        self.volume_ctl.should_receive('create_volume') \
             .never()
 
         code, result = self.api_post(
@@ -73,7 +72,7 @@ class ApiVolumeTest(BaseApi):
                     volume_name="VOLUME_NAME",
                     attached_to=["INSTANCE_ID"])
 
-        self.controller.should_receive('create_volume') \
+        self.volume_ctl.should_receive('create_volume') \
             .with_args(project_id="PROJECT_ID",
                        **data) \
             .once() \
@@ -95,7 +94,7 @@ class ApiVolumeTest(BaseApi):
     def test_successfull_volume_delete(self):
         data = dict(date="DELETE_DATE")
 
-        self.controller.should_receive('delete_volume') \
+        self.volume_ctl.should_receive('delete_volume') \
             .with_args(volume_id="VOLUME_ID",
                        delete_date=data['date']) \
             .once()
@@ -104,7 +103,7 @@ class ApiVolumeTest(BaseApi):
         assert_that(code, equal_to(202))
 
     def test_volume_delete_missing_a_param_returns_bad_request_code(self):
-        self.controller.should_receive('delete_volume') \
+        self.volume_ctl.should_receive('delete_volume') \
             .never()
 
         code, result = self.api_delete('/volume/VOLUME_ID', data=dict(), headers={'X-Auth-Token': 'some token value'})
@@ -112,7 +111,7 @@ class ApiVolumeTest(BaseApi):
         assert_that(code, equal_to(400))
 
     def test_volume_delete_no_data_bad_request_code(self):
-        self.controller.should_receive('delete_volume') \
+        self.volume_ctl.should_receive('delete_volume') \
             .never()
 
         code, result = self.api_delete('/volume/VOLUME_ID', headers={'X-Auth-Token': 'some token value'})
@@ -122,7 +121,7 @@ class ApiVolumeTest(BaseApi):
     def test_volume_delete_bad_date_format_returns_bad_request_code(self):
         data = dict(date="A_BAD_DATE")
 
-        self.controller.should_receive('delete_volume') \
+        self.volume_ctl.should_receive('delete_volume') \
             .with_args(volume_id="VOLUME_ID",
                        delete_date=data['date']) \
             .once() \
@@ -141,7 +140,7 @@ class ApiVolumeTest(BaseApi):
         data = dict(date="UPDATED_AT",
                     size="NEW_SIZE")
 
-        self.controller.should_receive('resize_volume') \
+        self.volume_ctl.should_receive('resize_volume') \
             .with_args(volume_id="VOLUME_ID",
                        size=data['size'],
                        update_date=data['date']) \
@@ -153,7 +152,7 @@ class ApiVolumeTest(BaseApi):
     def test_volume_resize_missing_a_param_returns_bad_request_code(self):
         data = dict(date="A_DATE")
 
-        self.controller.should_receive('resize_volume') \
+        self.volume_ctl.should_receive('resize_volume') \
             .never()
 
         code, result = self.api_put('/volume/VOLUME_ID/resize', data=data, headers={'X-Auth-Token': 'some token value'})
@@ -164,7 +163,7 @@ class ApiVolumeTest(BaseApi):
         data = dict(date="BAD_DATE",
                     size="NEW_SIZE")
 
-        self.controller.should_receive('resize_volume') \
+        self.volume_ctl.should_receive('resize_volume') \
             .with_args(volume_id="VOLUME_ID",
                        size=data['size'],
                        update_date=data['date']) \
@@ -184,7 +183,7 @@ class ApiVolumeTest(BaseApi):
         data = dict(date="UPDATED_AT",
                     attachments=[str(uuid4())])
 
-        self.controller.should_receive('attach_volume') \
+        self.volume_ctl.should_receive('attach_volume') \
             .with_args(volume_id="VOLUME_ID",
                        attachments=data['attachments'],
                        date=data['date']) \
@@ -196,7 +195,7 @@ class ApiVolumeTest(BaseApi):
     def test_volume_attach_missing_a_param_returns_bad_request_code(self):
         data = dict(date="A_DATE")
 
-        self.controller.should_receive('attach_volume') \
+        self.volume_ctl.should_receive('attach_volume') \
             .never()
 
         code, result = self.api_put(
@@ -214,7 +213,7 @@ class ApiVolumeTest(BaseApi):
         data = dict(date="A_BAD_DATE",
                     attachments=[str(uuid4())])
 
-        self.controller.should_receive('attach_volume') \
+        self.volume_ctl.should_receive('attach_volume') \
             .with_args(volume_id="VOLUME_ID",
                        attachments=data['attachments'],
                        date=data['date']) \
@@ -234,7 +233,7 @@ class ApiVolumeTest(BaseApi):
         data = dict(date="UPDATED_AT",
                     attachments=[str(uuid4())])
 
-        self.controller.should_receive('detach_volume') \
+        self.volume_ctl.should_receive('detach_volume') \
             .with_args(volume_id="VOLUME_ID",
                        attachments=data['attachments'],
                        date=data['date']) \
@@ -246,7 +245,7 @@ class ApiVolumeTest(BaseApi):
     def test_volume_detach_missing_a_param_returns_bad_request_code(self):
         data = dict(date="A_DATE")
 
-        self.controller.should_receive('detach_volume') \
+        self.volume_ctl.should_receive('detach_volume') \
             .never()
 
         code, result = self.api_put('/volume/VOLUME_ID/detach', data=data, headers={'X-Auth-Token': 'some token value'})
@@ -260,7 +259,7 @@ class ApiVolumeTest(BaseApi):
         data = dict(date="A_BAD_DATE",
                     attachments=[str(uuid4())])
 
-        self.controller.should_receive('detach_volume') \
+        self.volume_ctl.should_receive('detach_volume') \
             .with_args(volume_id="VOLUME_ID",
                        attachments=data['attachments'],
                        date=data['date']) \

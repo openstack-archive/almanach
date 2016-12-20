@@ -15,10 +15,10 @@
 from hamcrest import assert_that
 from hamcrest import equal_to
 
-from almanach.tests.unit.api.base_api import BaseApi
+from almanach.tests.unit.api import base_api
 
 
-class ApiAuthenticationTest(BaseApi):
+class ApiAuthenticationTest(base_api.BaseApi):
 
     def setUp(self):
         super(ApiAuthenticationTest, self).setUp()
@@ -26,7 +26,7 @@ class ApiAuthenticationTest(BaseApi):
         self.prepare_with_failed_authentication()
 
     def test_with_wrong_authentication(self):
-        self.controller.should_receive('list_entities').never()
+        self.entity_ctl.should_receive('list_entities').never()
         query_string = {'start': '2014-01-01 00:00:00.0000', 'end': '2014-02-01 00:00:00.0000'}
 
         code, result = self.api_get(url='/project/TENANT_ID/entities',
