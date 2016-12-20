@@ -25,7 +25,11 @@ from almanach.core import exception
 
 LOG = log.getLogger(__name__)
 api = flask.Blueprint("api", __name__)
-controller = None
+instance_ctl = None
+volume_ctl = None
+volume_type_ctl = None
+entity_ctl = None
+app_ctl = None
 auth_adapter = None
 
 
@@ -93,7 +97,7 @@ def get_info():
     .. literalinclude:: ../api_examples/output/info.json
         :language: json
     """
-    return controller.get_application_info()
+    return app_ctl.get_application_info()
 
 
 @api.route("/project/<project_id>/instance", methods=["POST"])
@@ -122,7 +126,7 @@ def create_instance(project_id):
     """
     instance = jsonutils.loads(flask.request.data)
     LOG.info("Creating instance for tenant %s with data %s", project_id, instance)
-    controller.create_instance(
+    instance_ctl.create_instance(
         tenant_id=project_id,
         instance_id=instance['id'],
         create_date=instance['created_at'],
@@ -157,7 +161,7 @@ def delete_instance(instance_id):
     """
     data = jsonutils.loads(flask.request.data)
     LOG.info("Deleting instance with id %s with data %s", instance_id, data)
-    controller.delete_instance(
+    instance_ctl.delete_instance(
         instance_id=instance_id,
         delete_date=data['date']
     )
@@ -186,7 +190,7 @@ def resize_instance(instance_id):
     """
     instance = jsonutils.loads(flask.request.data)
     LOG.info("Resizing instance with id %s with data %s", instance_id, instance)
-    controller.resize_instance(
+    instance_ctl.resize_instance(
         instance_id=instance_id,
         resize_date=instance['date'],
         flavor=instance['flavor']
@@ -218,7 +222,7 @@ def rebuild_instance(instance_id):
     """
     instance = jsonutils.loads(flask.request.data)
     LOG.info("Rebuilding instance with id %s with data %s", instance_id, instance)
-    controller.rebuild_instance(
+    instance_ctl.rebuild_instance(
         instance_id=instance_id,
         distro=instance['distro'],
         version=instance['version'],
@@ -250,7 +254,7 @@ def list_instances(project_id):
     """
     start, end = get_period()
     LOG.info("Listing instances between %s and %s", start, end)
-    return controller.list_instances(project_id, start, end)
+    return instance_ctl.list_instances(project_id, start, end)
 
 
 @api.route("/project/<project_id>/volume", methods=["POST"])
@@ -278,7 +282,7 @@ def create_volume(project_id):
     """
     volume = jsonutils.loads(flask.request.data)
     LOG.info("Creating volume for tenant %s with data %s", project_id, volume)
-    controller.create_volume(
+    volume_ctl.create_volume(
         project_id=project_id,
         volume_id=volume['volume_id'],
         start=volume['start'],
@@ -306,7 +310,7 @@ def delete_volume(volume_id):
     """
     data = jsonutils.loads(flask.request.data)
     LOG.info("Deleting volume with id %s with data %s", volume_id, data)
-    controller.delete_volume(
+    volume_ctl.delete_volume(
         volume_id=volume_id,
         delete_date=data['date']
     )
@@ -335,7 +339,7 @@ def resize_volume(volume_id):
     """
     volume = jsonutils.loads(flask.request.data)
     LOG.info("Resizing volume with id %s with data %s", volume_id, volume)
-    controller.resize_volume(
+    volume_ctl.resize_volume(
         volume_id=volume_id,
         size=volume['size'],
         update_date=volume['date']
@@ -365,7 +369,7 @@ def attach_volume(volume_id):
     """
     volume = jsonutils.loads(flask.request.data)
     LOG.info("Attaching volume with id %s with data %s", volume_id, volume)
-    controller.attach_volume(
+    volume_ctl.attach_volume(
         volume_id=volume_id,
         date=volume['date'],
         attachments=volume['attachments']
@@ -393,7 +397,7 @@ def detach_volume(volume_id):
     """
     volume = jsonutils.loads(flask.request.data)
     LOG.info("Detaching volume with id %s with data %s", volume_id, volume)
-    controller.detach_volume(
+    volume_ctl.detach_volume(
         volume_id=volume_id,
         date=volume['date'],
         attachments=volume['attachments']
@@ -423,7 +427,7 @@ def list_volumes(project_id):
     """
     start, end = get_period()
     LOG.info("Listing volumes between %s and %s", start, end)
-    return controller.list_volumes(project_id, start, end)
+    return volume_ctl.list_volumes(project_id, start, end)
 
 
 @api.route("/project/<project_id>/entities", methods=["GET"])
@@ -448,7 +452,7 @@ def list_entity(project_id):
     """
     start, end = get_period()
     LOG.info("Listing entities between %s and %s", start, end)
-    return controller.list_entities(project_id, start, end)
+    return entity_ctl.list_entities(project_id, start, end)
 
 
 @api.route("/entity/instance/<instance_id>", methods=["PUT"])
@@ -479,9 +483,9 @@ def update_instance_entity(instance_id):
     LOG.info("Updating instance entity with id %s with data %s", instance_id, data)
     if 'start' in flask.request.args:
         start, end = get_period()
-        result = controller.update_inactive_entity(instance_id=instance_id, start=start, end=end, **data)
+        result = entity_ctl.update_inactive_entity(instance_id=instance_id, start=start, end=end, **data)
     else:
-        result = controller.update_active_instance_entity(instance_id=instance_id, **data)
+        result = entity_ctl.update_active_instance_entity(instance_id=instance_id, **data)
     return result
 
 
@@ -497,7 +501,7 @@ def entity_exists(entity_id):
     """
     LOG.info("Does entity with id %s exists", entity_id)
     response = flask.Response('', 404)
-    if controller.entity_exists(entity_id=entity_id):
+    if entity_ctl.entity_exists(entity_id=entity_id):
         response = flask.Response('', 200)
     return response
 
@@ -518,7 +522,7 @@ def get_entity(entity_id):
     .. literalinclude:: ../api_examples/output/entity.json
         :language: json
     """
-    return controller.get_all_entities_by_id(entity_id)
+    return entity_ctl.get_all_entities_by_id(entity_id)
 
 
 @api.route("/volume_types", methods=["GET"])
@@ -535,7 +539,7 @@ def list_volume_types():
         :language: json
     """
     LOG.info("Listing volumes types")
-    return controller.list_volume_types()
+    return volume_type_ctl.list_volume_types()
 
 
 @api.route("/volume_type/<type_id>", methods=["GET"])
@@ -556,7 +560,7 @@ def get_volume_type(type_id):
         :language: json
     """
     LOG.info("Get volumes type for id %s", type_id)
-    return controller.get_volume_type(type_id)
+    return volume_type_ctl.get_volume_type(type_id)
 
 
 @api.route("/volume_type", methods=["POST"])
@@ -578,7 +582,7 @@ def create_volume_type():
     """
     volume_type = jsonutils.loads(flask.request.data)
     LOG.info("Creating volume type with data '%s'", volume_type)
-    controller.create_volume_type(
+    volume_type_ctl.create_volume_type(
         volume_type_id=volume_type['type_id'],
         volume_type_name=volume_type['type_name']
     )
@@ -597,7 +601,7 @@ def delete_volume_type(type_id):
     :code 404 Not Found: If volume type does not exist.
     """
     LOG.info("Deleting volume type with id '%s'", type_id)
-    controller.delete_volume_type(type_id)
+    volume_type_ctl.delete_volume_type(type_id)
     return flask.Response(status=202)
 
 

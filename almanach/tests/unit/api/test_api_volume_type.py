@@ -20,15 +20,15 @@ from hamcrest import has_key
 from hamcrest import has_length
 
 from almanach.core import exception
-from almanach.tests.unit.api.base_api import BaseApi
+from almanach.tests.unit.api import base_api
 from almanach.tests.unit.builder import a
 from almanach.tests.unit.builder import volume_type
 
 
-class ApiVolumeTypeTest(BaseApi):
+class ApiVolumeTypeTest(base_api.BaseApi):
 
     def test_get_volume_types(self):
-        self.controller.should_receive('list_volume_types') \
+        self.volume_type_ctl.should_receive('list_volume_types') \
             .and_return([a(volume_type().with_volume_type_name('some_volume_type_name'))]) \
             .once()
 
@@ -45,7 +45,7 @@ class ApiVolumeTypeTest(BaseApi):
             type_name="A_VOLUME_TYPE_NAME"
         )
 
-        self.controller.should_receive('create_volume_type') \
+        self.volume_type_ctl.should_receive('create_volume_type') \
             .with_args(
             volume_type_id=data['type_id'],
             volume_type_name=data['type_name']) \
@@ -57,7 +57,7 @@ class ApiVolumeTypeTest(BaseApi):
     def test_volume_type_create_missing_a_param_returns_bad_request_code(self):
         data = dict(type_name="A_VOLUME_TYPE_NAME")
 
-        self.controller.should_receive('create_volume_type') \
+        self.volume_type_ctl.should_receive('create_volume_type') \
             .never()
 
         code, result = self.api_post('/volume_type', data=data, headers={'X-Auth-Token': 'some token value'})
@@ -65,7 +65,7 @@ class ApiVolumeTypeTest(BaseApi):
         assert_that(result, has_entries({"error": "The 'type_id' param is mandatory for the request you have made."}))
 
     def test_volume_type_delete_with_authentication(self):
-        self.controller.should_receive('delete_volume_type') \
+        self.volume_type_ctl.should_receive('delete_volume_type') \
             .with_args('A_VOLUME_TYPE_ID') \
             .once()
 
@@ -73,7 +73,7 @@ class ApiVolumeTypeTest(BaseApi):
         assert_that(code, equal_to(202))
 
     def test_volume_type_delete_not_in_database(self):
-        self.controller.should_receive('delete_volume_type') \
+        self.volume_type_ctl.should_receive('delete_volume_type') \
             .with_args('A_VOLUME_TYPE_ID') \
             .and_raise(exception.AlmanachException("An exception occurred")) \
             .once()
