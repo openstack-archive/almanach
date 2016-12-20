@@ -22,7 +22,9 @@ from almanach.collector.handlers import volume_type_handler
 from almanach.collector import messaging
 from almanach.collector import notification
 from almanach.collector import service as collector_service
-from almanach.core import controller
+from almanach.core.controllers import instance_controller
+from almanach.core.controllers import volume_controller
+from almanach.core.controllers import volume_type_controller
 from almanach.core import opts
 from almanach.storage import storage_driver
 
@@ -37,12 +39,14 @@ def main():
     database_driver.connect()
 
     messaging_factory = messaging.MessagingFactory(config)
-    app_controller = controller.Controller(config, database_driver)
+    instance_ctl = instance_controller.InstanceController(config, database_driver)
+    volume_ctl = volume_controller.VolumeController(config, database_driver)
+    volume_type_ctl = volume_type_controller.VolumeTypeController(database_driver)
 
     notification_handler = notification.NotificationHandler(config, messaging_factory)
-    notification_handler.add_event_handler(instance_handler.InstanceHandler(app_controller))
-    notification_handler.add_event_handler(volume_handler.VolumeHandler(app_controller))
-    notification_handler.add_event_handler(volume_type_handler.VolumeTypeHandler(app_controller))
+    notification_handler.add_event_handler(instance_handler.InstanceHandler(instance_ctl))
+    notification_handler.add_event_handler(volume_handler.VolumeHandler(volume_ctl))
+    notification_handler.add_event_handler(volume_type_handler.VolumeTypeHandler(volume_type_ctl))
 
     listener = messaging_factory.get_listener(notification_handler)
 
