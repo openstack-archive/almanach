@@ -16,17 +16,9 @@ from oslo_log import log
 from oslo_service import service
 import sys
 
-from almanach.collector.handlers import instance_handler
-from almanach.collector.handlers import volume_handler
-from almanach.collector.handlers import volume_type_handler
-from almanach.collector import messaging
-from almanach.collector import notification
 from almanach.collector import service as collector_service
-from almanach.core.controllers import instance_controller
-from almanach.core.controllers import volume_controller
-from almanach.core.controllers import volume_type_controller
+from almanach.core import factory as core_factory
 from almanach.core import opts
-from almanach.storage import storage_driver
 
 LOG = log.getLogger(__name__)
 
@@ -35,22 +27,8 @@ def main():
     opts.CONF(sys.argv[1:])
     config = opts.CONF
 
-    database_driver = storage_driver.StorageDriver(config).get_database_driver()
-    database_driver.connect()
-
-    messaging_factory = messaging.MessagingFactory(config)
-    instance_ctl = instance_controller.InstanceController(config, database_driver)
-    volume_ctl = volume_controller.VolumeController(config, database_driver)
-    volume_type_ctl = volume_type_controller.VolumeTypeController(database_driver)
-
-    notification_handler = notification.NotificationHandler(config, messaging_factory)
-    notification_handler.add_event_handler(instance_handler.InstanceHandler(instance_ctl))
-    notification_handler.add_event_handler(volume_handler.VolumeHandler(volume_ctl))
-    notification_handler.add_event_handler(volume_type_handler.VolumeTypeHandler(volume_type_ctl))
-
-    listener = messaging_factory.get_listener(notification_handler)
-
-    launcher = service.launch(config, collector_service.CollectorService(listener))
+    service_factory = collector_service.ServiceFactory(config, core_factory.Factory(config))
+    launcher = service.launch(config, service_factory.get_service())
     launcher.wait()
 
 if __name__ == '__main__':

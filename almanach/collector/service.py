@@ -15,6 +15,12 @@
 from oslo_log import log as logging
 from oslo_service import service
 
+from almanach.collector.handlers import instance_handler
+from almanach.collector.handlers import volume_handler
+from almanach.collector.handlers import volume_type_handler
+from almanach.collector import messaging
+from almanach.collector import notification
+
 LOG = logging.getLogger(__name__)
 
 
@@ -37,3 +43,30 @@ class CollectorService(service.ServiceBase):
 
     def reset(self):
         pass
+
+
+class ServiceFactory(object):
+
+    def __init__(self, config, core_factory):
+        self.config = config
+        self.core_factory = core_factory
+
+    def get_service(self):
+        messaging_factory = messaging.MessagingFactory(self.config)
+
+        notification_handler = notification.NotificationHandler(self.config, messaging_factory)
+        notification_handler.add_event_handler(self._get_instance_handler())
+        notification_handler.add_event_handler(self._get_volume_handler())
+        notification_handler.add_event_handler(self._get_volume_type_handler())
+
+        listener = messaging_factory.get_listener(notification_handler)
+        return CollectorService(listener)
+
+    def _get_instance_handler(self):
+        return instance_handler.InstanceHandler(self.core_factory.get_instance_controller())
+
+    def _get_volume_handler(self):
+        return volume_handler.VolumeHandler(self.core_factory.get_volume_controller())
+
+    def _get_volume_type_handler(self):
+        return volume_type_handler.VolumeTypeHandler(self.core_factory.get_volume_type_controller())

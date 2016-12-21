@@ -20,6 +20,7 @@ from almanach.tests.unit import base
 
 
 class StorageDriverTest(base.BaseTestCase):
+
     def setUp(self):
         super(StorageDriverTest, self).setUp()
         self.storage_driver = storage_driver.StorageDriver(self.config)
