@@ -304,7 +304,7 @@ class MongoDbDriverTest(base.BaseTestCase):
         self.assertEqual(0, self.db.volume_type.count())
 
     def test_delete_volume_type_not_in_database(self):
-        self.assertRaises(exception.AlmanachException,
+        self.assertRaises(exception.VolumeTypeNotFoundException,
                           self.adapter.delete_volume_type,
                           "not_in_database_id")
 

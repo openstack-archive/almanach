@@ -94,11 +94,8 @@ class MongoDbDriver(base_driver.BaseDriver):
         if volume_type_id is None:
             raise exception.AlmanachException("Trying to delete all volume types which is not permitted.")
         returned_value = self.db.volume_type.remove({"volume_type_id": volume_type_id})
-        if returned_value['n'] == 1:
-            LOG.info("Deleted volume type with id '%s' successfully.", volume_type_id)
-        else:
-            raise exception.AlmanachException(
-                    "Volume type with id {} doesn't exist in the database.".format(volume_type_id))
+        if returned_value['n'] != 1:
+            raise exception.VolumeTypeNotFoundException(volume_type_id)
 
     def list_volume_types(self):
         volume_types = self.db.volume_type.find()
