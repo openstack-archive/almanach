@@ -21,8 +21,8 @@ from voluptuous import Invalid
 
 from almanach.core import exception
 from almanach.tests.unit.api import base_api
-from almanach.tests.unit.builder import a
-from almanach.tests.unit.builder import instance
+from almanach.tests.unit.builders.entity import a
+from almanach.tests.unit.builders.entity import instance
 
 
 class ApiEntityTest(base_api.BaseApi):

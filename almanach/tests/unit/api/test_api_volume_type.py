@@ -21,8 +21,8 @@ from hamcrest import has_length
 
 from almanach.core import exception
 from almanach.tests.unit.api import base_api
-from almanach.tests.unit.builder import a
-from almanach.tests.unit.builder import volume_type
+from almanach.tests.unit.builders.entity import a
+from almanach.tests.unit.builders.entity import volume_type
 
 
 class ApiVolumeTypeTest(base_api.BaseApi):

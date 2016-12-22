@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from flexmock import flexmock
-
 from almanach.core.controllers import volume_type_controller
 from almanach.storage.drivers import base_driver
+from flexmock import flexmock
+
 from almanach.tests.unit import base
-from almanach.tests.unit.builder import a
-from almanach.tests.unit.builder import volume_type
+from almanach.tests.unit.builders.entity import a
+from almanach.tests.unit.builders.entity import volume_type
 
 
 class VolumeTypeControllerTest(base.BaseTestCase):

@@ -22,10 +22,11 @@ from almanach.core.controllers import volume_controller
 from almanach.core import exception
 from almanach.core import model
 from almanach.storage.drivers import base_driver
+
 from almanach.tests.unit import base
-from almanach.tests.unit.builder import a
-from almanach.tests.unit.builder import volume
-from almanach.tests.unit.builder import volume_type
+from almanach.tests.unit.builders.entity import a
+from almanach.tests.unit.builders.entity import volume
+from almanach.tests.unit.builders.entity import volume_type
 
 
 class VolumeControllerTest(base.BaseTestCase):
