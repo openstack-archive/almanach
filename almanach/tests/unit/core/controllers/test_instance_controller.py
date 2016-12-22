@@ -134,7 +134,7 @@ class InstanceControllerTest(base.BaseTestCase):
 
     def test_list_instances(self):
         (flexmock(self.database_adapter)
-         .should_receive("list_entities")
+         .should_receive("get_all_entities_by_project")
          .with_args("project_id", "start", "end", model.Instance.TYPE)
          .and_return(["instance1", "instance2"])
          .once())

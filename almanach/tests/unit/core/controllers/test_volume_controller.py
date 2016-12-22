@@ -106,7 +106,7 @@ class VolumeControllerTest(base.BaseTestCase):
 
     def test_list_volumes(self):
         (flexmock(self.database_adapter)
-         .should_receive("list_entities")
+         .should_receive("get_all_entities_by_project")
          .with_args("project_id", "start", "end", model.Volume.TYPE)
          .and_return(["volume2", "volume3"]))
 

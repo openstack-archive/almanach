@@ -28,7 +28,7 @@ class VolumeController(base_controller.BaseController):
         self.volume_existence_threshold = timedelta(0, config.resources.volume_existence_threshold)
 
     def list_volumes(self, project_id, start, end):
-        return self.database_adapter.list_entities(project_id, start, end, model.Volume.TYPE)
+        return self.database_adapter.get_all_entities_by_project(project_id, start, end, model.Volume.TYPE)
 
     def create_volume(self, volume_id, project_id, start, volume_type, size, volume_name, attached_to=None):
         start = self._validate_and_parse_date(start)
