@@ -114,7 +114,7 @@ class EntityControllerTest(base.BaseTestCase):
         fake_instance1 = a(instance().with_start(2016, 3, 1, 0, 0, 0).with_end(2016, 3, 2, 0, 0, 0))
 
         (flexmock(self.database_adapter)
-         .should_receive("list_entities_by_id")
+         .should_receive("get_all_entities_by_id_and_date")
          .with_args(fake_instance1.entity_id, start, end)
          .and_return([fake_instance1])
          .twice())
@@ -135,7 +135,7 @@ class EntityControllerTest(base.BaseTestCase):
         fake_instances = [a(instance()), a(instance())]
 
         (flexmock(self.database_adapter)
-         .should_receive("list_entities_by_id")
+         .should_receive("get_all_entities_by_id_and_date")
          .with_args(fake_instances[0].entity_id, fake_instances[0].start, fake_instances[0].end)
          .and_return(fake_instances)
          .once())
@@ -152,7 +152,7 @@ class EntityControllerTest(base.BaseTestCase):
         fake_instances = a(instance())
 
         (flexmock(self.database_adapter)
-         .should_receive("list_entities_by_id")
+         .should_receive("get_all_entities_by_id_and_date")
          .with_args(fake_instances.entity_id, fake_instances.start, fake_instances.end)
          .and_return([])
          .once())
@@ -167,7 +167,7 @@ class EntityControllerTest(base.BaseTestCase):
 
     def test_list_entities(self):
         (flexmock(self.database_adapter)
-         .should_receive("list_entities")
+         .should_receive("get_all_entities_by_project")
          .with_args("project_id", "start", "end")
          .and_return(["volume2", "volume3", "instance1"]))
 

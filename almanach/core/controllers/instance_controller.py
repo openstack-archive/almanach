@@ -87,7 +87,7 @@ class InstanceController(base_controller.BaseController):
             self.database_adapter.insert_entity(instance)
 
     def list_instances(self, project_id, start, end):
-        return self.database_adapter.list_entities(project_id, start, end, model.Instance.TYPE)
+        return self.database_adapter.get_all_entities_by_project(project_id, start, end, model.Instance.TYPE)
 
     def _filter_metadata_with_whitelist(self, metadata):
         return {key: value for key, value in metadata.items() if key in self.metadata_whitelist}

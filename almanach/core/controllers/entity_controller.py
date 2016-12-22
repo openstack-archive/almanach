@@ -37,7 +37,7 @@ class EntityController(base_controller.BaseController):
             raise e
 
     def update_inactive_entity(self, instance_id, start, end, **kwargs):
-        inactive_entities = self.database_adapter.list_entities_by_id(instance_id, start, end)
+        inactive_entities = self.database_adapter.get_all_entities_by_id_and_date(instance_id, start, end)
         if len(inactive_entities) > 1:
             raise exception.MultipleEntitiesMatchingQueryException()
         if len(inactive_entities) < 1:
@@ -48,7 +48,7 @@ class EntityController(base_controller.BaseController):
         self.database_adapter.update_closed_entity(entity=entity, data=entity_update)
         start = entity_update.get('start') or start
         end = entity_update.get('end') or end
-        return self.database_adapter.list_entities_by_id(instance_id, start, end)[0]
+        return self.database_adapter.get_all_entities_by_id_and_date(instance_id, start, end)[0]
 
     def entity_exists(self, entity_id):
         return self.database_adapter.count_entity_entries(entity_id=entity_id) >= 1
@@ -59,7 +59,7 @@ class EntityController(base_controller.BaseController):
         return self.database_adapter.get_all_entities_by_id(entity_id=entity_id)
 
     def list_entities(self, project_id, start, end):
-        return self.database_adapter.list_entities(project_id, start, end)
+        return self.database_adapter.get_all_entities_by_project(project_id, start, end)
 
     def _update_instance_object(self, instance, **kwargs):
         for key, value in self._transform_attribute_to_match_entity_attribute(**kwargs).items():
