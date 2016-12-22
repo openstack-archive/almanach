@@ -25,9 +25,10 @@ import pytz
 from almanach.core.controllers import entity_controller
 from almanach.core import exception
 from almanach.storage.drivers import base_driver
+
 from almanach.tests.unit import base
-from almanach.tests.unit.builder import a
-from almanach.tests.unit.builder import instance
+from almanach.tests.unit.builders.entity import a
+from almanach.tests.unit.builders.entity import instance
 
 
 class EntityControllerTest(base.BaseTestCase):

@@ -14,14 +14,10 @@
 
 from copy import copy
 from datetime import datetime
+import pytz
 from uuid import uuid4
 
-import pytz
-
-from almanach.core.model import build_entity_from_dict
-from almanach.core.model import Instance
-from almanach.core.model import Volume
-from almanach.core.model import VolumeType
+from almanach.core import model
 
 
 class Builder(object):
@@ -33,7 +29,7 @@ class Builder(object):
 class EntityBuilder(Builder):
 
     def build(self):
-        return build_entity_from_dict(self.dict_object)
+        return model.build_entity_from_dict(self.dict_object)
 
     def with_id(self, entity_id):
         self.dict_object["entity_id"] = entity_id
@@ -103,7 +99,7 @@ class VolumeBuilder(EntityBuilder):
 class VolumeTypeBuilder(Builder):
 
     def build(self):
-        return VolumeType(**self.dict_object)
+        return model.VolumeType(**self.dict_object)
 
     def with_volume_type_id(self, volume_type_id):
         self.dict_object["volume_type_id"] = volume_type_id
@@ -127,7 +123,7 @@ def instance():
             "distro": "windows",
             "version": "2012r2"
         },
-        "entity_type": Instance.TYPE,
+        "entity_type": model.Instance.TYPE,
         "name": "some-instance",
         "metadata": {
             "a_metadata.to_filter": "include.this",
@@ -145,7 +141,7 @@ def volume():
         "last_event": datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
         "volume_type": "SF400",
         "size": 1000000,
-        "entity_type": Volume.TYPE,
+        "entity_type": model.Volume.TYPE,
         "name": "some-volume",
         "attached_to": None,
     })

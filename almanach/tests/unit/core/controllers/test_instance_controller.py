@@ -21,9 +21,10 @@ from almanach.core.controllers import instance_controller
 from almanach.core import exception
 from almanach.core import model
 from almanach.storage.drivers import base_driver
+
 from almanach.tests.unit import base
-from almanach.tests.unit.builder import a
-from almanach.tests.unit.builder import instance
+from almanach.tests.unit.builders.entity import a
+from almanach.tests.unit.builders.entity import instance
 
 
 class InstanceControllerTest(base.BaseTestCase):

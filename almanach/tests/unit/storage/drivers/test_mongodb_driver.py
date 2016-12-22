@@ -21,11 +21,12 @@ import pytz
 from almanach.core import exception
 from almanach.core import model
 from almanach.storage.drivers import mongodb_driver
+
 from almanach.tests.unit import base
-from almanach.tests.unit.builder import a
-from almanach.tests.unit.builder import instance
-from almanach.tests.unit.builder import volume
-from almanach.tests.unit.builder import volume_type
+from almanach.tests.unit.builders.entity import a
+from almanach.tests.unit.builders.entity import instance
+from almanach.tests.unit.builders.entity import volume
+from almanach.tests.unit.builders.entity import volume_type
 
 
 class MongoDbDriverTest(base.BaseTestCase):
