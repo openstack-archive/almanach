@@ -14,6 +14,8 @@
 
 import six
 
+from almanach.core import exception
+
 
 class Entity(object):
     def __init__(self, entity_id, project_id, start, end, last_event, name, entity_type):
@@ -120,7 +122,8 @@ def build_entity_from_dict(entity_dict):
         return Instance(**entity_dict)
     elif entity_dict.get("entity_type") == Volume.TYPE:
         return Volume(**entity_dict)
-    raise NotImplementedError("unsupported entity type: '%s'" % entity_dict.get("entity_type"))
+    raise exception.EntityTypeNotSupportedException(
+            'Unsupported entity type: "{}"'.format(entity_dict.get("entity_type")))
 
 
 def todict(obj):

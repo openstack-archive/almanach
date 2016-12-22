@@ -45,9 +45,9 @@ class BaseController(object):
             entity = self.database_adapter.get_active_entity(entity_id)
             if entity and entity.last_event > date:
                 return True
-        except KeyError:
+        except exception.EntityNotFoundException:
             pass
-        except NotImplementedError:
+        except exception.EntityTypeNotSupportedException:
             pass
         return False
 

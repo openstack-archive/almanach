@@ -46,7 +46,7 @@ class InstanceController(base_controller.BaseController):
 
     def delete_instance(self, instance_id, delete_date):
         if not self.database_adapter.has_active_entity(instance_id):
-            raise exception.AlmanachEntityNotFoundException(
+            raise exception.EntityNotFoundException(
                     "InstanceId: {0} Not Found".format(instance_id))
 
         delete_date = self._validate_and_parse_date(delete_date)
@@ -65,7 +65,7 @@ class InstanceController(base_controller.BaseController):
                 instance.end = None
                 instance.last_event = resize_date
                 self.database_adapter.insert_entity(instance)
-        except KeyError as e:
+        except exception.EntityNotFoundException as e:
             LOG.error("Trying to resize an instance with id '%s' not in the database yet.", instance_id)
             raise e
 
@@ -87,7 +87,7 @@ class InstanceController(base_controller.BaseController):
             self.database_adapter.insert_entity(instance)
 
     def list_instances(self, project_id, start, end):
-        return self.database_adapter.list_entities(project_id, start, end, model.Instance.TYPE)
+        return self.database_adapter.get_all_entities_by_project(project_id, start, end, model.Instance.TYPE)
 
     def _filter_metadata_with_whitelist(self, metadata):
         return {key: value for key, value in metadata.items() if key in self.metadata_whitelist}

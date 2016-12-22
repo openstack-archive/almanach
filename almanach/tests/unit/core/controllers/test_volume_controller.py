@@ -106,7 +106,7 @@ class VolumeControllerTest(base.BaseTestCase):
 
     def test_list_volumes(self):
         (flexmock(self.database_adapter)
-         .should_receive("list_entities")
+         .should_receive("get_all_entities_by_project")
          .with_args("project_id", "start", "end", model.Volume.TYPE)
          .and_return(["volume2", "volume3"]))
 
@@ -193,7 +193,7 @@ class VolumeControllerTest(base.BaseTestCase):
         (flexmock(self.database_adapter)
          .should_receive("get_volume_type")
          .with_args(some_volume_type.volume_type_id)
-         .and_raise(KeyError)
+         .and_raise(exception.VolumeTypeNotFoundException)
          .once())
 
         some_volume = a(volume()
@@ -210,7 +210,7 @@ class VolumeControllerTest(base.BaseTestCase):
          .and_return(None)
          .once())
 
-        self.assertRaises(KeyError, self.controller.create_volume,
+        self.assertRaises(exception.VolumeTypeNotFoundException, self.controller.create_volume,
                           some_volume.entity_id, some_volume.project_id, some_volume.start,
                           some_volume_type.volume_type_id, some_volume.size, some_volume.name,
                           some_volume.attached_to)

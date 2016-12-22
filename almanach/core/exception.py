@@ -18,12 +18,20 @@ class AlmanachException(Exception):
         self.message = message
 
 
-class AlmanachEntityNotFoundException(AlmanachException):
+class EntityNotFoundException(AlmanachException):
     def __init__(self, message=None):
         if not message:
             message = "Entity not found"
 
-        super(AlmanachEntityNotFoundException, self).__init__(message)
+        super(EntityNotFoundException, self).__init__(message)
+
+
+class EntityTypeNotSupportedException(AlmanachException):
+    def __init__(self, message=None):
+        if not message:
+            message = "Entity type not supported"
+
+        super(EntityTypeNotSupportedException, self).__init__(message)
 
 
 class AuthenticationFailureException(AlmanachException):
@@ -60,9 +68,11 @@ class InvalidAttributeException(AlmanachException):
 
 
 class VolumeTypeNotFoundException(AlmanachException):
-    def __init__(self, volume_type_id, message=None):
-        if not message:
-            message = "Unable to find volume_type id '{volume_type_id}'".format(volume_type_id=volume_type_id)
+    def __init__(self, volume_type_id=None, message=None):
+        if not message and volume_type_id:
+            message = 'Unable to find volume_type_id "{}"'.format(volume_type_id)
+        elif not message:
+            message = 'Unable to find volume_type_id'
 
         super(VolumeTypeNotFoundException, self).__init__(message)
 

@@ -16,6 +16,7 @@ from datetime import timedelta
 from oslo_log import log
 
 from almanach.core.controllers import base_controller
+from almanach.core import exception
 from almanach.core import model
 
 LOG = log.getLogger(__name__)
@@ -28,7 +29,7 @@ class VolumeController(base_controller.BaseController):
         self.volume_existence_threshold = timedelta(0, config.resources.volume_existence_threshold)
 
     def list_volumes(self, project_id, start, end):
-        return self.database_adapter.list_entities(project_id, start, end, model.Volume.TYPE)
+        return self.database_adapter.get_all_entities_by_project(project_id, start, end, model.Volume.TYPE)
 
     def create_volume(self, volume_id, project_id, start, volume_type, size, volume_name, attached_to=None):
         start = self._validate_and_parse_date(start)
@@ -47,7 +48,7 @@ class VolumeController(base_controller.BaseController):
         LOG.info("volume %s detached on %s", volume_id, date)
         try:
             self._volume_detach_instance(volume_id, date, attachments)
-        except KeyError as e:
+        except exception.EntityNotFoundException as e:
             LOG.error("Trying to detach a volume with id '%s' not in the database yet.", volume_id)
             raise e
 
@@ -56,7 +57,7 @@ class VolumeController(base_controller.BaseController):
         LOG.info("Volume %s attached to %s on %s", volume_id, attachments, date)
         try:
             self._volume_attach_instance(volume_id, date, attachments)
-        except KeyError as e:
+        except exception.EntityNotFoundException as e:
             LOG.error("Trying to attach a volume with id '%s' not in the database yet.", volume_id)
             raise e
 
@@ -67,7 +68,7 @@ class VolumeController(base_controller.BaseController):
                 LOG.info("volume %s renamed from %s to %s", volume_id, volume.name, volume_name)
                 volume.name = volume_name
                 self.database_adapter.update_active_entity(volume)
-        except KeyError:
+        except exception.EntityNotFoundException:
             LOG.error("Trying to update a volume with id '%s' not in the database yet.", volume_id)
 
     def resize_volume(self, volume_id, size, update_date):
@@ -84,7 +85,7 @@ class VolumeController(base_controller.BaseController):
             volume.end = None
             volume.last_event = update_date
             self.database_adapter.insert_entity(volume)
-        except KeyError as e:
+        except exception.EntityNotFoundException as e:
             LOG.error("Trying to update a volume with id '%s' not in the database yet.", volume_id)
             raise e
 
@@ -98,7 +99,7 @@ class VolumeController(base_controller.BaseController):
                     self.database_adapter.delete_active_entity(volume_id)
                     return
             self.database_adapter.close_active_entity(volume_id, delete_date)
-        except KeyError as e:
+        except exception.EntityNotFoundException as e:
             LOG.error("Trying to delete a volume with id '%s' not in the database yet.", volume_id)
             raise e
 

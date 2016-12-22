@@ -39,7 +39,7 @@ class InstanceControllerTest(base.BaseTestCase):
         (flexmock(self.database_adapter)
          .should_receive("get_active_entity")
          .with_args(fake_instance.entity_id)
-         .and_raise(KeyError)
+         .and_raise(exception.EntityNotFoundException)
          .once())
 
         (flexmock(self.database_adapter)
@@ -96,7 +96,7 @@ class InstanceControllerTest(base.BaseTestCase):
         (flexmock(self.database_adapter)
          .should_receive("get_active_entity")
          .with_args(fake_instance.entity_id)
-         .and_raise(NotImplementedError)  # The db adapter found garbage in the database, we will ignore this entry
+         .and_raise(exception.EntityTypeNotSupportedException)
          .once())
 
         (flexmock(self.database_adapter)
@@ -128,13 +128,13 @@ class InstanceControllerTest(base.BaseTestCase):
          .and_return(False)
          .once())
 
-        self.assertRaises(exception.AlmanachEntityNotFoundException,
+        self.assertRaises(exception.EntityNotFoundException,
                           self.controller.delete_instance,
                           "id1", "2015-10-21T16:25:00.000000Z")
 
     def test_list_instances(self):
         (flexmock(self.database_adapter)
-         .should_receive("list_entities")
+         .should_receive("get_all_entities_by_project")
          .with_args("project_id", "start", "end", model.Instance.TYPE)
          .and_return(["instance1", "instance2"])
          .once())

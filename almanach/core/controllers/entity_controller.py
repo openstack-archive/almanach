@@ -32,34 +32,34 @@ class EntityController(base_controller.BaseController):
             self._update_instance_object(instance, **kwargs)
             self.database_adapter.update_active_entity(instance)
             return instance
-        except KeyError as e:
+        except exception.EntityNotFoundException as e:
             LOG.error("Instance %s is not in the database yet.", instance_id)
             raise e
 
     def update_inactive_entity(self, instance_id, start, end, **kwargs):
-        inactive_entities = self.database_adapter.list_entities_by_id(instance_id, start, end)
+        inactive_entities = self.database_adapter.get_all_entities_by_id_and_date(instance_id, start, end)
         if len(inactive_entities) > 1:
             raise exception.MultipleEntitiesMatchingQueryException()
         if len(inactive_entities) < 1:
-            raise exception.AlmanachEntityNotFoundException(
+            raise exception.EntityNotFoundException(
                     "InstanceId: {0} Not Found with start".format(instance_id))
         entity = inactive_entities[0]
         entity_update = self._transform_attribute_to_match_entity_attribute(**kwargs)
         self.database_adapter.update_closed_entity(entity=entity, data=entity_update)
         start = entity_update.get('start') or start
         end = entity_update.get('end') or end
-        return self.database_adapter.list_entities_by_id(instance_id, start, end)[0]
+        return self.database_adapter.get_all_entities_by_id_and_date(instance_id, start, end)[0]
 
     def entity_exists(self, entity_id):
         return self.database_adapter.count_entity_entries(entity_id=entity_id) >= 1
 
     def get_all_entities_by_id(self, entity_id):
         if not self.entity_exists(entity_id=entity_id):
-            raise exception.AlmanachEntityNotFoundException("Entity not found")
+            raise exception.EntityNotFoundException("Entity not found")
         return self.database_adapter.get_all_entities_by_id(entity_id=entity_id)
 
     def list_entities(self, project_id, start, end):
-        return self.database_adapter.list_entities(project_id, start, end)
+        return self.database_adapter.get_all_entities_by_project(project_id, start, end)
 
     def _update_instance_object(self, instance, **kwargs):
         for key, value in self._transform_attribute_to_match_entity_attribute(**kwargs).items():
