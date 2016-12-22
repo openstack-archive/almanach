@@ -13,14 +13,10 @@
 # limitations under the License.
 
 from datetime import datetime
-
-import mongomock
-import pymongo
-import pytz
-
-from flexmock import flexmock
 from hamcrest import assert_that
 from hamcrest import contains_inanyorder
+import mongomock
+import pytz
 
 from almanach.core import exception
 from almanach.core import model
@@ -33,12 +29,12 @@ from almanach.tests.unit.builder import volume_type
 
 
 class MongoDbDriverTest(base.BaseTestCase):
+
     def setUp(self):
         super(MongoDbDriverTest, self).setUp()
         mongo_connection = mongomock.Connection()
         self.db = mongo_connection['almanach']
         self.adapter = mongodb_driver.MongoDbDriver(self.config, self.db)
-        flexmock(pymongo.MongoClient).new_instances(mongo_connection)
 
     def test_insert_instance(self):
         fake_instance = a(instance())
@@ -80,7 +76,7 @@ class MongoDbDriverTest(base.BaseTestCase):
         self.assert_entities_metadata_have_been_sanitize([entity])
 
     def test_get_instance_entity_will_not_found(self):
-        self.assertRaises(KeyError,
+        self.assertRaises(exception.AlmanachEntityNotFoundException,
                           self.adapter.get_active_entity,
                           "will_not_found")
 
@@ -96,12 +92,24 @@ class MongoDbDriverTest(base.BaseTestCase):
 
     def test_count_entities(self):
         fake_active_entities = [
-            a(volume().with_id("id2").with_start(2014, 1, 1, 1, 0, 0).with_no_end()),
-            a(instance().with_id("id3").with_start(2014, 1, 1, 8, 0, 0).with_no_end()),
+            a(volume()
+              .with_id("id2")
+              .with_start(2014, 1, 1, 1, 0, 0)
+              .with_no_end()),
+            a(instance()
+              .with_id("id3")
+              .with_start(2014, 1, 1, 8, 0, 0)
+              .with_no_end()),
         ]
         fake_inactive_entities = [
-            a(instance().with_id("id1").with_start(2014, 1, 1, 7, 0, 0).with_end(2014, 1, 1, 8, 0, 0)),
-            a(volume().with_id("id2").with_start(2014, 1, 1, 1, 0, 0).with_end(2014, 1, 1, 8, 0, 0)),
+            a(instance()
+              .with_id("id1")
+              .with_start(2014, 1, 1, 7, 0, 0)
+              .with_end(2014, 1, 1, 8, 0, 0)),
+            a(volume()
+              .with_id("id2")
+              .with_start(2014, 1, 1, 1, 0, 0)
+              .with_end(2014, 1, 1, 8, 0, 0)),
         ]
 
         all_entities = fake_active_entities + fake_inactive_entities
@@ -125,23 +133,50 @@ class MongoDbDriverTest(base.BaseTestCase):
 
     def test_list_instances(self):
         fake_instances = [
-            a(instance().with_id("id1").with_start(2014, 1, 1, 7, 0, 0).with_end(
-                2014, 1, 1, 8, 0, 0).with_project_id("project_id").with_metadata({})),
-            a(instance().with_id("id2").with_start(2014, 1, 1, 1, 0,
-                                                   0).with_no_end().with_project_id("project_id").with_metadata({})),
-            a(instance().with_id("id3").with_start(2014, 1, 1, 8, 0,
-                                                   0).with_no_end().with_project_id("project_id").with_metadata({})),
+            a(instance()
+              .with_id("id1")
+              .with_start(2014, 1, 1, 7, 0, 0)
+              .with_end(2014, 1, 1, 8, 0, 0)
+              .with_project_id("project_id")
+              .with_metadata({})),
+            a(instance()
+              .with_id("id2")
+              .with_start(2014, 1, 1, 1, 0, 0)
+              .with_no_end()
+              .with_project_id("project_id")
+              .with_metadata({})),
+            a(instance()
+              .with_id("id3")
+              .with_start(2014, 1, 1, 8, 0, 0)
+              .with_no_end()
+              .with_project_id("project_id")
+              .with_metadata({})),
         ]
+
         fake_volumes = [
-            a(volume().with_id("id1").with_start(2014, 1, 1, 7, 0, 0).with_end(
-                2014, 1, 1, 8, 0, 0).with_project_id("project_id")),
-            a(volume().with_id("id2").with_start(2014, 1, 1, 1, 0, 0).with_no_end().with_project_id("project_id")),
-            a(volume().with_id("id3").with_start(2014, 1, 1, 8, 0, 0).with_no_end().with_project_id("project_id")),
+            a(volume()
+              .with_id("id1")
+              .with_start(2014, 1, 1, 7, 0, 0)
+              .with_end(2014, 1, 1, 8, 0, 0)
+              .with_project_id("project_id")),
+            a(volume()
+              .with_id("id2")
+              .with_start(2014, 1, 1, 1, 0, 0)
+              .with_no_end()
+              .with_project_id("project_id")),
+            a(volume()
+              .with_id("id3")
+              .with_start(2014, 1, 1, 8, 0, 0)
+              .with_no_end()
+              .with_project_id("project_id")),
         ]
+
         [self.db.entity.insert(model.todict(fake_entity)) for fake_entity in fake_instances + fake_volumes]
 
-        entities = self.adapter.list_entities("project_id", datetime(
-            2014, 1, 1, 0, 0, 0, tzinfo=pytz.utc), datetime(2014, 1, 1, 12, 0, 0, tzinfo=pytz.utc), "instance")
+        entities = self.adapter.get_all_entities_by_project("project_id",
+                                                            datetime(2014, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+                                                            datetime(2014, 1, 1, 12, 0, 0, tzinfo=pytz.utc),
+                                                            "instance")
         assert_that(entities, contains_inanyorder(*fake_instances))
 
     def test_list_instances_with_decode_output(self):
@@ -179,39 +214,57 @@ class MongoDbDriverTest(base.BaseTestCase):
 
         [self.db.entity.insert(model.todict(fake_entity)) for fake_entity in fake_instances]
 
-        entities = self.adapter.list_entities("project_id", datetime(
+        entities = self.adapter.get_all_entities_by_project("project_id", datetime(
             2014, 1, 1, 0, 0, 0, tzinfo=pytz.utc), datetime(2014, 1, 1, 12, 0, 0, tzinfo=pytz.utc), "instance")
         assert_that(entities, contains_inanyorder(*expected_instances))
         self.assert_entities_metadata_have_been_sanitize(entities)
 
     def test_list_entities_in_period(self):
         fake_entities_in_period = [
-            a(instance().with_id("in_the_period").with_start(2014, 1, 1, 7, 0,
-                                                             0).with_end(2014, 1, 1, 8, 0, 0).with_project_id(
-                "project_id")),
-            a(instance().with_id("running_has_started_before").with_start(
-                2014, 1, 1, 1, 0, 0).with_no_end().with_project_id("project_id")),
-            a(instance().with_id("running_has_started_during").with_start(
-                2014, 1, 1, 8, 0, 0).with_no_end().with_project_id("project_id")),
+            a(instance()
+                .with_id("in_the_period")
+                .with_start(2014, 1, 1, 7, 0, 0)
+                .with_end(2014, 1, 1, 8, 0, 0)
+                .with_project_id("project_id")),
+            a(instance()
+              .with_id("running_has_started_before")
+              .with_start(2014, 1, 1, 1, 0, 0)
+              .with_no_end()
+              .with_project_id("project_id")),
+            a(instance()
+              .with_id("running_has_started_during")
+              .with_start(2014, 1, 1, 8, 0, 0)
+              .with_no_end()
+              .with_project_id("project_id")),
         ]
         fake_entities_out_period = [
-            a(instance().with_id("before_the_period").with_start(2014, 1, 1, 0,
-                                                                 0, 0).with_end(2014, 1, 1, 1, 0, 0).with_project_id(
-                "project_id")),
-            a(instance().with_id("after_the_period").with_start(2014, 1, 1, 10,
-                                                                0, 0).with_end(2014, 1, 1, 11, 0, 0).with_project_id(
-                "project_id")),
-            a(instance().with_id("running_has_started_after").with_start(
-                2014, 1, 1, 10, 0, 0).with_no_end().with_project_id("project_id")),
+            a(instance()
+                .with_id("before_the_period")
+                .with_start(2014, 1, 1, 0, 0, 0)
+                .with_end(2014, 1, 1, 1, 0, 0)
+                .with_project_id("project_id")),
+            a(instance()
+                .with_id("after_the_period")
+                .with_start(2014, 1, 1, 10, 0, 0)
+                .with_end(2014, 1, 1, 11, 0, 0)
+                .with_project_id("project_id")),
+            a(instance()
+              .with_id("running_has_started_after")
+              .with_start(2014, 1, 1, 10, 0, 0)
+              .with_no_end()
+              .with_project_id("project_id")),
         ]
+
         [self.db.entity.insert(model.todict(fake_entity))
          for fake_entity in fake_entities_in_period + fake_entities_out_period]
 
-        entities = self.adapter.list_entities("project_id", datetime(
-            2014, 1, 1, 6, 0, 0, tzinfo=pytz.utc), datetime(2014, 1, 1, 9, 0, 0, tzinfo=pytz.utc))
+        entities = self.adapter.get_all_entities_by_project("project_id",
+                                                            datetime(2014, 1, 1, 6, 0, 0, tzinfo=pytz.utc),
+                                                            datetime(2014, 1, 1, 9, 0, 0, tzinfo=pytz.utc))
+
         assert_that(entities, contains_inanyorder(*fake_entities_in_period))
 
-    def test_list_entities_by_id(self):
+    def test_get_all_entities_by_id_and_date(self):
         start = datetime(2016, 3, 1, 0, 0, 0, 0, pytz.utc)
         end = datetime(2016, 3, 3, 0, 0, 0, 0, pytz.utc)
         proper_instance = a(instance().with_id("id1").with_start(2016, 3, 1, 0, 0, 0).with_end(2016, 3, 2, 0, 0, 0))
@@ -222,10 +275,10 @@ class MongoDbDriverTest(base.BaseTestCase):
               .with_start(2016, 3, 2, 0, 0, 0)
               .with_no_end()),
         ]
+
         [self.db.entity.insert(model.todict(fake_instance)) for fake_instance in instances]
 
-        instance_list = self.adapter.list_entities_by_id("id1", start, end)
-
+        instance_list = self.adapter.get_all_entities_by_id_and_date("id1", start, end)
         assert_that(instance_list, contains_inanyorder(*[proper_instance]))
 
     def test_update_active_entity(self):
@@ -304,7 +357,7 @@ class MongoDbDriverTest(base.BaseTestCase):
         self.assertEqual(0, self.db.volume_type.count())
 
     def test_delete_volume_type_not_in_database(self):
-        self.assertRaises(exception.AlmanachException,
+        self.assertRaises(exception.VolumeTypeNotFoundException,
                           self.adapter.delete_volume_type,
                           "not_in_database_id")
 

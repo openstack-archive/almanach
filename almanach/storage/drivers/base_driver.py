@@ -47,7 +47,7 @@ class BaseDriver(object):
         pass
 
     @abc.abstractmethod
-    def list_entities(self, project_id, start, end, entity_type=None):
+    def get_all_entities_by_project(self, project_id, start, end, entity_type=None):
         pass
 
     @abc.abstractmethod
@@ -55,7 +55,7 @@ class BaseDriver(object):
         pass
 
     @abc.abstractmethod
-    def list_entities_by_id(self, entity_id, start, end):
+    def get_all_entities_by_id_and_date(self, entity_id, start, end):
         pass
 
     @abc.abstractmethod
