@@ -542,13 +542,13 @@ def list_volume_types():
     return volume_type_ctl.list_volume_types()
 
 
-@api.route("/volume_type/<type_id>", methods=["GET"])
+@api.route("/volume_type/<volume_type_id>", methods=["GET"])
 @authenticated
 @to_json
-def get_volume_type(type_id):
+def get_volume_type(volume_type_id):
     """Get a volume type.
 
-    :arg uuid type_id: Volume Type Uuid
+    :arg uuid volume_type_id: Volume Type Uuid
 
     :code 200 OK: Volume type exists
     :code 400 Bad Request: If request data has an invalid or missing field
@@ -559,8 +559,8 @@ def get_volume_type(type_id):
     .. literalinclude:: ../api_examples/output/volume_type.json
         :language: json
     """
-    LOG.info("Get volumes type for id %s", type_id)
-    return volume_type_ctl.get_volume_type(type_id)
+    LOG.info("Get volumes type for id %s", volume_type_id)
+    return volume_type_ctl.get_volume_type(volume_type_id)
 
 
 @api.route("/volume_type", methods=["POST"])
@@ -589,10 +589,10 @@ def create_volume_type():
     return flask.Response(status=201)
 
 
-@api.route("/volume_type/<type_id>", methods=["DELETE"])
+@api.route("/volume_type/<volume_type_id>", methods=["DELETE"])
 @authenticated
 @to_json
-def delete_volume_type(type_id):
+def delete_volume_type(volume_type_id):
     """Delete the volume type.
 
     :arg uuid type_id: Volume Type Uuid
@@ -600,8 +600,8 @@ def delete_volume_type(type_id):
     :code 202 Accepted: Volume successfully deleted
     :code 404 Not Found: If volume type does not exist.
     """
-    LOG.info("Deleting volume type with id '%s'", type_id)
-    volume_type_ctl.delete_volume_type(type_id)
+    LOG.info("Deleting volume type with id '%s'", volume_type_id)
+    volume_type_ctl.delete_volume_type(volume_type_id)
     return flask.Response(status=202)
 
 

@@ -13,8 +13,7 @@
 # limitations under the License.
 
 from almanach.core.controllers import volume_type_controller
-from almanach.storage.drivers import base_driver
-from flexmock import flexmock
+import mock
 
 from almanach.tests.unit import base
 from almanach.tests.unit.builders.entity import a
@@ -25,43 +24,30 @@ class VolumeTypeControllerTest(base.BaseTestCase):
 
     def setUp(self):
         super(VolumeTypeControllerTest, self).setUp()
-        self.database_adapter = flexmock(base_driver.BaseDriver)
+        self.database_adapter = mock.Mock()
         self.controller = volume_type_controller.VolumeTypeController(self.database_adapter)
 
-    def test_volume_type_created(self):
+    def test_create_volume_type(self):
         fake_volume_type = a(volume_type())
-
-        (flexmock(self.database_adapter)
-         .should_receive("insert_volume_type")
-         .with_args(fake_volume_type)
-         .once())
-
         self.controller.create_volume_type(fake_volume_type.volume_type_id, fake_volume_type.volume_type_name)
+        self.database_adapter.insert_volume_type.assert_called_once_with(fake_volume_type)
 
     def test_get_volume_type(self):
         some_volume = a(volume_type())
-        (flexmock(self.database_adapter)
-         .should_receive("get_volume_type")
-         .and_return(some_volume)
-         .once())
+        self.database_adapter.get_volume_type.return_value = some_volume
 
-        returned_volume_type = self.controller.get_volume_type(some_volume.volume_type_id)
+        a_volume_type = self.controller.get_volume_type(some_volume.volume_type_id)
 
-        self.assertEqual(some_volume, returned_volume_type)
+        self.assertEqual(some_volume, a_volume_type)
+        self.database_adapter.get_volume_type.assert_called_once_with(some_volume.volume_type_id)
 
     def test_delete_volume_type(self):
         some_volume = a(volume_type())
-        (flexmock(self.database_adapter)
-         .should_receive("delete_volume_type")
-         .once())
-
         self.controller.delete_volume_type(some_volume.volume_type_id)
+        self.database_adapter.delete_volume_type.assert_called_once_with(some_volume.volume_type_id)
 
     def test_list_volume_types(self):
         some_volumes = [a(volume_type()), a(volume_type())]
-        (flexmock(self.database_adapter)
-         .should_receive("list_volume_types")
-         .and_return(some_volumes)
-         .once())
-
+        self.database_adapter.list_volume_types.return_value = some_volumes
         self.assertEqual(len(self.controller.list_volume_types()), 2)
+        self.database_adapter.list_volume_types.assert_called_once()
