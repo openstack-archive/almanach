@@ -30,11 +30,11 @@ class VolumeTypeController(base_controller.BaseController):
         volume_type = model.VolumeType(volume_type_id, volume_type_name)
         self.database_adapter.insert_volume_type(volume_type)
 
-    def get_volume_type(self, type_id):
-        return self.database_adapter.get_volume_type(type_id)
+    def get_volume_type(self, volume_type_id):
+        return self.database_adapter.get_volume_type(volume_type_id)
 
-    def delete_volume_type(self, type_id):
-        self.database_adapter.delete_volume_type(type_id)
+    def delete_volume_type(self, volume_type_id):
+        self.database_adapter.delete_volume_type(volume_type_id)
 
     def list_volume_types(self):
         return self.database_adapter.list_volume_types()
