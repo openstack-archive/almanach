@@ -35,6 +35,10 @@ class EntityBuilder(Builder):
         self.dict_object["entity_id"] = entity_id
         return self
 
+    def with_name(self, name):
+        self.dict_object["name"] = name
+        return self
+
     def with_project_id(self, project_id):
         self.dict_object["project_id"] = project_id
         return self

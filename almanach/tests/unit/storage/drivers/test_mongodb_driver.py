@@ -13,8 +13,6 @@
 # limitations under the License.
 
 from datetime import datetime
-from hamcrest import assert_that
-from hamcrest import contains_inanyorder
 import mongomock
 import pytz
 
@@ -37,12 +35,19 @@ class MongoDbDriverTest(base.BaseTestCase):
         self.db = mongo_connection['almanach']
         self.adapter = mongodb_driver.MongoDbDriver(self.config, self.db)
 
-    def test_insert_instance(self):
+    def test_insert_instance_entity(self):
         fake_instance = a(instance())
         self.adapter.insert_entity(fake_instance)
-
         self.assertEqual(self.db.entity.count(), 1)
         self.assert_mongo_collection_contains("entity", fake_instance)
+
+    def test_insert_volume_entity(self):
+        count = self.db.entity.count()
+        fake_volume = a(volume())
+        self.adapter.insert_entity(fake_volume)
+
+        self.assertEqual(count + 1, self.db.entity.count())
+        self.assert_mongo_collection_contains("entity", fake_volume)
 
     def test_has_active_entity_not_found(self):
         self.assertFalse(self.adapter.has_active_entity("my_entity_id"))
@@ -52,19 +57,16 @@ class MongoDbDriverTest(base.BaseTestCase):
         self.adapter.insert_entity(fake_instance)
         self.assertTrue(self.adapter.has_active_entity("my_entity_id"))
 
-    def test_get_instance_entity(self):
+    def test_get_active_entity(self):
         fake_entity = a(instance().with_metadata({}))
-
         self.db.entity.insert(model.todict(fake_entity))
+        self.assertEqual(fake_entity, self.adapter.get_active_entity(fake_entity.entity_id))
 
-        self.assertEqual(self.adapter.get_active_entity(fake_entity.entity_id), fake_entity)
-
-    def test_get_instance_entity_with_decode_output(self):
+    def test_get_active_entity_with_special_metadata_characters(self):
         fake_entity = a(instance().with_metadata({"a_metadata_not_sanitize": "not.sanitize",
                                                   "a_metadata^to_sanitize": "this.sanitize"}))
 
         self.db.entity.insert(model.todict(fake_entity))
-
         entity = self.adapter.get_active_entity(fake_entity.entity_id)
 
         expected_entity = a(instance()
@@ -76,17 +78,16 @@ class MongoDbDriverTest(base.BaseTestCase):
         self.assertEqual(entity, expected_entity)
         self.assert_entities_metadata_have_been_sanitize([entity])
 
-    def test_get_instance_entity_will_not_found(self):
+    def test_get_active_entity_when_not_found(self):
         self.assertRaises(exception.EntityNotFoundException,
                           self.adapter.get_active_entity,
                           "will_not_found")
 
-    def test_get_instance_entity_with_unknown_type(self):
+    def test_get_active_entity_with_unknown_type(self):
         fake_entity = a(instance())
         fake_entity.entity_type = "will_raise_exception"
 
         self.db.entity.insert(model.todict(fake_entity))
-
         self.assertRaises(exception.EntityTypeNotSupportedException,
                           self.adapter.get_active_entity,
                           fake_entity.entity_id)
@@ -121,7 +122,7 @@ class MongoDbDriverTest(base.BaseTestCase):
         self.assertEqual(1, self.adapter.count_entity_entries("id1"))
         self.assertEqual(2, self.adapter.count_entity_entries("id2"))
 
-    def test_get_entity(self):
+    def test_get_all_entities_by_id(self):
         fake_entity = a(instance().with_id("id1").with_start(2014, 1, 1, 8, 0, 0).with_no_end())
         self.db.entity.insert(model.todict(fake_entity))
 
@@ -132,7 +133,7 @@ class MongoDbDriverTest(base.BaseTestCase):
         entries = self.adapter.get_all_entities_by_id(entity_id="id2")
         self.assertEqual(0, len(entries))
 
-    def test_list_instances(self):
+    def test_get_all_entities_by_project_and_type(self):
         fake_instances = [
             a(instance()
               .with_id("id1")
@@ -177,10 +178,13 @@ class MongoDbDriverTest(base.BaseTestCase):
         entities = self.adapter.get_all_entities_by_project("project_id",
                                                             datetime(2014, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
                                                             datetime(2014, 1, 1, 12, 0, 0, tzinfo=pytz.utc),
-                                                            "instance")
-        assert_that(entities, contains_inanyorder(*fake_instances))
+                                                            model.Instance.TYPE)
+        self.assertEqual(3, len(entities))
+        self.assertIn(fake_instances[0], entities)
+        self.assertIn(fake_instances[1], entities)
+        self.assertIn(fake_instances[2], entities)
 
-    def test_list_instances_with_decode_output(self):
+    def test_get_all_entities_by_project_with_special_metadata_characters(self):
         fake_instances = [
             a(instance()
               .with_id("id1")
@@ -215,12 +219,17 @@ class MongoDbDriverTest(base.BaseTestCase):
 
         [self.db.entity.insert(model.todict(fake_entity)) for fake_entity in fake_instances]
 
-        entities = self.adapter.get_all_entities_by_project("project_id", datetime(
-            2014, 1, 1, 0, 0, 0, tzinfo=pytz.utc), datetime(2014, 1, 1, 12, 0, 0, tzinfo=pytz.utc), "instance")
-        assert_that(entities, contains_inanyorder(*expected_instances))
+        entities = self.adapter.get_all_entities_by_project("project_id",
+                                                            datetime(2014, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+                                                            datetime(2014, 1, 1, 12, 0, 0, tzinfo=pytz.utc),
+                                                            model.Instance.TYPE)
+
+        self.assertEqual(2, len(entities))
+        self.assertIn(expected_instances[0], entities)
+        self.assertIn(expected_instances[1], entities)
         self.assert_entities_metadata_have_been_sanitize(entities)
 
-    def test_list_entities_in_period(self):
+    def test_get_all_entities_by_project(self):
         fake_entities_in_period = [
             a(instance()
                 .with_id("in_the_period")
@@ -262,27 +271,34 @@ class MongoDbDriverTest(base.BaseTestCase):
         entities = self.adapter.get_all_entities_by_project("project_id",
                                                             datetime(2014, 1, 1, 6, 0, 0, tzinfo=pytz.utc),
                                                             datetime(2014, 1, 1, 9, 0, 0, tzinfo=pytz.utc))
-
-        assert_that(entities, contains_inanyorder(*fake_entities_in_period))
+        self.assertEqual(3, len(entities))
+        self.assertIn(fake_entities_in_period[0], entities)
+        self.assertIn(fake_entities_in_period[1], entities)
+        self.assertIn(fake_entities_in_period[2], entities)
 
     def test_get_all_entities_by_id_and_date(self):
         start = datetime(2016, 3, 1, 0, 0, 0, 0, pytz.utc)
         end = datetime(2016, 3, 3, 0, 0, 0, 0, pytz.utc)
-        proper_instance = a(instance().with_id("id1").with_start(2016, 3, 1, 0, 0, 0).with_end(2016, 3, 2, 0, 0, 0))
         instances = [
-            proper_instance,
             a(instance()
+              .with_name("instance with end date")
+              .with_id("id1")
+              .with_start(2016, 3, 1, 0, 0, 0)
+              .with_end(2016, 3, 2, 0, 0, 0)),
+            a(instance()
+              .with_name("instance with no end date")
               .with_id("id1")
               .with_start(2016, 3, 2, 0, 0, 0)
               .with_no_end()),
         ]
 
         [self.db.entity.insert(model.todict(fake_instance)) for fake_instance in instances]
+        entities = self.adapter.get_all_entities_by_id_and_date("id1", start, end)
 
-        instance_list = self.adapter.get_all_entities_by_id_and_date("id1", start, end)
-        assert_that(instance_list, contains_inanyorder(*[proper_instance]))
+        self.assertEqual(1, len(entities))
+        self.assertEqual("instance with end date", entities[0].name)
 
-    def test_update_active_entity(self):
+    def test_close_active_entity(self):
         fake_entity = a(instance())
         end_date = datetime(2015, 10, 21, 16, 29, 0)
 
@@ -299,10 +315,10 @@ class MongoDbDriverTest(base.BaseTestCase):
         self.adapter.update_closed_entity(fake_entity, data={"flavor": fake_entity.flavor})
 
         db_entity = self.db.entity.find_one({"entity_id": fake_entity.entity_id})
-        assert_that(db_entity['flavor'], fake_entity.flavor)
-        assert_that(db_entity['end'], fake_entity.end)
+        self.assertEqual(db_entity['flavor'], fake_entity.flavor)
+        self.assertEqual(db_entity['end'], fake_entity.end)
 
-    def test_replace_entity(self):
+    def test_update_active_entity(self):
         fake_entity = a(instance())
         fake_entity.os.distro = "Centos"
 
@@ -313,14 +329,6 @@ class MongoDbDriverTest(base.BaseTestCase):
 
         self.assertEqual(self.db.entity.find_one({"entity_id": fake_entity.entity_id})["os"]["distro"],
                          fake_entity.os.distro)
-
-    def test_insert_volume(self):
-        count = self.db.entity.count()
-        fake_volume = a(volume())
-        self.adapter.insert_entity(fake_volume)
-
-        self.assertEqual(count + 1, self.db.entity.count())
-        self.assert_mongo_collection_contains("entity", fake_volume)
 
     def test_delete_active_entity(self):
         fake_entity = a(volume())
@@ -343,7 +351,7 @@ class MongoDbDriverTest(base.BaseTestCase):
         self.db.volume_type.insert(model.todict(fake_volume_type))
         self.assertEqual(self.adapter.get_volume_type(fake_volume_type.volume_type_id), fake_volume_type)
 
-    def test_get_volume_type_not_exist(self):
+    def test_get_volume_type_that_does_not_exists(self):
         fake_volume_type = a(volume_type())
 
         self.assertRaises(exception.VolumeTypeNotFoundException,
@@ -362,7 +370,7 @@ class MongoDbDriverTest(base.BaseTestCase):
                           self.adapter.delete_volume_type,
                           "not_in_database_id")
 
-    def test_delete_all_volume_types_not_permitted(self):
+    def test_delete_all_volume_types_is_not_permitted(self):
         self.assertRaises(exception.AlmanachException,
                           self.adapter.delete_volume_type,
                           None)
@@ -376,11 +384,11 @@ class MongoDbDriverTest(base.BaseTestCase):
         self.assertEqual(len(self.adapter.list_volume_types()), 2)
 
     def assert_mongo_collection_contains(self, collection, obj):
-        (self.assertTrue(obj.as_dict() in self.db[collection].find(fields={"_id": 0}),
-                         "The collection '%s' does not contains the object of type '%s'" % (collection, type(obj))))
+        self.assertTrue(obj.as_dict() in self.db[collection].find(fields={"_id": 0}),
+                        "The collection '{}' does not contains the object of type '{}'".format(collection, type(obj)))
 
     def assert_entities_metadata_have_been_sanitize(self, entities):
         for entity in entities:
             for key in entity.metadata:
                 self.assertTrue(key.find("^") == -1,
-                                "The metadata key %s contains caret" % (key))
+                                "The metadata key {} contains caret".format(key))
