@@ -11,12 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from oslo_serialization import jsonutils as json
 
 from almanach.tests.tempest.tests.api import base
 
 
 class TestVolumeResize(base.BaseAlmanachTest):
+
     @classmethod
     def resource_setup(cls):
         super(TestVolumeResize, cls).resource_setup()

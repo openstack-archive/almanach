@@ -26,7 +26,7 @@ class VolumeController(base_controller.BaseController):
 
     def __init__(self, config, database_adapter):
         self.database_adapter = database_adapter
-        self.volume_existence_threshold = timedelta(0, config.resources.volume_existence_threshold)
+        self.volume_existence_threshold = timedelta(0, config.entities.volume_existence_threshold)
 
     def list_volumes(self, project_id, start, end):
         return self.database_adapter.get_all_entities_by_project(project_id, start, end, model.Volume.TYPE)

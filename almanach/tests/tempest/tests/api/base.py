@@ -11,12 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from uuid import uuid4
 
 from oslo_serialization import jsonutils as json
 from tempest.common.utils import data_utils
 from tempest import config
 import tempest.test
+from uuid import uuid4
 
 from almanach.tests.tempest import clients
 
@@ -24,6 +24,7 @@ CONF = config.CONF
 
 
 class BaseAlmanachTest(tempest.test.BaseTestCase):
+
     @classmethod
     def skip_checks(cls):
         super(BaseAlmanachTest, cls).skip_checks()

@@ -32,6 +32,8 @@ class TestServerResizeScenario(base.BaseAlmanachScenarioTest):
         self.assertEqual(initial_flavor['name'], entities[0]['flavor'])
         self.assertIsNotNone(entities[0]['start'])
         self.assertIsNotNone(entities[0]['end'])
+        self.assertEqual(dict(), entities[0]['os'])
+        self.assertEqual(dict(), entities[0]['image_meta'])
 
         self.assertEqual(server['id'], entities[1]['entity_id'])
         self.assertEqual('instance', entities[1]['entity_type'])
@@ -39,6 +41,8 @@ class TestServerResizeScenario(base.BaseAlmanachScenarioTest):
         self.assertEqual(resized_flavor['name'], entities[1]['flavor'])
         self.assertIsNotNone(entities[1]['start'])
         self.assertIsNone(entities[1]['end'])
+        self.assertEqual(dict(), entities[0]['os'])
+        self.assertEqual(dict(), entities[0]['image_meta'])
 
     def _resize_server(self):
         flavors = self.flavors_client.list_flavors()['flavors']

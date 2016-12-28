@@ -87,14 +87,16 @@ auth_opts = [
                help='Private key for private key authentication'),
 ]
 
-resource_opts = [
+entity_opts = [
     cfg.IntOpt('volume_existence_threshold',
                default=60,
                help='Volume existence threshold'),
-    cfg.ListOpt('device_metadata_whitelist',
+    cfg.ListOpt('instance_metadata',
                 default=[],
-                deprecated_for_removal=True,
-                help='Metadata to include in entity'),
+                help='List of instance metadata to include from notifications'),
+    cfg.ListOpt('instance_image_meta',
+                default=[],
+                help='List of instance image metadata to include from notifications'),
 ]
 
 CONF.register_opts(database_opts, group='database')
@@ -102,7 +104,7 @@ CONF.register_opts(api_opts, group='api')
 CONF.register_opts(collector_opts, group='collector')
 CONF.register_opts(auth_opts, group='auth')
 CONF.register_opts(keystone_opts, group='keystone_authtoken')
-CONF.register_opts(resource_opts, group='resources')
+CONF.register_opts(entity_opts, group='entities')
 
 logging.register_options(CONF)
 logging.setup(CONF, DOMAIN)
@@ -115,5 +117,5 @@ def list_opts():
         ('collector', collector_opts),
         ('auth', auth_opts),
         ('keystone_authtoken', keystone_opts),
-        ('resources', resource_opts),
+        ('entities', entity_opts),
     ]

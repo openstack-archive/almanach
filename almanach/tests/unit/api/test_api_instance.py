@@ -57,13 +57,12 @@ class ApiInstanceTest(base_api.BaseApi):
             .with_args(tenant_id="PROJECT_ID",
                        instance_id=data["id"],
                        create_date=data["created_at"],
-                       flavor=data['flavor'],
-                       os_type=data['os_type'],
-                       distro=data['os_distro'],
-                       version=data['os_version'],
                        name=data['name'],
-                       metadata={}) \
-            .once()
+                       flavor=data['flavor'],
+                       image_meta=dict(os_type=data['os_type'],
+                                       distro=data['os_distro'],
+                                       version=data['os_version'])
+                       ).once()
 
         code, result = self.api_post(
             '/project/PROJECT_ID/instance',
@@ -105,11 +104,10 @@ class ApiInstanceTest(base_api.BaseApi):
                        instance_id=data["id"],
                        create_date=data["created_at"],
                        flavor=data['flavor'],
-                       os_type=data['os_type'],
-                       distro=data['os_distro'],
-                       version=data['os_version'],
-                       name=data['name'],
-                       metadata={}) \
+                       image_meta=dict(os_type=data['os_type'],
+                                       distro=data['os_distro'],
+                                       version=data['os_version']),
+                       name=data['name']) \
             .once() \
             .and_raise(exception.DateFormatException)
 
@@ -240,12 +238,12 @@ class ApiInstanceTest(base_api.BaseApi):
         }
         self.instance_ctl.should_receive('rebuild_instance') \
             .with_args(
-            instance_id=instance_id,
-            distro=data.get('distro'),
-            version=data.get('version'),
-            os_type=data.get('os_type'),
-            rebuild_date=data.get('rebuild_date')) \
-            .once()
+                instance_id=instance_id,
+                rebuild_date=data.get('rebuild_date'),
+                image_meta=dict(distro=data.get('distro'),
+                                version=data.get('version'),
+                                os_type=data.get('os_type'))
+            ).once()
 
         code, result = self.api_put(
             '/instance/INSTANCE_ID/rebuild',
@@ -282,7 +280,11 @@ class ApiInstanceTest(base_api.BaseApi):
         }
 
         self.instance_ctl.should_receive('rebuild_instance') \
-            .with_args(instance_id=instance_id, **data) \
+            .with_args(instance_id=instance_id,
+                       rebuild_date=data.get('rebuild_date'),
+                       image_meta=dict(distro=data.get('distro'),
+                                       version=data.get('version'),
+                                       os_type=data.get('os_type'))) \
             .once() \
             .and_raise(exception.DateFormatException)
 

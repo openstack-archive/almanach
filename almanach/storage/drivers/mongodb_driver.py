@@ -17,7 +17,7 @@ import pymongo
 
 from almanach.core import exception
 from almanach.core import model
-from almanach.core.model import build_entity_from_dict
+from almanach.core.model import get_entity_from_dict
 from almanach.storage.drivers import base_driver
 
 LOG = log.getLogger(__name__)
@@ -50,7 +50,7 @@ class MongoDbDriver(base_driver.BaseDriver):
         entity = self.db.entity.find_one({"entity_id": entity_id, "end": None}, {"_id": 0})
         if not entity:
             raise exception.EntityNotFoundException("Entity {} not found".format(entity_id))
-        return build_entity_from_dict(entity)
+        return get_entity_from_dict(entity)
 
     def get_all_entities_by_project(self, project_id, start, end, entity_type=None):
         args = {
@@ -65,11 +65,11 @@ class MongoDbDriver(base_driver.BaseDriver):
             args["entity_type"] = entity_type
 
         entities = list(self.db.entity.find(args, {"_id": 0}))
-        return [build_entity_from_dict(entity) for entity in entities]
+        return [get_entity_from_dict(entity) for entity in entities]
 
     def get_all_entities_by_id(self, entity_id):
         entities = self.db.entity.find({"entity_id": entity_id}, {"_id": 0})
-        return [build_entity_from_dict(entity) for entity in entities]
+        return [get_entity_from_dict(entity) for entity in entities]
 
     def get_all_entities_by_id_and_date(self, entity_id, start, end):
         entities = self.db.entity.find({
@@ -80,7 +80,7 @@ class MongoDbDriver(base_driver.BaseDriver):
                 {"end": {"$lte": end}}
             ]
         }, {"_id": 0})
-        return [build_entity_from_dict(entity) for entity in entities]
+        return [get_entity_from_dict(entity) for entity in entities]
 
     def close_active_entity(self, entity_id, end):
         self.db.entity.update({"entity_id": entity_id, "end": None}, {"$set": {"end": end, "last_event": end}})
@@ -110,9 +110,7 @@ class MongoDbDriver(base_driver.BaseDriver):
         volume_type = self.db.volume_type.find_one({"volume_type_id": volume_type_id})
         if not volume_type:
             raise exception.VolumeTypeNotFoundException(volume_type_id=volume_type_id)
-
-        return model.VolumeType(volume_type_id=volume_type["volume_type_id"],
-                                volume_type_name=volume_type["volume_type_name"])
+        return model.VolumeType.from_dict(volume_type)
 
     def delete_volume_type(self, volume_type_id):
         if volume_type_id is None:
