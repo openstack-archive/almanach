@@ -59,14 +59,14 @@ class MongoDbDriverTest(base.BaseTestCase):
 
     def test_get_active_entity(self):
         fake_entity = a(instance().with_metadata({}))
-        self.db.entity.insert(model.todict(fake_entity))
+        self.db.entity.insert(fake_entity.as_dict())
         self.assertEqual(fake_entity, self.adapter.get_active_entity(fake_entity.entity_id))
 
     def test_get_active_entity_with_special_metadata_characters(self):
         fake_entity = a(instance().with_metadata({"a_metadata_not_sanitize": "not.sanitize",
                                                   "a_metadata^to_sanitize": "this.sanitize"}))
 
-        self.db.entity.insert(model.todict(fake_entity))
+        self.db.entity.insert(fake_entity.as_dict())
         entity = self.adapter.get_active_entity(fake_entity.entity_id)
 
         expected_entity = a(instance()
@@ -87,7 +87,7 @@ class MongoDbDriverTest(base.BaseTestCase):
         fake_entity = a(instance())
         fake_entity.entity_type = "will_raise_exception"
 
-        self.db.entity.insert(model.todict(fake_entity))
+        self.db.entity.insert(fake_entity.as_dict())
         self.assertRaises(exception.EntityTypeNotSupportedException,
                           self.adapter.get_active_entity,
                           fake_entity.entity_id)
@@ -115,7 +115,7 @@ class MongoDbDriverTest(base.BaseTestCase):
         ]
 
         all_entities = fake_active_entities + fake_inactive_entities
-        [self.db.entity.insert(model.todict(fake_entity)) for fake_entity in all_entities]
+        [self.db.entity.insert(fake_entity.as_dict()) for fake_entity in all_entities]
 
         self.assertEqual(4, self.adapter.count_entities())
         self.assertEqual(2, self.adapter.count_active_entities())
@@ -124,7 +124,7 @@ class MongoDbDriverTest(base.BaseTestCase):
 
     def test_get_all_entities_by_id(self):
         fake_entity = a(instance().with_id("id1").with_start(2014, 1, 1, 8, 0, 0).with_no_end())
-        self.db.entity.insert(model.todict(fake_entity))
+        self.db.entity.insert(fake_entity.as_dict())
 
         entries = self.adapter.get_all_entities_by_id(entity_id="id1")
         self.assertEqual(1, len(entries))
@@ -173,7 +173,7 @@ class MongoDbDriverTest(base.BaseTestCase):
               .with_project_id("project_id")),
         ]
 
-        [self.db.entity.insert(model.todict(fake_entity)) for fake_entity in fake_instances + fake_volumes]
+        [self.db.entity.insert(fake_entity.as_dict()) for fake_entity in fake_instances + fake_volumes]
 
         entities = self.adapter.get_all_entities_by_project("project_id",
                                                             datetime(2014, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
@@ -217,7 +217,7 @@ class MongoDbDriverTest(base.BaseTestCase):
               .with_metadata({"a_metadata.to_sanitize": "this.sanitize"})),
         ]
 
-        [self.db.entity.insert(model.todict(fake_entity)) for fake_entity in fake_instances]
+        [self.db.entity.insert(fake_entity.as_dict()) for fake_entity in fake_instances]
 
         entities = self.adapter.get_all_entities_by_project("project_id",
                                                             datetime(2014, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
@@ -265,16 +265,17 @@ class MongoDbDriverTest(base.BaseTestCase):
               .with_project_id("project_id")),
         ]
 
-        [self.db.entity.insert(model.todict(fake_entity))
+        [self.db.entity.insert(fake_entity.as_dict())
          for fake_entity in fake_entities_in_period + fake_entities_out_period]
 
         entities = self.adapter.get_all_entities_by_project("project_id",
                                                             datetime(2014, 1, 1, 6, 0, 0, tzinfo=pytz.utc),
                                                             datetime(2014, 1, 1, 9, 0, 0, tzinfo=pytz.utc))
         self.assertEqual(3, len(entities))
-        self.assertIn(fake_entities_in_period[0], entities)
-        self.assertIn(fake_entities_in_period[1], entities)
-        self.assertIn(fake_entities_in_period[2], entities)
+        entity_ids = [entity.entity_id for entity in entities]
+        self.assertIn(fake_entities_in_period[0].entity_id, entity_ids)
+        self.assertIn(fake_entities_in_period[1].entity_id, entity_ids)
+        self.assertIn(fake_entities_in_period[2].entity_id, entity_ids)
 
     def test_get_all_entities_by_id_and_date(self):
         start = datetime(2016, 3, 1, 0, 0, 0, 0, pytz.utc)
@@ -292,7 +293,7 @@ class MongoDbDriverTest(base.BaseTestCase):
               .with_no_end()),
         ]
 
-        [self.db.entity.insert(model.todict(fake_instance)) for fake_instance in instances]
+        [self.db.entity.insert(fake_instance.as_dict()) for fake_instance in instances]
         entities = self.adapter.get_all_entities_by_id_and_date("id1", start, end)
 
         self.assertEqual(1, len(entities))
@@ -302,7 +303,7 @@ class MongoDbDriverTest(base.BaseTestCase):
         fake_entity = a(instance())
         end_date = datetime(2015, 10, 21, 16, 29, 0)
 
-        self.db.entity.insert(model.todict(fake_entity))
+        self.db.entity.insert(fake_entity.as_dict())
         self.adapter.close_active_entity(fake_entity.entity_id, end_date)
 
         self.assertEqual(self.db.entity.find_one({"entity_id": fake_entity.entity_id})["end"], end_date)
@@ -310,7 +311,7 @@ class MongoDbDriverTest(base.BaseTestCase):
     def test_update_closed_entity(self):
         fake_entity = a(instance().with_end(2016, 3, 2, 0, 0, 0))
 
-        self.db.entity.insert(model.todict(fake_entity))
+        self.db.entity.insert(fake_entity.as_dict())
         fake_entity.flavor = "my_new_flavor"
         self.adapter.update_closed_entity(fake_entity, data={"flavor": fake_entity.flavor})
 
@@ -320,20 +321,22 @@ class MongoDbDriverTest(base.BaseTestCase):
 
     def test_update_active_entity(self):
         fake_entity = a(instance())
-        fake_entity.os.distro = "Centos"
+        fake_entity.image_meta['distro'] = "Centos"
 
-        self.db.entity.insert(model.todict(fake_entity))
-        fake_entity.os.distro = "Windows"
+        self.db.entity.insert(fake_entity.as_dict())
+        fake_entity.image_meta['distro'] = "Windows"
 
         self.adapter.update_active_entity(fake_entity)
 
         self.assertEqual(self.db.entity.find_one({"entity_id": fake_entity.entity_id})["os"]["distro"],
-                         fake_entity.os.distro)
+                         fake_entity.image_meta['distro'])
+        self.assertEqual(self.db.entity.find_one({"entity_id": fake_entity.entity_id})["image_meta"]["distro"],
+                         fake_entity.image_meta['distro'])
 
     def test_delete_active_entity(self):
         fake_entity = a(volume())
 
-        self.db.entity.insert(model.todict(fake_entity))
+        self.db.entity.insert(fake_entity.as_dict())
         self.assertEqual(1, self.db.entity.count())
 
         self.adapter.delete_active_entity(fake_entity.entity_id)
@@ -348,7 +351,7 @@ class MongoDbDriverTest(base.BaseTestCase):
 
     def test_get_volume_type(self):
         fake_volume_type = a(volume_type())
-        self.db.volume_type.insert(model.todict(fake_volume_type))
+        self.db.volume_type.insert(fake_volume_type.as_dict())
         self.assertEqual(self.adapter.get_volume_type(fake_volume_type.volume_type_id), fake_volume_type)
 
     def test_get_volume_type_that_does_not_exists(self):
@@ -360,7 +363,7 @@ class MongoDbDriverTest(base.BaseTestCase):
 
     def test_delete_volume_type(self):
         fake_volume_type = a(volume_type())
-        self.db.volume_type.insert(model.todict(fake_volume_type))
+        self.db.volume_type.insert(fake_volume_type.as_dict())
         self.assertEqual(1, self.db.volume_type.count())
         self.adapter.delete_volume_type(fake_volume_type.volume_type_id)
         self.assertEqual(0, self.db.volume_type.count())
@@ -379,7 +382,7 @@ class MongoDbDriverTest(base.BaseTestCase):
         fake_volume_types = [a(volume_type()), a(volume_type())]
 
         for fake_volume_type in fake_volume_types:
-            self.db.volume_type.insert(model.todict(fake_volume_type))
+            self.db.volume_type.insert(fake_volume_type.as_dict())
 
         self.assertEqual(len(self.adapter.list_volume_types()), 2)
 

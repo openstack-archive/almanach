@@ -49,7 +49,7 @@ def to_json(api_call):
             LOG.warning(e.message)
             return send_response({"error": e.message}, 400)
         except KeyError as e:
-            message = "The {param} param is mandatory for the request you have made.".format(param=e)
+            message = "The {} param is mandatory for the request you have made.".format(e)
             LOG.warning(message)
             return send_response({"error": message}, 400)
         except (TypeError, ValueError):
@@ -124,18 +124,18 @@ def create_instance(project_id):
     .. literalinclude:: ../api_examples/input/create_instance-body.json
         :language: json
     """
-    instance = jsonutils.loads(flask.request.data)
-    LOG.info("Creating instance for tenant %s with data %s", project_id, instance)
+    body = jsonutils.loads(flask.request.data)
+    LOG.info("Creating instance for tenant %s with data %s", project_id, body)
+
     instance_ctl.create_instance(
         tenant_id=project_id,
-        instance_id=instance['id'],
-        create_date=instance['created_at'],
-        flavor=instance['flavor'],
-        os_type=instance['os_type'],
-        distro=instance['os_distro'],
-        version=instance['os_version'],
-        name=instance['name'],
-        metadata={}
+        instance_id=body['id'],
+        create_date=body['created_at'],
+        name=body['name'],
+        flavor=body['flavor'],
+        image_meta=dict(distro=body['os_distro'],
+                        version=body['os_version'],
+                        os_type=body['os_type'])
     )
 
     return flask.Response(status=201)
@@ -220,14 +220,14 @@ def rebuild_instance(instance_id):
     .. literalinclude:: ../api_examples/input/rebuild_instance-body.json
         :language: json
     """
-    instance = jsonutils.loads(flask.request.data)
-    LOG.info("Rebuilding instance with id %s with data %s", instance_id, instance)
+    body = jsonutils.loads(flask.request.data)
+    LOG.info("Rebuilding instance with id %s with data %s", instance_id, body)
     instance_ctl.rebuild_instance(
         instance_id=instance_id,
-        distro=instance['distro'],
-        version=instance['version'],
-        os_type=instance['os_type'],
-        rebuild_date=instance['rebuild_date'],
+        rebuild_date=body['rebuild_date'],
+        image_meta=dict(distro=body['distro'],
+                        version=body['version'],
+                        os_type=body['os_type'])
     )
 
     return flask.Response(status=200)

@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from oslo_serialization import jsonutils as json
 from oslo_utils import timeutils
 
@@ -18,6 +19,7 @@ from almanach.tests.tempest.tests.api import base
 
 
 class TestVolumeDeletion(base.BaseAlmanachTest):
+
     @classmethod
     def resource_setup(cls):
         super(TestVolumeDeletion, cls).resource_setup()
