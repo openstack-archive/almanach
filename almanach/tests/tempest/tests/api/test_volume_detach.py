@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from oslo_serialization import jsonutils as json
 from uuid import uuid4
 
@@ -18,6 +19,7 @@ from almanach.tests.tempest.tests.api import base
 
 
 class TestVolumeDetach(base.BaseAlmanachTest):
+
     @classmethod
     def resource_setup(cls):
         super(TestVolumeDetach, cls).resource_setup()
@@ -43,8 +45,10 @@ class TestVolumeDetach(base.BaseAlmanachTest):
         self.assertEqual(resp.status, 200)
         self.assertIsInstance(response_body, list)
         self.assertEqual(3, len(response_body))
+
         un_attached_volumes = [v for v in response_body if v['attached_to'] == []]
         attached_volume = [v for v in response_body if v['attached_to'] != []][0]
+
         self.assertEqual(volume['volume_id'], attached_volume['entity_id'])
         self.assertEqual(volume['volume_id'], un_attached_volumes[0]['entity_id'])
         self.assertEqual(volume['volume_id'], un_attached_volumes[1]['entity_id'])

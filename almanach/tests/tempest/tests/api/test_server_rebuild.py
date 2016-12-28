@@ -11,13 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+from oslo_serialization import jsonutils as json
 from uuid import uuid4
 
 from almanach.tests.tempest.tests.api import base
-from oslo_serialization import jsonutils as json
 
 
 class TestServerRebuild(base.BaseAlmanachTest):
+
     def setUp(self):
         super(base.BaseAlmanachTest, self).setUp()
 
@@ -30,15 +32,15 @@ class TestServerRebuild(base.BaseAlmanachTest):
         server = self.get_server_creation_payload()
         self.create_server_through_api(tenant_id, server)
 
-        rebuild_data = {
+        data = {
             'distro': 'Ubuntu',
             'version': '14.04',
-            'os_type': 'Linux',
+            'os_type': 'linux',
             'rebuild_date': '2016-01-01T18:50:00Z'
         }
-        data = json.dumps(rebuild_data)
 
-        self.almanach_client.rebuild(server['id'], data)
+        self.almanach_client.rebuild(server['id'],
+                                     json.dumps(data))
 
         resp, response_body = self.almanach_client.get_tenant_entities(tenant_id)
 
@@ -46,11 +48,20 @@ class TestServerRebuild(base.BaseAlmanachTest):
         self.assertIsInstance(entities, list)
         self.assertEqual(2, len(entities))
 
-        rebuilded_server, initial_server = sorted(entities, key=lambda k: k['end'] if k['end'] is not None else '')
+        rebuilt_server, initial_server = sorted(entities, key=lambda k: k['end'] if k['end'] is not None else '')
 
         self.assertEqual(server['id'], initial_server['entity_id'])
-        self.assertEqual(server['os_version'], initial_server['os']['version'])
         self.assertIsNotNone(initial_server['end'])
-        self.assertEqual(server['id'], rebuilded_server['entity_id'])
-        self.assertEqual(rebuild_data['version'], rebuilded_server['os']['version'])
-        self.assertIsNone(rebuilded_server['end'])
+        self.assertEqual(dict(), initial_server['os'])
+        self.assertEqual(dict(), initial_server['image_meta'])
+
+        self.assertEqual(server['id'], rebuilt_server['entity_id'])
+        self.assertIsNone(rebuilt_server['end'])
+
+        self.assertEqual(data['distro'], rebuilt_server['os']['distro'])
+        self.assertEqual(data['version'], rebuilt_server['os']['version'])
+        self.assertEqual(data['os_type'], rebuilt_server['os']['os_type'])
+
+        self.assertEqual(data['distro'], rebuilt_server['image_meta']['distro'])
+        self.assertEqual(data['version'], rebuilt_server['image_meta']['version'])
+        self.assertEqual(data['os_type'], rebuilt_server['image_meta']['os_type'])

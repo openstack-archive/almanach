@@ -29,7 +29,7 @@ class Builder(object):
 class EntityBuilder(Builder):
 
     def build(self):
-        return model.build_entity_from_dict(self.dict_object)
+        return model.get_entity_from_dict(self.dict_object)
 
     def with_id(self, entity_id):
         self.dict_object["entity_id"] = entity_id
