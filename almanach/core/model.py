@@ -12,12 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import abc
 import six
 
 from almanach.core import exception
 
 
+@six.add_metaclass(abc.ABCMeta)
 class Entity(object):
+
     def __init__(self, entity_id, project_id, start, end, last_event, name, entity_type):
         self.entity_id = entity_id
         self.project_id = project_id
@@ -28,7 +31,19 @@ class Entity(object):
         self.entity_type = entity_type
 
     def as_dict(self):
-        return todict(self)
+        return dict(
+            entity_id=self.entity_id,
+            project_id=self.project_id,
+            start=self.start,
+            end=self.end,
+            last_event=self.last_event,
+            name=self.name,
+            entity_type=self.entity_type,
+        )
+
+    @staticmethod
+    def from_dict(d):
+        raise NotImplementedError
 
     def __eq__(self, other):
         return (other.entity_id == self.entity_id and
@@ -44,49 +59,70 @@ class Entity(object):
 
 
 class Instance(Entity):
-    TYPE = "instance"
+    TYPE = 'instance'
 
-    def __init__(self, entity_id, project_id, start, end, flavor, os, last_event, name, metadata={}, entity_type=TYPE):
-        super(Instance, self).__init__(entity_id, project_id, start, end, last_event, name, entity_type)
+    def __init__(self, entity_id, project_id, start, end, flavor, last_event, name, image_meta=None, metadata=None):
+        super(Instance, self).__init__(entity_id, project_id, start, end, last_event, name, self.TYPE)
         self.flavor = flavor
-        self.metadata = metadata
-        self.os = OS(**os)
-
-    def as_dict(self):
-        _replace_metadata_name_with_dot_instead_of_circumflex(self)
-        return todict(self)
+        self.metadata = metadata or dict()
+        self.image_meta = image_meta or dict()
 
     def __eq__(self, other):
         return (super(Instance, self).__eq__(other) and
                 other.flavor == self.flavor and
-                other.os == self.os and
+                other.image_meta == self.image_meta and
                 other.metadata == self.metadata)
 
-    def __ne__(self, other):
-        return not self.__eq__(other)
+    def as_dict(self):
+        d = super(Instance, self).as_dict()
+        d['flavor'] = self.flavor
+        d['metadata'] = self.metadata
+        d['image_meta'] = self.image_meta
 
+        # NOTE(fguillot): we keep this key for backward compatibility
+        d['os'] = self.image_meta
+        return d
 
-class OS(object):
-    def __init__(self, os_type, distro, version):
-        self.os_type = os_type
-        self.distro = distro
-        self.version = version
+    @staticmethod
+    def from_dict(d):
+        return Instance(
+            entity_id=d.get('entity_id'),
+            project_id=d.get('project_id'),
+            start=d.get('start'),
+            end=d.get('end'),
+            last_event=d.get('last_event'),
+            name=d.get('name'),
+            flavor=d.get('flavor'),
+            image_meta=d.get('os') or d.get('image_meta'),
+            metadata=Instance._unserialize_metadata(d),
+        )
 
-    def __eq__(self, other):
-        return (other.os_type == self.os_type and
-                other.distro == self.distro and
-                other.version == self.version)
+    @staticmethod
+    def _unserialize_metadata(d):
+        metadata = d.get('metadata')
+        if metadata:
+            tmp = dict()
+            for key, value in metadata.items():
+                if '^' in key:
+                    key = key.replace('^', '.')
+                tmp[key] = value
+            metadata = tmp
+        return metadata
 
-    def __ne__(self, other):
-        return not self.__eq__(other)
+    def _serialize_metadata(self):
+        tmp = dict()
+        for key, value in self.metadata.items():
+            if '.' in key:
+                key = key.replace('.', '^')
+            tmp[key] = value
+        return tmp
 
 
 class Volume(Entity):
-    TYPE = "volume"
+    TYPE = 'volume'
 
-    def __init__(self, entity_id, project_id, start, end, volume_type, size, last_event, name, attached_to=None,
-                 entity_type=TYPE):
-        super(Volume, self).__init__(entity_id, project_id, start, end, last_event, name, entity_type)
+    def __init__(self, entity_id, project_id, start, end, volume_type, size, last_event, name, attached_to=None):
+        super(Volume, self).__init__(entity_id, project_id, start, end, last_event, name, self.TYPE)
         self.volume_type = volume_type
         self.size = size
         self.attached_to = attached_to or []
@@ -97,11 +133,30 @@ class Volume(Entity):
                 other.size == self.size and
                 other.attached_to == self.attached_to)
 
-    def __ne__(self, other):
-        return not self.__eq__(other)
+    def as_dict(self):
+        d = super(Volume, self).as_dict()
+        d['volume_type'] = self.volume_type
+        d['size'] = self.size
+        d['attached_to'] = self.attached_to
+        return d
+
+    @staticmethod
+    def from_dict(d):
+        return Volume(
+            entity_id=d.get('entity_id'),
+            project_id=d.get('project_id'),
+            start=d.get('start'),
+            end=d.get('end'),
+            last_event=d.get('last_event'),
+            name=d.get('name'),
+            volume_type=d.get('volume_type'),
+            size=d.get('size'),
+            attached_to=d.get('attached_to'),
+        )
 
 
 class VolumeType(object):
+
     def __init__(self, volume_type_id, volume_type_name):
         self.volume_type_id = volume_type_id
         self.volume_type_name = volume_type_name
@@ -109,52 +164,23 @@ class VolumeType(object):
     def __eq__(self, other):
         return other.__dict__ == self.__dict__
 
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
     def as_dict(self):
-        return todict(self)
+        return dict(
+            volume_type_id=self.volume_type_id,
+            volume_type_name=self.volume_type_name,
+        )
+
+    @staticmethod
+    def from_dict(d):
+        return VolumeType(volume_type_id=d['volume_type_id'],
+                          volume_type_name=d['volume_type_name'])
 
 
-def build_entity_from_dict(entity_dict):
-    if entity_dict.get("entity_type") == Instance.TYPE:
-        _replace_metadata_name_with_circumflex_instead_of_dot(entity_dict)
-        return Instance(**entity_dict)
-    elif entity_dict.get("entity_type") == Volume.TYPE:
-        return Volume(**entity_dict)
+def get_entity_from_dict(d):
+    entity_type = d.get('entity_type')
+    if entity_type == Instance.TYPE:
+        return Instance.from_dict(d)
+    elif entity_type == Volume.TYPE:
+        return Volume.from_dict(d)
     raise exception.EntityTypeNotSupportedException(
-            'Unsupported entity type: "{}"'.format(entity_dict.get("entity_type")))
-
-
-def todict(obj):
-    if isinstance(obj, dict) or isinstance(obj, six.text_type):
-        return obj
-    elif hasattr(obj, "__iter__"):
-        return [todict(v) for v in obj]
-    elif hasattr(obj, "__dict__"):
-        return dict([(key, todict(value))
-                     for key, value in obj.__dict__.items()
-                     if not callable(value) and not key.startswith('_')])
-    else:
-        return obj
-
-
-def _replace_metadata_name_with_dot_instead_of_circumflex(instance):
-    if instance.metadata:
-        cleaned_metadata = dict()
-        for key, value in instance.metadata.items():
-            if '.' in key:
-                key = key.replace(".", "^")
-            cleaned_metadata[key] = value
-        instance.metadata = cleaned_metadata
-
-
-def _replace_metadata_name_with_circumflex_instead_of_dot(entity_dict):
-    metadata = entity_dict.get("metadata")
-    if metadata:
-        dirty_metadata = dict()
-        for key, value in metadata.items():
-            if '^' in key:
-                key = key.replace("^", ".")
-            dirty_metadata[key] = value
-        entity_dict["metadata"] = dirty_metadata
+            'Unsupported entity type: "{}"'.format(entity_type))

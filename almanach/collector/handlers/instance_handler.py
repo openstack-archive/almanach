@@ -33,15 +33,13 @@ class InstanceHandler(base_handler.BaseHandler):
 
     def _on_instance_created(self, notification):
         self.controller.create_instance(
-            notification.payload.get("instance_id"),
-            notification.payload.get("tenant_id"),
-            notification.payload.get("created_at"),
-            notification.payload.get("instance_type"),
-            notification.payload.get("image_meta").get("os_type"),
-            notification.payload.get("image_meta").get("distro"),
-            notification.payload.get("image_meta").get("version"),
-            notification.payload.get("hostname"),
-            notification.payload.get("metadata", {})
+            instance_id=notification.payload.get("instance_id"),
+            tenant_id=notification.payload.get("tenant_id"),
+            create_date=notification.payload.get("created_at"),
+            flavor=notification.payload.get("instance_type"),
+            name=notification.payload.get("hostname"),
+            image_meta=notification.payload.get("image_meta"),
+            metadata=notification.payload.get("metadata"),
         )
 
     def _on_instance_deleted(self, notification):
@@ -58,7 +56,8 @@ class InstanceHandler(base_handler.BaseHandler):
     def _on_instance_rebuilt(self, notification):
         date = notification.context.get("timestamp")
         instance_id = notification.payload.get("instance_id")
-        distro = notification.payload.get("image_meta").get("distro")
-        version = notification.payload.get("image_meta").get("version")
-        os_type = notification.payload.get("image_meta").get("os_type")
-        self.controller.rebuild_instance(instance_id, distro, version, os_type, date)
+        self.controller.rebuild_instance(
+            instance_id=instance_id,
+            rebuild_date=date,
+            image_meta=notification.payload.get("image_meta")
+        )

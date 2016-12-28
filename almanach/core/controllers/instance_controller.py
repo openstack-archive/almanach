@@ -27,21 +27,26 @@ class InstanceController(base_controller.BaseController):
         self.database_adapter = database_adapter
         self.metadata_whitelist = config.resources.device_metadata_whitelist
 
-    def create_instance(self, instance_id, tenant_id, create_date, flavor, os_type, distro, version, name, metadata):
+    def create_instance(self, instance_id, tenant_id, create_date, name, flavor, image_meta=None, metadata=None):
         create_date = self._validate_and_parse_date(create_date)
-        LOG.info("instance %s created in project %s (flavor %s; distro %s %s %s) on %s",
-                 instance_id, tenant_id, flavor, os_type, distro, version, create_date)
+        LOG.info("instance %s created in project %s (flavor %s; image_meta %s) on %s",
+                 instance_id, tenant_id, flavor, image_meta, create_date)
 
         if self._fresher_entity_exists(instance_id, create_date):
             LOG.warning("instance %s already exists with a more recent entry", instance_id)
             return
 
-        filtered_metadata = self._filter_metadata_with_whitelist(metadata)
+        entity = model.Instance(
+            entity_id=instance_id,
+            project_id=tenant_id,
+            last_event=create_date,
+            start=create_date,
+            end=None,
+            name=name,
+            flavor=flavor,
+            image_meta=image_meta,
+            metadata=self._filter_metadata_with_whitelist(metadata))
 
-        entity = model.Instance(instance_id, tenant_id, create_date, None, flavor,
-                                {"os_type": os_type, "distro": distro,
-                                 "version": version},
-                                create_date, name, filtered_metadata)
         self.database_adapter.insert_entity(entity)
 
     def delete_instance(self, instance_id, delete_date):
@@ -69,18 +74,15 @@ class InstanceController(base_controller.BaseController):
             LOG.error("Trying to resize an instance with id '%s' not in the database yet.", instance_id)
             raise e
 
-    def rebuild_instance(self, instance_id, distro, version, os_type, rebuild_date):
+    def rebuild_instance(self, instance_id, rebuild_date, image_meta):
         rebuild_date = self._validate_and_parse_date(rebuild_date)
         instance = self.database_adapter.get_active_entity(instance_id)
-        LOG.info("instance %s rebuilded in project %s to os %s %s %s on %s",
-                 instance_id, instance.project_id, os_type, distro, version, rebuild_date)
+        LOG.info("instance %s rebuilded in project %s to %s on %s",
+                 instance_id, instance.project_id, image_meta, rebuild_date)
 
-        if instance.os.distro != distro or instance.os.version != version:
+        if instance.image_meta != image_meta:
             self.database_adapter.close_active_entity(instance_id, rebuild_date)
-
-            instance.os.distro = distro
-            instance.os.version = version
-            instance.os.os_type = os_type
+            instance.image_meta = image_meta
             instance.start = rebuild_date
             instance.end = None
             instance.last_event = rebuild_date
@@ -90,4 +92,6 @@ class InstanceController(base_controller.BaseController):
         return self.database_adapter.get_all_entities_by_project(project_id, start, end, model.Instance.TYPE)
 
     def _filter_metadata_with_whitelist(self, metadata):
-        return {key: value for key, value in metadata.items() if key in self.metadata_whitelist}
+        if metadata:
+            return {key: value for key, value in metadata.items() if key in self.metadata_whitelist}
+        return None

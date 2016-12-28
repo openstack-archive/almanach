@@ -37,15 +37,13 @@ class InstanceHandlerTest(base.BaseTestCase):
         self.instance_handler.handle_events(notification)
 
         self.controller.create_instance.assert_called_once_with(
-            notification.payload['instance_id'],
-            notification.payload['tenant_id'],
-            notification.payload['created_at'],
-            notification.payload['instance_type'],
-            notification.payload['image_meta']['os_type'],
-            notification.payload['image_meta']['distro'],
-            notification.payload['image_meta']['version'],
-            notification.payload['hostname'],
-            notification.payload['metadata'],
+            instance_id=notification.payload['instance_id'],
+            tenant_id=notification.payload['tenant_id'],
+            create_date=notification.payload['created_at'],
+            name=notification.payload['hostname'],
+            flavor=notification.payload['instance_type'],
+            image_meta=notification.payload['image_meta'],
+            metadata=notification.payload['metadata'],
         )
 
     def test_instance_deleted(self):
@@ -87,9 +85,7 @@ class InstanceHandlerTest(base.BaseTestCase):
         self.instance_handler.handle_events(notification)
 
         self.controller.rebuild_instance.assert_called_once_with(
-            notification.payload['instance_id'],
-            notification.payload['image_meta']['distro'],
-            notification.payload['image_meta']['version'],
-            notification.payload['image_meta']['os_type'],
-            notification.context.get("timestamp")
+            instance_id=notification.payload['instance_id'],
+            rebuild_date=notification.context.get("timestamp"),
+            image_meta=notification.payload['image_meta'],
         )
