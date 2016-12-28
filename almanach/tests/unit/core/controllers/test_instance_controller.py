@@ -31,6 +31,7 @@ class InstanceControllerTest(base.BaseTestCase):
 
     def setUp(self):
         super(InstanceControllerTest, self).setUp()
+        self.config.entities.instance_image_meta = ['distro', 'version', 'os_type']
         self.database_adapter = flexmock(base_driver.BaseDriver)
         self.controller = instance_controller.InstanceController(self.config, self.database_adapter)
 
@@ -47,9 +48,13 @@ class InstanceControllerTest(base.BaseTestCase):
          .should_receive("insert_entity")
          .once())
 
-        self.controller.create_instance(fake_instance.entity_id, fake_instance.project_id, fake_instance.start,
-                                        fake_instance.flavor, fake_instance.os.os_type, fake_instance.os.distro,
-                                        fake_instance.os.version, fake_instance.name, fake_instance.metadata)
+        self.controller.create_instance(fake_instance.entity_id,
+                                        fake_instance.project_id,
+                                        fake_instance.start,
+                                        fake_instance.flavor,
+                                        fake_instance.name,
+                                        fake_instance.image_meta,
+                                        fake_instance.metadata)
 
     def test_resize_instance(self):
         fake_instance = a(instance())
@@ -88,8 +93,7 @@ class InstanceControllerTest(base.BaseTestCase):
 
         self.controller.create_instance(fake_instance.entity_id, fake_instance.project_id,
                                         '2015-10-21T16:25:00.000000Z',
-                                        fake_instance.flavor, fake_instance.os.os_type, fake_instance.os.distro,
-                                        fake_instance.os.version, fake_instance.name, fake_instance.metadata)
+                                        fake_instance.flavor, fake_instance.image_meta, fake_instance.metadata)
 
     def test_instance_created_but_find_garbage(self):
         fake_instance = a(instance().with_all_dates_in_string())
@@ -105,8 +109,7 @@ class InstanceControllerTest(base.BaseTestCase):
          .once())
 
         self.controller.create_instance(fake_instance.entity_id, fake_instance.project_id, fake_instance.start,
-                                        fake_instance.flavor, fake_instance.os.os_type, fake_instance.os.distro,
-                                        fake_instance.os.version, fake_instance.name, fake_instance.metadata)
+                                        fake_instance.flavor, fake_instance.image_meta, fake_instance.metadata)
 
     def test_instance_deleted(self):
         (flexmock(self.database_adapter)
@@ -158,15 +161,11 @@ class InstanceControllerTest(base.BaseTestCase):
 
         self.controller.rebuild_instance(
             "an_instance_id",
-            "some_distro",
-            "some_version",
-            "some_type",
-            "2015-10-21T16:25:00.000000Z"
+            "2015-10-21T16:25:00.000000Z",
+            dict(distro="some_distro", version="some_version", os_type="some_type")
         )
         self.controller.rebuild_instance(
             "an_instance_id",
-            i.os.distro,
-            i.os.version,
-            i.os.os_type,
-            "2015-10-21T16:25:00.000000Z"
+            "2015-10-21T16:25:00.000000Z",
+            dict(distro=i.image_meta['distro'], version=i.image_meta['version'], os_type=i.image_meta['os_type'])
         )

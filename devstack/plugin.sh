@@ -46,6 +46,8 @@ function almanach_configure {
     iniset $ALMANACH_CONF collector transport_url rabbit://$RABBIT_USERID:$RABBIT_PASSWORD@$RABBIT_HOST:5672
 
     iniset $ALMANACH_CONF database connection_url mongodb://localhost/almanach
+
+    iniset $ALMANACH_CONF entities instance_image_meta distro,version,os_type
 }
 
 function almanach_configure_external_services {
