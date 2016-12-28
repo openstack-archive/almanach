@@ -32,7 +32,8 @@ class TestServerRebuildScenario(base.BaseAlmanachScenarioTest):
         self.assertEqual(flavor['name'], entities[0]['flavor'])
         self.assertIsNotNone(entities[0]['start'])
         self.assertIsNotNone(entities[0]['end'])
-        self.assertIsNone(entities[0]['os']['distro'])
+        self.assertEqual(dict(), entities[0]['os'])
+        self.assertEqual(dict(), entities[0]['image_meta'])
 
         self.assertEqual(server['id'], entities[1]['entity_id'])
         self.assertEqual('instance', entities[1]['entity_type'])
@@ -40,6 +41,7 @@ class TestServerRebuildScenario(base.BaseAlmanachScenarioTest):
         self.assertEqual(flavor['name'], entities[1]['flavor'])
         self.assertIsNotNone(entities[1]['start'])
         self.assertIsNone(entities[1]['end'])
+        self.assertEqual('linux', entities[1]['image_meta']['distro'])
         self.assertEqual('linux', entities[1]['os']['distro'])
 
     def _rebuild_server(self):

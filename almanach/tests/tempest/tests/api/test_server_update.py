@@ -11,13 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+from oslo_serialization import jsonutils as json
 from uuid import uuid4
 
 from almanach.tests.tempest.tests.api import base
-from oslo_serialization import jsonutils as json
 
 
 class TestServerUpdate(base.BaseAlmanachTest):
+
     def setUp(self):
         super(base.BaseAlmanachTest, self).setUp()
 
