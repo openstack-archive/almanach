@@ -16,10 +16,10 @@ from hamcrest import assert_that
 from hamcrest import equal_to
 from hamcrest import has_key
 
-from almanach.tests.unit.api import base_api
+from almanach.tests.unit.api.v1 import base_api
 
 
-class ApiInfoTest(base_api.BaseApi):
+class TestApiInfo(base_api.BaseApi):
 
     def test_info(self):
         self.app_ctl.should_receive('get_application_info').and_return({

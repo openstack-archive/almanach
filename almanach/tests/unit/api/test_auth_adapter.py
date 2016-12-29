@@ -22,9 +22,10 @@ from almanach.api import auth_adapter
 from almanach.tests.unit import base
 
 
-class AuthenticationAdapterTest(base.BaseTestCase):
+class TestAuthenticationAdapter(base.BaseTestCase):
+
     def setUp(self):
-        super(AuthenticationAdapterTest, self).setUp()
+        super(TestAuthenticationAdapter, self).setUp()
         self.auth_adapter = auth_adapter.AuthenticationAdapter(self.config)
 
     def test_assert_that_the_default_backend_is_private_key(self):

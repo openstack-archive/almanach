@@ -27,10 +27,10 @@ from almanach.tests.unit.builders.entity import a
 from almanach.tests.unit.builders.entity import instance
 
 
-class InstanceControllerTest(base.BaseTestCase):
+class TestInstanceController(base.BaseTestCase):
 
     def setUp(self):
-        super(InstanceControllerTest, self).setUp()
+        super(TestInstanceController, self).setUp()
         self.config.entities.instance_image_meta = ['distro', 'version', 'os_type']
         self.database_adapter = flexmock(base_driver.BaseDriver)
         self.controller = instance_controller.InstanceController(self.config, self.database_adapter)

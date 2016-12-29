@@ -23,10 +23,10 @@ from almanach.core import exception
 from almanach.tests.unit import base
 
 
-class MixedAuthenticationTest(base.BaseTestCase):
+class TestMixedAuthentication(base.BaseTestCase):
 
     def setUp(self):
-        super(MixedAuthenticationTest, self).setUp()
+        super(TestMixedAuthentication, self).setUp()
         self.auth_one = flexmock()
         self.auth_two = flexmock()
         self.auth_backend = mixed_auth.MixedAuthentication([self.auth_one, self.auth_two])

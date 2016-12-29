@@ -20,12 +20,12 @@ from hamcrest import has_key
 from hamcrest import has_length
 
 from almanach.core import exception
-from almanach.tests.unit.api import base_api
+from almanach.tests.unit.api.v1 import base_api
 from almanach.tests.unit.builders.entity import a
 from almanach.tests.unit.builders.entity import volume_type
 
 
-class ApiVolumeTypeTest(base_api.BaseApi):
+class TestApiVolumeType(base_api.BaseApi):
 
     def test_get_volume_types(self):
         self.volume_type_ctl.should_receive('list_volume_types') \

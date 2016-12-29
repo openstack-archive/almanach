@@ -20,10 +20,10 @@ from almanach.core import exception
 from almanach.tests.unit import base
 
 
-class KeystoneAuthenticationTest(base.BaseTestCase):
+class TestKeystoneAuthentication(base.BaseTestCase):
 
     def setUp(self):
-        super(KeystoneAuthenticationTest, self).setUp()
+        super(TestKeystoneAuthentication, self).setUp()
         self.session_mock = mock.patch('keystoneauth1.session.Session').start()
         self.keystone_mock = mock.patch('keystoneclient.v3.client.Client').start()
 

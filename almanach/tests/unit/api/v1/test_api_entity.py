@@ -20,12 +20,12 @@ from hamcrest import is_
 from voluptuous import Invalid
 
 from almanach.core import exception
-from almanach.tests.unit.api import base_api
+from almanach.tests.unit.api.v1 import base_api
 from almanach.tests.unit.builders.entity import a
 from almanach.tests.unit.builders.entity import instance
 
 
-class ApiEntityTest(base_api.BaseApi):
+class TestApiEntity(base_api.BaseApi):
 
     def test_update_instance_flavor_for_terminated_instance(self):
         some_new_flavor = 'some_new_flavor'

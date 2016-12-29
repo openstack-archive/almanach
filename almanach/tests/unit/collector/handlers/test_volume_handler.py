@@ -19,10 +19,10 @@ from almanach.tests.unit import base
 from almanach.tests.unit.builders import notification as builder
 
 
-class VolumeHandlerTest(base.BaseTestCase):
+class TestVolumeHandler(base.BaseTestCase):
 
     def setUp(self):
-        super(VolumeHandlerTest, self).setUp()
+        super(TestVolumeHandler, self).setUp()
         self.controller = mock.Mock()
         self.volume_handler = volume_handler.VolumeHandler(self.controller)
 

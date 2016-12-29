@@ -23,7 +23,8 @@ from almanach.core import exception
 from almanach.validators.instance_validator import InstanceValidator
 
 
-class InstanceValidatorTests(unittest.TestCase):
+class TestInstanceValidator(unittest.TestCase):
+
     def test_validate_update_with_invalid_attribute(self):
         instance_validator = InstanceValidator()
         payload = {"invalid attribute": ".."}

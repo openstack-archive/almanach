@@ -31,10 +31,10 @@ from almanach.tests.unit.builders.entity import a
 from almanach.tests.unit.builders.entity import instance
 
 
-class EntityControllerTest(base.BaseTestCase):
+class TestEntityController(base.BaseTestCase):
 
     def setUp(self):
-        super(EntityControllerTest, self).setUp()
+        super(TestEntityController, self).setUp()
         self.database_adapter = flexmock(base_driver.BaseDriver)
         self.controller = entity_controller.EntityController(self.database_adapter)
 

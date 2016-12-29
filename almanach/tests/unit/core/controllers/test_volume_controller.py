@@ -29,10 +29,10 @@ from almanach.tests.unit.builders.entity import volume
 from almanach.tests.unit.builders.entity import volume_type
 
 
-class VolumeControllerTest(base.BaseTestCase):
+class TestVolumeController(base.BaseTestCase):
 
     def setUp(self):
-        super(VolumeControllerTest, self).setUp()
+        super(TestVolumeController, self).setUp()
         self.database_adapter = flexmock(base_driver.BaseDriver)
         self.controller = volume_controller.VolumeController(self.config, self.database_adapter)
 

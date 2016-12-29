@@ -19,10 +19,10 @@ from almanach.storage import storage_driver
 from almanach.tests.unit import base
 
 
-class StorageDriverTest(base.BaseTestCase):
+class TestStorageDriver(base.BaseTestCase):
 
     def setUp(self):
-        super(StorageDriverTest, self).setUp()
+        super(TestStorageDriver, self).setUp()
         self.storage_driver = storage_driver.StorageDriver(self.config)
 
     def test_get_default_database_adapter(self):

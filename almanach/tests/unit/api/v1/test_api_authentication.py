@@ -15,13 +15,13 @@
 from hamcrest import assert_that
 from hamcrest import equal_to
 
-from almanach.tests.unit.api import base_api
+from almanach.tests.unit.api.v1 import base_api
 
 
-class ApiAuthenticationTest(base_api.BaseApi):
+class TestApiAuthentication(base_api.BaseApi):
 
     def setUp(self):
-        super(ApiAuthenticationTest, self).setUp()
+        super(TestApiAuthentication, self).setUp()
         self.prepare()
         self.prepare_with_failed_authentication()
 

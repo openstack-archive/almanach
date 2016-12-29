@@ -22,10 +22,10 @@ from almanach.core import exception
 from almanach.tests.unit import base
 
 
-class PrivateKeyAuthenticationTest(base.BaseTestCase):
+class TestPrivateKeyAuthentication(base.BaseTestCase):
 
     def setUp(self):
-        super(PrivateKeyAuthenticationTest, self).setUp()
+        super(TestPrivateKeyAuthentication, self).setUp()
         self.auth_backend = private_key_auth.PrivateKeyAuthentication("my token")
 
     def test_with_correct_token(self):

@@ -23,10 +23,10 @@ import mock
 from almanach.tests.unit import base
 
 
-class FactoryTest(base.BaseTestCase):
+class TestFactory(base.BaseTestCase):
 
     def setUp(self):
-        super(FactoryTest, self).setUp()
+        super(TestFactory, self).setUp()
         self.storage = mock.Mock()
         self.factory = factory.Factory(self.config, self.storage)
 

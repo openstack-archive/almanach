@@ -19,12 +19,12 @@ from hamcrest import has_key
 from hamcrest import has_length
 
 from almanach.core import exception
-from almanach.tests.unit.api import base_api
+from almanach.tests.unit.api.v1 import base_api
 from almanach.tests.unit.builders.entity import a
 from almanach.tests.unit.builders.entity import instance
 
 
-class ApiInstanceTest(base_api.BaseApi):
+class TestApiInstance(base_api.BaseApi):
 
     def test_get_instances(self):
         self.instance_ctl.should_receive('list_instances') \

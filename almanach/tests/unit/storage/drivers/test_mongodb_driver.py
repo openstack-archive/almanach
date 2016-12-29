@@ -27,10 +27,10 @@ from almanach.tests.unit.builders.entity import volume
 from almanach.tests.unit.builders.entity import volume_type
 
 
-class MongoDbDriverTest(base.BaseTestCase):
+class TestMongoDbDriver(base.BaseTestCase):
 
     def setUp(self):
-        super(MongoDbDriverTest, self).setUp()
+        super(TestMongoDbDriver, self).setUp()
         mongo_connection = mongomock.Connection()
         self.db = mongo_connection['almanach']
         self.adapter = mongodb_driver.MongoDbDriver(self.config, self.db)

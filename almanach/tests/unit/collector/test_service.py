@@ -18,10 +18,10 @@ import mock
 from almanach.tests.unit import base
 
 
-class ServiceFactoryTest(base.BaseTestCase):
+class TestServiceFactory(base.BaseTestCase):
 
     def setUp(self):
-        super(ServiceFactoryTest, self).setUp()
+        super(TestServiceFactory, self).setUp()
         self.core_factory = mock.Mock()
         self.factory = service.ServiceFactory(self.config, self.core_factory)
 

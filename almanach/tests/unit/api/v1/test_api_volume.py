@@ -18,10 +18,10 @@ from hamcrest import has_entries
 from uuid import uuid4
 
 from almanach.core import exception
-from almanach.tests.unit.api import base_api
+from almanach.tests.unit.api.v1 import base_api
 
 
-class ApiVolumeTest(base_api.BaseApi):
+class TestApiVolume(base_api.BaseApi):
 
     def test_successful_volume_create(self):
         data = dict(volume_id="VOLUME_ID",

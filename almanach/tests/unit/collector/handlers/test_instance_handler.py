@@ -19,10 +19,10 @@ from almanach.tests.unit import base
 from almanach.tests.unit.builders import notification as builder
 
 
-class InstanceHandlerTest(base.BaseTestCase):
+class TestInstanceHandler(base.BaseTestCase):
 
     def setUp(self):
-        super(InstanceHandlerTest, self).setUp()
+        super(TestInstanceHandler, self).setUp()
         self.controller = mock.Mock()
         self.instance_handler = instance_handler.InstanceHandler(self.controller)
 

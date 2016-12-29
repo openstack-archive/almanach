@@ -19,10 +19,10 @@ from almanach.collector import messaging
 from almanach.tests.unit import base
 
 
-class MessagingFactoryTest(base.BaseTestCase):
+class TestMessagingFactory(base.BaseTestCase):
 
     def setUp(self):
-        super(MessagingFactoryTest, self).setUp()
+        super(TestMessagingFactory, self).setUp()
         self.factory = messaging.MessagingFactory(self.config)
 
     def test_get_listener(self):

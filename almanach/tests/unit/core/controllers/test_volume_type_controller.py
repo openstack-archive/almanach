@@ -20,10 +20,10 @@ from almanach.tests.unit.builders.entity import a
 from almanach.tests.unit.builders.entity import volume_type
 
 
-class VolumeTypeControllerTest(base.BaseTestCase):
+class TestVolumeTypeController(base.BaseTestCase):
 
     def setUp(self):
-        super(VolumeTypeControllerTest, self).setUp()
+        super(TestVolumeTypeController, self).setUp()
         self.database_adapter = mock.Mock()
         self.controller = volume_type_controller.VolumeTypeController(self.database_adapter)
 
