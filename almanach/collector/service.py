@@ -26,20 +26,22 @@ LOG = logging.getLogger(__name__)
 
 class CollectorService(service.ServiceBase):
 
-    def __init__(self, listener):
+    def __init__(self, listeners):
         super(CollectorService, self).__init__()
-        self.listener = listener
+        self.listeners = listeners
 
     def start(self):
-        LOG.info('Starting collector service...')
-        self.listener.start()
+        LOG.info('Starting collector listeners...')
+        for listener in self.listeners:
+            listener.start()
 
     def wait(self):
         LOG.info('Waiting...')
 
     def stop(self):
         LOG.info('Graceful shutdown of the collector service...')
-        self.listener.stop()
+        for listener in self.listeners:
+            listener.stop()
 
     def reset(self):
         pass
@@ -59,8 +61,8 @@ class ServiceFactory(object):
         notification_handler.add_event_handler(self._get_volume_handler())
         notification_handler.add_event_handler(self._get_volume_type_handler())
 
-        listener = messaging_factory.get_listener(notification_handler)
-        return CollectorService(listener)
+        listeners = messaging_factory.get_listeners(notification_handler)
+        return CollectorService(listeners)
 
     def _get_instance_handler(self):
         return instance_handler.InstanceHandler(self.core_factory.get_instance_controller())

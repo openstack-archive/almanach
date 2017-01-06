@@ -25,8 +25,16 @@ class TestMessagingFactory(base.BaseTestCase):
         super(TestMessagingFactory, self).setUp()
         self.factory = messaging.MessagingFactory(self.config)
 
-    def test_get_listener(self):
-        self.assertIsNotNone(self.factory.get_listener(mock.Mock()))
+    def test_get_listeners_with_one_listener(self):
+        self.config.collector.transport_url = ['rabbit://guest:guest@localhost:5672']
+        listeners = self.factory.get_listeners(mock.Mock())
+        self.assertEqual(1, len(listeners))
+
+    def test_get_listeners_with_multiple_listener(self):
+        self.config.collector.transport_url = ['rabbit://guest:guest@localhost:5672',
+                                               'rabbit://guest:guest@localhost:5673']
+        listeners = self.factory.get_listeners(mock.Mock())
+        self.assertEqual(2, len(listeners))
 
     def test_get_notifier(self):
         self.assertIsInstance(self.factory.get_notifier(), oslo_messaging.Notifier)
