@@ -115,11 +115,20 @@ class TestEntityController(base.BaseTestCase):
         end = datetime(2016, 3, 3, 0, 0, 0, 0, pytz.utc)
         flavor = 'a_new_flavor'
         fake_instance1 = a(instance().with_start(2016, 3, 1, 0, 0, 0).with_end(2016, 3, 2, 0, 0, 0))
-        self.database_adapter.get_all_entities_by_id_and_date.return_value = fake_instance1
+        self.database_adapter.get_all_entities_by_id_and_date.side_effect = [[fake_instance1], [fake_instance1]]
+        calls = [
+            mock.call(fake_instance1.entity_id, start, end),
+            mock.call(fake_instance1.entity_id, start, end)
+        ]
 
-        self.database_adapter.get_all_entities_by_id_and_date.expect_called_once_with(
-            fake_instance1.entity_id, start, end
+        self.controller.update_inactive_entity(
+            instance_id=fake_instance1.entity_id,
+            start=start,
+            end=end,
+            flavor=flavor,
         )
+
+        self.database_adapter.get_all_entities_by_id_and_date.assert_has_calls(calls)
         self.database_adapter.update_closed_entity.expect_called_once_with(
             entity=fake_instance1, data={"flavor": flavor}
         )
