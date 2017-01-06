@@ -39,10 +39,10 @@ api_opts = [
 ]
 
 collector_opts = [
-    cfg.StrOpt('transport_url',
-               secret=True,
-               default='rabbit://guest:guest@localhost:5672',
-               help='AMQP connection URL'),
+    cfg.ListOpt('transport_url',
+                secret=True,
+                default='rabbit://guest:guest@localhost:5672',
+                help='AMQP connection URL'),
     cfg.StrOpt('topic',
                default='almanach',
                help='AMQP topic used for OpenStack notifications'),
