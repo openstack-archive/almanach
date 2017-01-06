@@ -12,24 +12,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from oslo_log import log as logging
 import oslo_messaging
+
+LOG = logging.getLogger(__name__)
 
 
 class MessagingFactory(object):
+
     def __init__(self, config):
         self.config = config
 
-    def _get_transport(self):
-        return oslo_messaging.get_notification_transport(self.config, url=self.config.collector.transport_url)
-
-    def get_listener(self, handler):
+    def get_listeners(self, handler):
+        listeners = []
         targets = [
             oslo_messaging.Target(topic=self.config.collector.topic),
         ]
 
-        return oslo_messaging.get_notification_listener(self._get_transport(), targets,
-                                                        endpoints=[handler], executor='threading')
+        for url in self.config.collector.transport_url:
+            LOG.debug('Creating listener for %s', url)
+            transport = self._get_transport(url)
+            listeners.append(oslo_messaging.get_notification_listener(transport=transport,
+                                                                      targets=targets,
+                                                                      endpoints=[handler],
+                                                                      executor='threading'))
+        return listeners
 
     def get_notifier(self):
-        return oslo_messaging.Notifier(self._get_transport(), publisher_id='almanach.collector',
+        transport = self._get_transport(self.config.collector.transport_url[0])
+        return oslo_messaging.Notifier(transport, publisher_id='almanach.collector',
                                        topic=self.config.collector.topic, driver='messagingv2')
+
+    def _get_transport(self, url):
+        return oslo_messaging.get_notification_transport(self.config, url=url)
