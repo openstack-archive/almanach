@@ -24,6 +24,7 @@ CONF = config.CONF
 
 
 class BaseAlmanachTest(tempest.test.BaseTestCase):
+    identity_version = 'v3'
 
     @classmethod
     def skip_checks(cls):
