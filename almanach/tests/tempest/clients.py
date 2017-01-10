@@ -19,6 +19,6 @@ from almanach.tests.tempest.services import almanach_client
 
 class Manager(clients.Manager):
 
-    def __init__(self, credentials=None, service=None):
-        super(Manager, self).__init__(credentials, service)
+    def __init__(self, credentials=None):
+        super(Manager, self).__init__(credentials)
         self.almanach_client = almanach_client.AlmanachClient(self.auth_provider)
