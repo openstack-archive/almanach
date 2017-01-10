@@ -22,6 +22,8 @@ class TestServerRebuildScenario(base.BaseAlmanachScenarioTest):
 
     def test_rebuild_server(self):
         server, flavor = self._rebuild_server()
+        self.wait_for_notification(self._check_that_a_new_entity_is_created,
+                                   server)
 
         entities = self.get_tenant_entities(server['tenant_id'])
         self.assertEqual(2, len(entities))
@@ -43,6 +45,10 @@ class TestServerRebuildScenario(base.BaseAlmanachScenarioTest):
         self.assertIsNone(entities[1]['end'])
         self.assertEqual('linux', entities[1]['image_meta']['distro'])
         self.assertEqual('linux', entities[1]['os']['distro'])
+
+    def _check_that_a_new_entity_is_created(self, server):
+        entities = self.get_tenant_entities(server['tenant_id'])
+        return len(entities) == 2
 
     def _rebuild_server(self):
         server, flavor = self.create_test_server(wait_until='ACTIVE')

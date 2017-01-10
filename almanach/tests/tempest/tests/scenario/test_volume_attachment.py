@@ -35,18 +35,23 @@ class TestVolumeAttachmentScenario(base.BaseAlmanachScenarioTest):
 
     def test_attachment(self):
         self._attach_volume_to_server()
+        self.wait_for_notification(self._assert_that_volume_is_attached)
+        self._detach_volume_from_server()
+        self.wait_for_notification(self._assert_that_volume_is_detached)
 
+    def _assert_that_volume_is_attached(self):
         entities = self.get_tenant_entities(self._volume['os-vol-tenant-attr:tenant_id'])
         self.assertIsNotNone(entities[0]['start'])
         self.assertIsNone(entities[0]['end'])
         self.assertTrue(self._server['id'] in entities[0]['attached_to'])
+        return True
 
-        self._detach_volume_from_server()
-
+    def _assert_that_volume_is_detached(self):
         entities = self.get_tenant_entities(self._volume['os-vol-tenant-attr:tenant_id'])
         self.assertIsNotNone(entities[0]['start'])
         self.assertIsNone(entities[0]['end'])
         self.assertFalse(self._server['id'] in entities[0]['attached_to'])
+        return True
 
     def _attach_volume_to_server(self):
         self._volume = self.create_test_volume()
