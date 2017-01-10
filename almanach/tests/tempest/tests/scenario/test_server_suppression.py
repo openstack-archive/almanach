@@ -20,9 +20,10 @@ class TestServerSuppressionScenario(base.BaseAlmanachScenarioTest):
     def test_delete_server(self):
         server, flavor = self.create_test_server(wait_until='ACTIVE')
         self.delete_test_server(server)
+        self.wait_for_notification(self._assert_entity_is_closed, server, flavor)
 
+    def _assert_entity_is_closed(self, server, flavor):
         entities = self.get_tenant_entities(server['tenant_id'])
-
         self.assertEqual(1, len(entities))
         self.assertEqual(server['id'], entities[0]['entity_id'])
         self.assertEqual('instance', entities[0]['entity_type'])
@@ -30,3 +31,4 @@ class TestServerSuppressionScenario(base.BaseAlmanachScenarioTest):
         self.assertEqual(flavor['name'], entities[0]['flavor'])
         self.assertIsNotNone(entities[0]['start'])
         self.assertIsNotNone(entities[0]['end'])
+        return True

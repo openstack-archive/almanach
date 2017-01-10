@@ -22,7 +22,10 @@ class TestServerResizeScenario(base.BaseAlmanachScenarioTest):
 
     def test_resize_server(self):
         server, initial_flavor, resized_flavor = self._resize_server()
+        self.wait_for_notification(self._assert_that_a_new_entity_is_created,
+                                   server, initial_flavor, resized_flavor)
 
+    def _assert_that_a_new_entity_is_created(self, server, initial_flavor, resized_flavor):
         entities = self.get_tenant_entities(server['tenant_id'])
         self.assertEqual(2, len(entities))
 
@@ -43,6 +46,7 @@ class TestServerResizeScenario(base.BaseAlmanachScenarioTest):
         self.assertIsNone(entities[1]['end'])
         self.assertEqual(dict(), entities[0]['os'])
         self.assertEqual(dict(), entities[0]['image_meta'])
+        return True
 
     def _resize_server(self):
         flavors = self.flavors_client.list_flavors()['flavors']
