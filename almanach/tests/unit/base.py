@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from flexmock import flexmock_teardown
 from oslo_config import fixture
 import testtools
 
@@ -28,4 +27,3 @@ class BaseTestCase(testtools.TestCase):
 
     def tearDown(self):
         super(BaseTestCase, self).tearDown()
-        flexmock_teardown()
