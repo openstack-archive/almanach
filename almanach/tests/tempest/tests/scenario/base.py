@@ -17,7 +17,10 @@ from tempest.common import compute
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib import exceptions
 from tempest.scenario import manager
+import time
+
 
 from almanach.tests.tempest import clients
 
@@ -25,8 +28,9 @@ CONF = config.CONF
 
 
 class BaseAlmanachScenarioTest(manager.ScenarioTest):
-
     credentials = ['primary', 'admin']
+    notification_interval = 1
+    notification_timeout = 30
 
     @classmethod
     def setup_clients(cls):
@@ -89,4 +93,15 @@ class BaseAlmanachScenarioTest(manager.ScenarioTest):
 
     def delete_test_server(self, server):
         self.os.servers_client.delete_server(server['id'])
-        waiters.wait_for_server_termination(self.os.servers_client, server['id'])
+        waiters.wait_for_server_termination(self.os.servers_client, server['id'], True)
+
+    def wait_for_notification(self, callback, *args):
+        start_time = int(time.time())
+        while True:
+            if callback(*args):
+                return
+
+            if int(time.time()) - start_time >= self.notification_timeout:
+                raise exceptions.TimeoutException
+
+            time.sleep(self.notification_interval)
