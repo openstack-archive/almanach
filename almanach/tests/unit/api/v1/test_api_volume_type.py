@@ -12,13 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from hamcrest import assert_that
-from hamcrest import equal_to
-from hamcrest import has_entries
-from hamcrest import has_entry
-from hamcrest import has_key
-from hamcrest import has_length
-
 from almanach.core import exception
 from almanach.tests.unit.api.v1 import base_api
 from almanach.tests.unit.builders.entity import a
@@ -28,16 +21,17 @@ from almanach.tests.unit.builders.entity import volume_type
 class TestApiVolumeType(base_api.BaseApi):
 
     def test_get_volume_types(self):
-        self.volume_type_ctl.should_receive('list_volume_types') \
-            .and_return([a(volume_type().with_volume_type_name('some_volume_type_name'))]) \
-            .once()
+        self.volume_type_ctl.list_volume_types.return_value = [
+            a(volume_type().with_volume_type_name('some_volume_type_name'))
+        ]
 
         code, result = self.api_get('/volume_types', headers={'X-Auth-Token': 'some token value'})
 
-        assert_that(code, equal_to(200))
-        assert_that(result, has_length(1))
-        assert_that(result[0], has_key('volume_type_name'))
-        assert_that(result[0]['volume_type_name'], equal_to('some_volume_type_name'))
+        self.volume_type_ctl.list_volume_types.assert_called_once()
+        self.assertEqual(code, 200)
+        self.assertEqual(len(result), 1)
+        self.assertIn('volume_type_name', result[0])
+        self.assertEqual(result[0]['volume_type_name'], 'some_volume_type_name')
 
     def test_successful_volume_type_create(self):
         data = dict(
@@ -45,40 +39,34 @@ class TestApiVolumeType(base_api.BaseApi):
             type_name="A_VOLUME_TYPE_NAME"
         )
 
-        self.volume_type_ctl.should_receive('create_volume_type') \
-            .with_args(
-            volume_type_id=data['type_id'],
-            volume_type_name=data['type_name']) \
-            .once()
-
         code, result = self.api_post('/volume_type', data=data, headers={'X-Auth-Token': 'some token value'})
-        assert_that(code, equal_to(201))
+
+        self.volume_type_ctl.create_volume_type.assert_called_once_with(
+            volume_type_id=data['type_id'],
+            volume_type_name=data['type_name']
+        )
+        self.assertEqual(code, 201)
 
     def test_volume_type_create_missing_a_param_returns_bad_request_code(self):
         data = dict(type_name="A_VOLUME_TYPE_NAME")
 
-        self.volume_type_ctl.should_receive('create_volume_type') \
-            .never()
-
         code, result = self.api_post('/volume_type', data=data, headers={'X-Auth-Token': 'some token value'})
-        assert_that(code, equal_to(400))
-        assert_that(result, has_entries({"error": "The 'type_id' param is mandatory for the request you have made."}))
+
+        self.volume_type_ctl.create_volume_type.assert_not_called()
+        self.assertEqual(result["error"], "The 'type_id' param is mandatory for the request you have made.")
+        self.assertEqual(code, 400)
 
     def test_volume_type_delete_with_authentication(self):
-        self.volume_type_ctl.should_receive('delete_volume_type') \
-            .with_args('A_VOLUME_TYPE_ID') \
-            .once()
-
         code, result = self.api_delete('/volume_type/A_VOLUME_TYPE_ID', headers={'X-Auth-Token': 'some token value'})
-        assert_that(code, equal_to(202))
+
+        self.volume_type_ctl.delete_volume_type.assert_called_once_with('A_VOLUME_TYPE_ID')
+        self.assertEqual(code, 202)
 
     def test_volume_type_delete_not_in_database(self):
-        self.volume_type_ctl.should_receive('delete_volume_type') \
-            .with_args('A_VOLUME_TYPE_ID') \
-            .and_raise(exception.AlmanachException("An exception occurred")) \
-            .once()
+        self.volume_type_ctl.delete_volume_type.side_effect = exception.AlmanachException("An exception occurred")
 
         code, result = self.api_delete('/volume_type/A_VOLUME_TYPE_ID', headers={'X-Auth-Token': 'some token value'})
 
-        assert_that(code, equal_to(500))
-        assert_that(result, has_entry("error", "An exception occurred"))
+        self.volume_type_ctl.delete_volume_type.assert_called_once_with('A_VOLUME_TYPE_ID')
+        self.assertIn("An exception occurred", result["error"])
+        self.assertEqual(code, 500)

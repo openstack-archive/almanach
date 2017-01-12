@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from hamcrest import assert_that
-from hamcrest import equal_to
-
 from almanach.tests.unit.api.v1 import base_api
 
 
@@ -26,11 +23,11 @@ class TestApiAuthentication(base_api.BaseApi):
         self.prepare_with_failed_authentication()
 
     def test_with_wrong_authentication(self):
-        self.entity_ctl.should_receive('list_entities').never()
         query_string = {'start': '2014-01-01 00:00:00.0000', 'end': '2014-02-01 00:00:00.0000'}
 
         code, result = self.api_get(url='/project/TENANT_ID/entities',
                                     query_string=query_string,
                                     headers={'X-Auth-Token': 'wrong token'})
 
-        assert_that(code, equal_to(401))
+        self.entity_ctl.list_entities.assert_not_called()
+        self.assertEqual(code, 401)

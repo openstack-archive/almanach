@@ -12,24 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from hamcrest import assert_that
-from hamcrest import equal_to
-from hamcrest import has_key
-
 from almanach.tests.unit.api.v1 import base_api
 
 
 class TestApiInfo(base_api.BaseApi):
 
     def test_info(self):
-        self.app_ctl.should_receive('get_application_info').and_return({
-            'info': {'version': '1.0'},
-            'database': {'all_entities': 10,
-                         'active_entities': 2}
-        })
+        info = {'info': {'version': '1.0'}, 'database': {'all_entities': 10, 'active_entities': 2}}
+        self.app_ctl.get_application_info.return_value = info
 
         code, result = self.api_get('/info')
 
-        assert_that(code, equal_to(200))
-        assert_that(result, has_key('info'))
-        assert_that(result['info']['version'], equal_to('1.0'))
+        self.app_ctl.get_application_info.assert_called_once()
+        self.assertEqual(code, 200)
+        self.assertIn('info', result)
+        self.assertEqual(result['info']['version'], '1.0')

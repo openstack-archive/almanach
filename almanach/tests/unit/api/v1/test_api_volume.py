@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from hamcrest import assert_that
-from hamcrest import equal_to
-from hamcrest import has_entries
 from uuid import uuid4
 
 from almanach.core import exception
@@ -31,17 +28,17 @@ class TestApiVolume(base_api.BaseApi):
                     volume_name="VOLUME_NAME",
                     attached_to=["INSTANCE_ID"])
 
-        self.volume_ctl.should_receive('create_volume') \
-            .with_args(project_id="PROJECT_ID",
-                       **data) \
-            .once()
-
         code, result = self.api_post(
             '/project/PROJECT_ID/volume',
             data=data,
             headers={'X-Auth-Token': 'some token value'}
         )
-        assert_that(code, equal_to(201))
+
+        self.volume_ctl.create_volume.assert_called_once_with(
+            project_id="PROJECT_ID",
+            **data
+        )
+        self.assertEqual(code, 201)
 
     def test_volume_create_missing_a_param_returns_bad_request_code(self):
         data = dict(volume_id="VOLUME_ID",
@@ -50,21 +47,21 @@ class TestApiVolume(base_api.BaseApi):
                     volume_name="VOLUME_NAME",
                     attached_to=[])
 
-        self.volume_ctl.should_receive('create_volume') \
-            .never()
-
         code, result = self.api_post(
             '/project/PROJECT_ID/volume',
             data=data,
             headers={'X-Auth-Token': 'some token value'}
         )
-        assert_that(
-            result,
-            has_entries({"error": "The 'volume_type' param is mandatory for the request you have made."})
+
+        self.assertIn(
+            "The 'volume_type' param is mandatory for the request you have made.",
+            result["error"]
         )
-        assert_that(code, equal_to(400))
+        self.volume_ctl.create_volume.assert_not_called()
+        self.assertEqual(code, 400)
 
     def test_volume_create_bad_date_format_returns_bad_request_code(self):
+        self.volume_ctl.create_volume.side_effect = exception.DateFormatException
         data = dict(volume_id="VOLUME_ID",
                     start="A_BAD_DATE",
                     volume_type="VOLUME_TYPE",
@@ -72,205 +69,203 @@ class TestApiVolume(base_api.BaseApi):
                     volume_name="VOLUME_NAME",
                     attached_to=["INSTANCE_ID"])
 
-        self.volume_ctl.should_receive('create_volume') \
-            .with_args(project_id="PROJECT_ID",
-                       **data) \
-            .once() \
-            .and_raise(exception.DateFormatException)
-
         code, result = self.api_post(
             '/project/PROJECT_ID/volume',
             data=data,
             headers={'X-Auth-Token': 'some token value'}
         )
-        assert_that(result, has_entries(
-            {
-                "error": "The provided date has an invalid format. "
-                         "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
-            }
-        ))
-        assert_that(code, equal_to(400))
 
-    def test_successfull_volume_delete(self):
+        self.assertIn(
+            "The provided date has an invalid format. "
+            "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z",
+            result["error"]
+        )
+        self.volume_ctl.create_volume.assert_called_once_with(
+            project_id="PROJECT_ID",
+            **data
+        )
+        self.assertEqual(code, 400)
+
+    def test_successful_volume_delete(self):
         data = dict(date="DELETE_DATE")
 
-        self.volume_ctl.should_receive('delete_volume') \
-            .with_args(volume_id="VOLUME_ID",
-                       delete_date=data['date']) \
-            .once()
-
         code, result = self.api_delete('/volume/VOLUME_ID', data=data, headers={'X-Auth-Token': 'some token value'})
-        assert_that(code, equal_to(202))
+
+        self.volume_ctl.delete_volume.assert_called_once_with(
+            volume_id="VOLUME_ID",
+            delete_date=data['date']
+        )
+        self.assertEqual(code, 202)
 
     def test_volume_delete_missing_a_param_returns_bad_request_code(self):
-        self.volume_ctl.should_receive('delete_volume') \
-            .never()
-
         code, result = self.api_delete('/volume/VOLUME_ID', data=dict(), headers={'X-Auth-Token': 'some token value'})
-        assert_that(result, has_entries({"error": "The 'date' param is mandatory for the request you have made."}))
-        assert_that(code, equal_to(400))
+
+        self.assertIn(
+            "The 'date' param is mandatory for the request you have made.",
+            result["error"]
+        )
+        self.volume_ctl.delete_volume.assert_not_called()
+        self.assertEqual(code, 400)
 
     def test_volume_delete_no_data_bad_request_code(self):
-        self.volume_ctl.should_receive('delete_volume') \
-            .never()
-
         code, result = self.api_delete('/volume/VOLUME_ID', headers={'X-Auth-Token': 'some token value'})
-        assert_that(result, has_entries({"error": "Invalid parameter or payload"}))
-        assert_that(code, equal_to(400))
+
+        self.assertIn(
+            "Invalid parameter or payload",
+            result["error"]
+        )
+        self.volume_ctl.delete_volume.assert_not_called()
+        self.assertEqual(code, 400)
 
     def test_volume_delete_bad_date_format_returns_bad_request_code(self):
+        self.volume_ctl.delete_volume.side_effect = exception.DateFormatException
         data = dict(date="A_BAD_DATE")
 
-        self.volume_ctl.should_receive('delete_volume') \
-            .with_args(volume_id="VOLUME_ID",
-                       delete_date=data['date']) \
-            .once() \
-            .and_raise(exception.DateFormatException)
-
         code, result = self.api_delete('/volume/VOLUME_ID', data=data, headers={'X-Auth-Token': 'some token value'})
-        assert_that(result, has_entries(
-            {
-                "error": "The provided date has an invalid format. "
-                         "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
-            }
-        ))
-        assert_that(code, equal_to(400))
+
+        self.assertIn(
+            "The provided date has an invalid format. "
+            "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z",
+            result["error"]
+        )
+        self.volume_ctl.delete_volume.assert_called_once_with(
+            volume_id="VOLUME_ID",
+            delete_date=data['date']
+        )
+        self.assertEqual(code, 400)
 
     def test_successful_volume_resize(self):
         data = dict(date="UPDATED_AT",
                     size="NEW_SIZE")
 
-        self.volume_ctl.should_receive('resize_volume') \
-            .with_args(volume_id="VOLUME_ID",
-                       size=data['size'],
-                       update_date=data['date']) \
-            .once()
-
         code, result = self.api_put('/volume/VOLUME_ID/resize', data=data, headers={'X-Auth-Token': 'some token value'})
-        assert_that(code, equal_to(200))
+
+        self.volume_ctl.resize_volume.assert_called_once_with(
+            volume_id="VOLUME_ID",
+            size=data['size'],
+            update_date=data['date']
+        )
+        self.assertEqual(code, 200)
 
     def test_volume_resize_missing_a_param_returns_bad_request_code(self):
         data = dict(date="A_DATE")
 
-        self.volume_ctl.should_receive('resize_volume') \
-            .never()
-
         code, result = self.api_put('/volume/VOLUME_ID/resize', data=data, headers={'X-Auth-Token': 'some token value'})
-        assert_that(result, has_entries({"error": "The 'size' param is mandatory for the request you have made."}))
-        assert_that(code, equal_to(400))
+
+        self.assertIn(
+            "The 'size' param is mandatory for the request you have made.",
+            result["error"]
+        )
+        self.volume_ctl.resize_volume.assert_not_called()
+        self.assertEqual(code, 400)
 
     def test_volume_resize_bad_date_format_returns_bad_request_code(self):
+        self.volume_ctl.resize_volume.side_effect = exception.DateFormatException
         data = dict(date="BAD_DATE",
                     size="NEW_SIZE")
 
-        self.volume_ctl.should_receive('resize_volume') \
-            .with_args(volume_id="VOLUME_ID",
-                       size=data['size'],
-                       update_date=data['date']) \
-            .once() \
-            .and_raise(exception.DateFormatException)
-
         code, result = self.api_put('/volume/VOLUME_ID/resize', data=data, headers={'X-Auth-Token': 'some token value'})
-        assert_that(result, has_entries(
-            {
-                "error": "The provided date has an invalid format. "
-                         "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
-            }
-        ))
-        assert_that(code, equal_to(400))
+
+        self.assertIn(
+            "The provided date has an invalid format. "
+            "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z",
+            result["error"]
+        )
+        self.volume_ctl.resize_volume.assert_called_once_with(
+            volume_id="VOLUME_ID",
+            size=data['size'],
+            update_date=data['date']
+        )
+        self.assertEqual(code, 400)
 
     def test_successful_volume_attach(self):
         data = dict(date="UPDATED_AT",
                     attachments=[str(uuid4())])
 
-        self.volume_ctl.should_receive('attach_volume') \
-            .with_args(volume_id="VOLUME_ID",
-                       attachments=data['attachments'],
-                       date=data['date']) \
-            .once()
-
         code, result = self.api_put('/volume/VOLUME_ID/attach', data=data, headers={'X-Auth-Token': 'some token value'})
-        assert_that(code, equal_to(200))
+
+        self.volume_ctl.attach_volume.assert_called_once_with(
+            volume_id="VOLUME_ID",
+            attachments=data['attachments'],
+            date=data['date']
+        )
+        self.assertEqual(code, 200)
 
     def test_volume_attach_missing_a_param_returns_bad_request_code(self):
         data = dict(date="A_DATE")
-
-        self.volume_ctl.should_receive('attach_volume') \
-            .never()
 
         code, result = self.api_put(
             '/volume/VOLUME_ID/attach',
             data=data,
             headers={'X-Auth-Token': 'some token value'}
         )
-        assert_that(
-            result,
-            has_entries({"error": "The 'attachments' param is mandatory for the request you have made."})
+
+        self.assertIn(
+            "The 'attachments' param is mandatory for the request you have made.",
+            result["error"]
         )
-        assert_that(code, equal_to(400))
+        self.volume_ctl.attach_volume.assert_not_called()
+        self.assertEqual(code, 400)
 
     def test_volume_attach_bad_date_format_returns_bad_request_code(self):
+        self.volume_ctl.attach_volume.side_effect = exception.DateFormatException
         data = dict(date="A_BAD_DATE",
                     attachments=[str(uuid4())])
 
-        self.volume_ctl.should_receive('attach_volume') \
-            .with_args(volume_id="VOLUME_ID",
-                       attachments=data['attachments'],
-                       date=data['date']) \
-            .once() \
-            .and_raise(exception.DateFormatException)
-
         code, result = self.api_put('/volume/VOLUME_ID/attach', data=data, headers={'X-Auth-Token': 'some token value'})
-        assert_that(result, has_entries(
-            {
-                "error": "The provided date has an invalid format. "
-                         "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
-            }
-        ))
-        assert_that(code, equal_to(400))
+
+        self.assertIn(
+            "The provided date has an invalid format. "
+            "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z",
+            result["error"]
+        )
+        self.volume_ctl.attach_volume.assert_called_once_with(
+            volume_id="VOLUME_ID",
+            attachments=data['attachments'],
+            date=data['date']
+        )
+        self.assertEqual(code, 400)
 
     def test_successful_volume_detach(self):
         data = dict(date="UPDATED_AT",
                     attachments=[str(uuid4())])
 
-        self.volume_ctl.should_receive('detach_volume') \
-            .with_args(volume_id="VOLUME_ID",
-                       attachments=data['attachments'],
-                       date=data['date']) \
-            .once()
-
         code, result = self.api_put('/volume/VOLUME_ID/detach', data=data, headers={'X-Auth-Token': 'some token value'})
-        assert_that(code, equal_to(200))
+
+        self.volume_ctl.detach_volume.assert_called_once_with(
+            volume_id="VOLUME_ID",
+            attachments=data['attachments'],
+            date=data['date']
+        )
+        self.assertEqual(code, 200)
 
     def test_volume_detach_missing_a_param_returns_bad_request_code(self):
         data = dict(date="A_DATE")
 
-        self.volume_ctl.should_receive('detach_volume') \
-            .never()
-
         code, result = self.api_put('/volume/VOLUME_ID/detach', data=data, headers={'X-Auth-Token': 'some token value'})
-        assert_that(
-            result,
-            has_entries({"error": "The 'attachments' param is mandatory for the request you have made."})
+
+        self.assertIn(
+            "The 'attachments' param is mandatory for the request you have made.",
+            result["error"]
         )
-        assert_that(code, equal_to(400))
+        self.volume_ctl.detach_volume.assert_not_called()
+        self.assertEqual(code, 400)
 
     def test_volume_detach_bad_date_format_returns_bad_request_code(self):
+        self.volume_ctl.detach_volume.side_effect = exception.DateFormatException
         data = dict(date="A_BAD_DATE",
                     attachments=[str(uuid4())])
 
-        self.volume_ctl.should_receive('detach_volume') \
-            .with_args(volume_id="VOLUME_ID",
-                       attachments=data['attachments'],
-                       date=data['date']) \
-            .once() \
-            .and_raise(exception.DateFormatException)
-
         code, result = self.api_put('/volume/VOLUME_ID/detach', data=data, headers={'X-Auth-Token': 'some token value'})
-        assert_that(result, has_entries(
-            {
-                "error": "The provided date has an invalid format. "
-                         "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z"
-            }
-        ))
-        assert_that(code, equal_to(400))
+
+        self.assertIn(
+            "The provided date has an invalid format. "
+            "Format should be of yyyy-mm-ddThh:mm:ss.msZ, ex: 2015-01-31T18:24:34.1523Z",
+            result["error"]
+        )
+        self.volume_ctl.detach_volume.assert_called_once_with(
+            volume_id="VOLUME_ID",
+            attachments=data['attachments'],
+            date=data['date']
+        )
+        self.assertEqual(code, 400)

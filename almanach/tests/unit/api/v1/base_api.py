@@ -15,6 +15,7 @@
 from datetime import datetime
 import flask
 from flexmock import flexmock
+from mock import mock
 from oslo_serialization import jsonutils as json
 
 from almanach.api.v1 import routes
@@ -30,11 +31,11 @@ class BaseApi(base.BaseTestCase):
         self.prepare_with_successful_authentication()
 
     def prepare(self):
-        self.instance_ctl = flexmock()
-        self.volume_ctl = flexmock()
-        self.volume_type_ctl = flexmock()
-        self.entity_ctl = flexmock()
-        self.app_ctl = flexmock()
+        self.instance_ctl = mock.Mock()
+        self.volume_ctl = mock.Mock()
+        self.volume_type_ctl = mock.Mock()
+        self.entity_ctl = mock.Mock()
+        self.app_ctl = mock.Mock()
         self.auth_adapter = flexmock()
         routes.instance_ctl = self.instance_ctl
         routes.volume_ctl = self.volume_ctl
