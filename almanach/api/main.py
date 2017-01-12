@@ -12,16 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from flask import Flask
-from oslo_log import log
 import sys
+
+from flask import Flask
+from oslo_log import log as logging
 
 from almanach.api import auth_adapter
 from almanach.api.v1 import routes
 from almanach.core import factory as core_factory
 from almanach.core import opts
 
-LOG = log.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 app = Flask('almanach')
 app.register_blueprint(routes.api)
@@ -29,7 +30,8 @@ app.register_blueprint(routes.api)
 
 def main():
     try:
-        opts.CONF(sys.argv[1:])
+        opts.CONF(sys.argv[1:], project=opts.DOMAIN)
+        logging.setup(opts.CONF, opts.DOMAIN)
         config = opts.CONF
         factory = core_factory.Factory(config)
 
