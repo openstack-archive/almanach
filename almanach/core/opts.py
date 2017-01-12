@@ -107,7 +107,6 @@ CONF.register_opts(keystone_opts, group='keystone_authtoken')
 CONF.register_opts(entity_opts, group='entities')
 
 logging.register_options(CONF)
-logging.setup(CONF, DOMAIN)
 
 
 def list_opts():

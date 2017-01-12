@@ -12,19 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from oslo_log import log
-from oslo_service import service
 import sys
+
+from oslo_log import log as logging
+from oslo_service import service
 
 from almanach.collector import service as collector_service
 from almanach.core import factory as core_factory
 from almanach.core import opts
 
-LOG = log.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 def main():
-    opts.CONF(sys.argv[1:])
+    opts.CONF(sys.argv[1:], project=opts.DOMAIN)
+    logging.setup(opts.CONF, opts.DOMAIN)
     config = opts.CONF
 
     service_factory = collector_service.ServiceFactory(config, core_factory.Factory(config))
