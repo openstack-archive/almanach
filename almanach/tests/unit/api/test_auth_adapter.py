@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from hamcrest import assert_that
-from hamcrest import instance_of
-
 from almanach.api.auth import keystone_auth
 from almanach.api.auth import mixed_auth
 from almanach.api.auth import private_key_auth
@@ -30,14 +27,14 @@ class TestAuthenticationAdapter(base.BaseTestCase):
 
     def test_assert_that_the_default_backend_is_private_key(self):
         adapter = self.auth_adapter.get_authentication_adapter()
-        assert_that(adapter, instance_of(private_key_auth.PrivateKeyAuthentication))
+        self.assertIsInstance(adapter, private_key_auth.PrivateKeyAuthentication)
 
     def test_get_keystone_auth_backend(self):
         self.config_fixture.config(strategy='keystone', group='auth')
         adapter = self.auth_adapter.get_authentication_adapter()
-        assert_that(adapter, instance_of(keystone_auth.KeystoneAuthentication))
+        self.assertIsInstance(adapter, keystone_auth.KeystoneAuthentication)
 
     def test_get_mixed_auth_backend(self):
         self.config_fixture.config(strategy='token,keystone', group='auth')
         adapter = self.auth_adapter.get_authentication_adapter()
-        assert_that(adapter, instance_of(mixed_auth.MixedAuthentication))
+        self.assertIsInstance(adapter, mixed_auth.MixedAuthentication)

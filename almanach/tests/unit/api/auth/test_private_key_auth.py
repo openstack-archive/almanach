@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from hamcrest import assert_that
-from hamcrest import calling
-from hamcrest import equal_to
-from hamcrest import raises
-
 from almanach.api.auth import private_key_auth
 from almanach.core import exception
 from almanach.tests.unit import base
@@ -29,12 +24,10 @@ class TestPrivateKeyAuthentication(base.BaseTestCase):
         self.auth_backend = private_key_auth.PrivateKeyAuthentication("my token")
 
     def test_with_correct_token(self):
-        assert_that(self.auth_backend.validate("my token"), equal_to(True))
+        self.assertEqual(self.auth_backend.validate("my token"), True)
 
     def test_with_invalid_token(self):
-        assert_that(calling(self.auth_backend.validate)
-                    .with_args("bad token"), raises(exception.AuthenticationFailureException))
+        self.assertRaises(exception.AuthenticationFailureException, self.auth_backend.validate, "bad token")
 
     def test_with_empty_token(self):
-        assert_that(calling(self.auth_backend.validate)
-                    .with_args(None), raises(exception.AuthenticationFailureException))
+        self.assertRaises(exception.AuthenticationFailureException, self.auth_backend.validate, None)

@@ -1,6 +1,5 @@
 flexmock==0.9.4
 mongomock==2.0.0
-PyHamcrest==1.8.5
 nose  # LGPL
 setuptools>=16.0,!=24.0.0  # PSF/ZPL
 sphinx>=1.2.1,!=1.3b1,<1.3  # BSD
