@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from almanach.core import exception
 from almanach.tests.unit.api.v1 import base_api
 
 
@@ -20,9 +21,9 @@ class TestApiAuthentication(base_api.BaseApi):
     def setUp(self):
         super(TestApiAuthentication, self).setUp()
         self.prepare()
-        self.prepare_with_failed_authentication()
 
     def test_with_wrong_authentication(self):
+        self.auth_adapter.validate.side_effect = exception.AuthenticationFailureException('Unauthorized')
         query_string = {'start': '2014-01-01 00:00:00.0000', 'end': '2014-02-01 00:00:00.0000'}
 
         code, result = self.api_get(url='/project/TENANT_ID/entities',

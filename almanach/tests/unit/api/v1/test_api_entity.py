@@ -127,12 +127,12 @@ class TestApiEntity(base_api.BaseApi):
         self.assertEqual(code, 400)
 
     def test_entity_head_with_existing_entity(self):
+        self.entity_ctl.entity_exists.return_value = True
         entity_id = "entity_id"
-        self.entity_ctl.should_receive('entity_exists') \
-            .and_return(True)
 
         code, result = self.api_head('/entity/{id}'.format(id=entity_id), headers={'X-Auth-Token': 'some token value'})
 
+        self.entity_ctl.entity_exists.assert_called_once_with(entity_id=entity_id)
         self.assertEqual(code, 200)
 
     def test_entity_head_with_nonexistent_entity(self):

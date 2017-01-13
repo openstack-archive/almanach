@@ -14,12 +14,10 @@
 
 from datetime import datetime
 import flask
-from flexmock import flexmock
 from mock import mock
 from oslo_serialization import jsonutils as json
 
 from almanach.api.v1 import routes
-from almanach.core import exception
 from almanach.tests.unit import base
 
 
@@ -28,7 +26,6 @@ class BaseApi(base.BaseTestCase):
     def setUp(self):
         super(BaseApi, self).setUp()
         self.prepare()
-        self.prepare_with_successful_authentication()
 
     def prepare(self):
         self.instance_ctl = mock.Mock()
@@ -36,7 +33,7 @@ class BaseApi(base.BaseTestCase):
         self.volume_type_ctl = mock.Mock()
         self.entity_ctl = mock.Mock()
         self.app_ctl = mock.Mock()
-        self.auth_adapter = flexmock()
+        self.auth_adapter = mock.Mock()
         routes.instance_ctl = self.instance_ctl
         routes.volume_ctl = self.volume_ctl
         routes.volume_type_ctl = self.volume_type_ctl
@@ -46,13 +43,6 @@ class BaseApi(base.BaseTestCase):
 
         self.app = flask.Flask("almanach")
         self.app.register_blueprint(routes.api)
-
-    def prepare_with_successful_authentication(self):
-        self.auth_adapter.should_receive("validate").and_return(True)
-
-    def prepare_with_failed_authentication(self):
-        self.auth_adapter.should_receive("validate")\
-            .and_raise(exception.AuthenticationFailureException("Wrong credentials"))
 
     def api_get(self, url, query_string=None, headers=None, accept='application/json'):
         return self._api_call(url, "get", None, query_string, headers, accept)

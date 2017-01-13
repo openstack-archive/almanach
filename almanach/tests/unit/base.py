@@ -24,6 +24,3 @@ class BaseTestCase(testtools.TestCase):
         super(BaseTestCase, self).setUp()
         self.config_fixture = self.useFixture(fixture.Config(conf=opts.CONF))
         self.config = self.config_fixture.conf
-
-    def tearDown(self):
-        super(BaseTestCase, self).tearDown()
