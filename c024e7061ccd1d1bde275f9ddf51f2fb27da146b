@@ -1,0 +1,10 @@
+Code-Review+2: Maxime Belanger <mbelanger@internap.com>
+Workflow+1: Frédéric Guillot <fguillot@internap.com>
+Code-Review+2: Mathieu Mitchell <mmitchell@iweb.com>
+Workflow+1: Mathieu Mitchell <mmitchell@iweb.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Fri, 13 Jan 2017 16:14:02 +0000
+Reviewed-on: https://review.openstack.org/420029
+Project: openstack/almanach
+Branch: refs/heads/master
