@@ -12,7 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from oslo_log import log as logging
+
 from almanach.collector.handlers import base_handler
+from almanach.core import exception
+
+LOG = logging.getLogger(__name__)
 
 
 class InstanceHandler(base_handler.BaseHandler):
@@ -45,7 +50,15 @@ class InstanceHandler(base_handler.BaseHandler):
     def _on_instance_deleted(self, notification):
         date = notification.payload.get("terminated_at")
         instance_id = notification.payload.get("instance_id")
-        self.controller.delete_instance(instance_id, date)
+
+        try:
+            self.controller.delete_instance(instance_id, date)
+        except exception.EntityNotFoundException as e:
+            if notification.payload.get('state') == 'error':
+                LOG.info('Instance deletion event ignored because instance %s was badly created',
+                         instance_id)
+            else:
+                raise e
 
     def _on_instance_resized(self, notification):
         date = notification.context.get("timestamp")

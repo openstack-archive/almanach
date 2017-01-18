@@ -15,6 +15,7 @@
 import mock
 
 from almanach.collector.handlers import instance_handler
+from almanach.core import exception
 from almanach.tests.unit import base
 from almanach.tests.unit.builders import notification as builder
 
@@ -52,6 +53,37 @@ class TestInstanceHandler(base.BaseTestCase):
             .with_payload_value('terminated_at', 'a_date') \
             .build()
 
+        self.instance_handler.handle_events(notification)
+
+        self.controller.delete_instance.assert_called_once_with(
+            notification.payload['instance_id'],
+            notification.payload['terminated_at']
+        )
+
+    def test_instance_deleted_but_never_created(self):
+        notification = builder.InstanceNotificationBuilder() \
+            .with_event_type('compute.instance.delete.end') \
+            .with_payload_value('terminated_at', 'a_date') \
+            .build()
+
+        self.controller.delete_instance.side_effect = exception.EntityNotFoundException('Instance not found')
+
+        self.assertRaises(exception.EntityNotFoundException,
+                          self.instance_handler.handle_events, notification)
+
+        self.controller.delete_instance.assert_called_once_with(
+            notification.payload['instance_id'],
+            notification.payload['terminated_at']
+        )
+
+    def test_instance_in_error_deleted(self):
+        notification = builder.InstanceNotificationBuilder() \
+            .with_event_type('compute.instance.delete.end') \
+            .with_payload_value('terminated_at', 'a_date') \
+            .with_payload_value('state', 'error') \
+            .build()
+
+        self.controller.delete_instance.side_effect = exception.EntityNotFoundException('Instance not found')
         self.instance_handler.handle_events(notification)
 
         self.controller.delete_instance.assert_called_once_with(
