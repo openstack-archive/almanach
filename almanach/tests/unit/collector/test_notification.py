@@ -80,3 +80,8 @@ class TestNotification(base.BaseTestCase):
         self.handler.error(context, 'compute.nova01', 'some_event', dict(), dict())
         self.notifier.error.assert_not_called()
         self.notifier.critical.assert_called_once()
+
+    def test_unrelated_notifications_are_not_handled_in_error_queue(self):
+        self.handler.error(dict(), 'compute.nova01', 'some_event', dict(), dict())
+        self.notifier.error.assert_not_called()
+        self.notifier.critical.assert_not_called()
