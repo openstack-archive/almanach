@@ -63,13 +63,13 @@ class TestNotification(base.BaseTestCase):
 
         self.notifier.error.assert_called_once()
 
-    def test_notifications_are_sent_again_to_error_queue_if_under_threshold(self):
+    def test_notifications_are_sent_again_to_info_queue_if_under_threshold(self):
         context = {
             notification.NotificationMessage.RETRY_COUNTER: 2
         }
 
         self.handler.error(context, 'compute.nova01', 'some_event', dict(), dict())
-        self.notifier.error.assert_called_once()
+        self.notifier.info.assert_called_once()
         self.notifier.critical.assert_not_called()
 
     def test_notifications_are_sent_to_critical_queue_if_above_threshold(self):
@@ -77,11 +77,17 @@ class TestNotification(base.BaseTestCase):
             notification.NotificationMessage.RETRY_COUNTER: 3
         }
 
-        self.handler.error(context, 'compute.nova01', 'some_event', dict(), dict())
+        event_handler = mock.Mock()
+        event_handler.handle_events.side_effect = Exception()
+
+        self.handler.add_event_handler(event_handler)
+
+        self.handler.info(context, 'compute.nova01', 'some_event', dict(), dict())
         self.notifier.error.assert_not_called()
         self.notifier.critical.assert_called_once()
 
     def test_unrelated_notifications_are_not_handled_in_error_queue(self):
         self.handler.error(dict(), 'compute.nova01', 'some_event', dict(), dict())
+        self.notifier.info.assert_not_called()
         self.notifier.error.assert_not_called()
         self.notifier.critical.assert_not_called()
