@@ -14,9 +14,10 @@
 
 import abc
 from dateutil import parser as date_parser
+import six
+
 from oslo_log import log
 import pytz
-import six
 
 from almanach.core import exception
 

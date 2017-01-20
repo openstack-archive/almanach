@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from almanach.core.controllers import application_controller
 import mock
 
+from almanach.core.controllers import application_controller
 from almanach.tests.unit import base
 
 

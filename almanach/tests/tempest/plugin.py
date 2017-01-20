@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import almanach
 import os
 
 from tempest import config
 from tempest.test_discover import plugins
 
+import almanach
 from almanach.tests.tempest import config as project_config
 
 

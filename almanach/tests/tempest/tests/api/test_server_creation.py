@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from uuid import uuid4
+
 from oslo_serialization import jsonutils as json
 from tempest.lib import exceptions
-from uuid import uuid4
 
 from almanach.tests.tempest.tests.api import base
 

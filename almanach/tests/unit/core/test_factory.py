@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import mock
+
 from almanach.core.controllers import application_controller
 from almanach.core.controllers import entity_controller
 from almanach.core.controllers import instance_controller
 from almanach.core.controllers import volume_controller
 from almanach.core.controllers import volume_type_controller
 from almanach.core import factory
-import mock
 
 from almanach.tests.unit import base
 

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from datetime import timedelta
+
 from oslo_log import log
 
 from almanach.core.controllers import base_controller

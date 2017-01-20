@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from uuid import uuid4
+
 from oslo_serialization import jsonutils as json
 from tempest.common.utils import data_utils
 from tempest import config
 import tempest.test
-from uuid import uuid4
 
 from almanach.tests.tempest import clients
 

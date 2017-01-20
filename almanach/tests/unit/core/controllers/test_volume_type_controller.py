@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from almanach.core.controllers import volume_type_controller
 import mock
+
+from almanach.core.controllers import volume_type_controller
 
 from almanach.tests.unit import base
 from almanach.tests.unit.builders.entity import a

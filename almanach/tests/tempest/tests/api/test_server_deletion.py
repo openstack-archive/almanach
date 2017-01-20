@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from oslo_serialization import jsonutils as json
 from uuid import uuid4
+
+from oslo_serialization import jsonutils as json
 
 from almanach.tests.tempest.tests.api import base
 

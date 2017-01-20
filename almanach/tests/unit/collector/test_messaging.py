@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import mock
+
 import oslo_messaging
 
 from almanach.collector import messaging

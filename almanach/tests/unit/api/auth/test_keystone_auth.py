@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from keystoneauth1 import exceptions as keystoneauth1_exceptions
 import mock
+
+from keystoneauth1 import exceptions as keystoneauth1_exceptions
 
 from almanach.api.auth import keystone_auth
 from almanach.core import exception

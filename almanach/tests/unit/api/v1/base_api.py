@@ -13,8 +13,9 @@
 # limitations under the License.
 
 from datetime import datetime
-import flask
 from mock import mock
+
+import flask
 from oslo_serialization import jsonutils as json
 
 from almanach.api.v1 import routes

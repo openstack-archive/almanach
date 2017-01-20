@@ -14,8 +14,9 @@
 
 from copy import copy
 from datetime import datetime
-import pytz
 from uuid import uuid4
+
+import pytz
 
 from almanach.core import model
 
