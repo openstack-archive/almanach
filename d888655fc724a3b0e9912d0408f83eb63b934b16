@@ -1,0 +1,8 @@
+Code-Review+2: Maxime Belanger <mbelanger@internap.com>
+Workflow+1: Marc Aubry <maubry@internap.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Sat, 21 Jan 2017 19:01:10 +0000
+Reviewed-on: https://review.openstack.org/423295
+Project: openstack/almanach
+Branch: refs/heads/master
