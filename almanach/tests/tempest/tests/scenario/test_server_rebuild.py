@@ -21,7 +21,7 @@ from almanach.tests.tempest.tests.scenario import base
 class TestServerRebuildScenario(base.BaseAlmanachScenarioTest):
 
     def test_rebuild_server(self):
-        server, flavor = self._rebuild_server()
+        server, flavor, original_image_id, new_image_id = self._rebuild_server()
         self.wait_for_notification(self._check_that_a_new_entity_is_created,
                                    server)
 
@@ -36,6 +36,7 @@ class TestServerRebuildScenario(base.BaseAlmanachScenarioTest):
         self.assertIsNotNone(entities[0]['end'])
         self.assertEqual(dict(), entities[0]['os'])
         self.assertEqual(dict(), entities[0]['image_meta'])
+        self.assertEqual(original_image_id, entities[0]['image_id'])
 
         self.assertEqual(server['id'], entities[1]['entity_id'])
         self.assertEqual('instance', entities[1]['entity_type'])
@@ -43,18 +44,23 @@ class TestServerRebuildScenario(base.BaseAlmanachScenarioTest):
         self.assertEqual(flavor['name'], entities[1]['flavor'])
         self.assertIsNotNone(entities[1]['start'])
         self.assertIsNone(entities[1]['end'])
-        self.assertEqual('linux', entities[1]['image_meta']['distro'])
-        self.assertEqual('linux', entities[1]['os']['distro'])
+        self.assertEqual(dict(), entities[1]['os'])
+        self.assertEqual(dict(), entities[1]['image_meta'])
+        self.assertEqual(new_image_id, entities[1]['image_id'])
 
     def _check_that_a_new_entity_is_created(self, server):
         entities = self.get_tenant_entities(server['tenant_id'])
         return len(entities) == 2
 
     def _rebuild_server(self):
-        server, flavor = self.create_test_server(wait_until='ACTIVE')
-        image = self._prepare_image()
+        images = self.image_client.list_images()['images']
+        original_image_id = images[0]['id']
+        new_image_id = images[1]['id']
 
-        self.os.servers_client.rebuild_server(server['id'], image['id'])
+        server, flavor, _ = self.create_test_server(wait_until='ACTIVE',
+                                                    image_id=original_image_id)
+
+        self.os.servers_client.rebuild_server(server['id'], new_image_id)
         waiters.wait_for_server_status(self.os.servers_client, server['id'],
                                        status='ACTIVE')
 
@@ -63,13 +69,4 @@ class TestServerRebuildScenario(base.BaseAlmanachScenarioTest):
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.os.servers_client.delete_server, server['id'])
 
-        return server, flavor
-
-    # TODO(fguillot): Unfortunately, Almanach do not store the image in the instance entity at
-    # the moment. The creation of a new entity is triggered by the modification of a custom
-    # image metadata: distro or version. In the future, Almanach should probably create a new entity
-    # if the image is changed (we receive the image_name in the notification).
-    def _prepare_image(self):
-        images = self.image_client.list_images()['images']
-        self.os_adm.compute_images_client.set_image_metadata(images[1]['id'], {'distro': 'linux'})
-        return images[1]
+        return server, flavor, original_image_id, new_image_id

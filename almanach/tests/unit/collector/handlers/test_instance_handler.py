@@ -33,6 +33,7 @@ class TestInstanceHandler(base.BaseTestCase):
             .with_image_meta('os_type', 'linux')\
             .with_image_meta('distro', 'ubuntu')\
             .with_image_meta('version', '16.04')\
+            .with_image_meta('base_image_ref', 'some_image_id')\
             .build()
 
         self.instance_handler.handle_events(notification)
@@ -43,6 +44,7 @@ class TestInstanceHandler(base.BaseTestCase):
             create_date=notification.payload['created_at'],
             name=notification.payload['hostname'],
             flavor=notification.payload['instance_type'],
+            image_id=notification.payload['image_meta']['base_image_ref'],
             image_meta=notification.payload['image_meta'],
             metadata=notification.payload['metadata'],
         )
@@ -109,6 +111,7 @@ class TestInstanceHandler(base.BaseTestCase):
         notification = builder.InstanceNotificationBuilder() \
             .with_event_type('compute.instance.rebuild.end') \
             .with_context_value('timestamp', 'a_date') \
+            .with_image_meta('base_image_ref', 'some_image_id') \
             .with_image_meta('os_type', 'linux') \
             .with_image_meta('distro', 'ubuntu') \
             .with_image_meta('version', '16.04') \
@@ -119,5 +122,6 @@ class TestInstanceHandler(base.BaseTestCase):
         self.controller.rebuild_instance.assert_called_once_with(
             instance_id=notification.payload['instance_id'],
             rebuild_date=notification.context.get("timestamp"),
+            image_id=notification.payload['image_meta']['base_image_ref'],
             image_meta=notification.payload['image_meta'],
         )

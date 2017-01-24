@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from almanach.core import exception
+
 from almanach.tests.unit.api.v1 import base_api
 from almanach.tests.unit.builders.entity import a
 from almanach.tests.unit.builders.entity import instance
@@ -59,6 +60,7 @@ class TestApiInstance(base_api.BaseApi):
             create_date=data["created_at"],
             name=data['name'],
             flavor=data['flavor'],
+            image_id=None,
             image_meta=dict(os_type=data['os_type'],
                             distro=data['os_distro'],
                             version=data['os_version'])
@@ -104,6 +106,7 @@ class TestApiInstance(base_api.BaseApi):
             instance_id=data["id"],
             create_date=data["created_at"],
             flavor=data['flavor'],
+            image_id=None,
             image_meta=dict(os_type=data['os_type'],
                             distro=data['os_distro'],
                             version=data['os_version']),
@@ -240,6 +243,7 @@ class TestApiInstance(base_api.BaseApi):
         self.instance_ctl.rebuild_instance.assert_called_once_with(
             instance_id=instance_id,
             rebuild_date=data.get('rebuild_date'),
+            image_id=None,
             image_meta=dict(distro=data.get('distro'),
                             version=data.get('version'),
                             os_type=data.get('os_type'))
@@ -282,6 +286,7 @@ class TestApiInstance(base_api.BaseApi):
         self.instance_ctl.rebuild_instance.assert_called_once_with(
             instance_id=instance_id,
             rebuild_date=data.get('rebuild_date'),
+            image_id=None,
             image_meta=dict(distro=data.get('distro'),
                             version=data.get('version'),
                             os_type=data.get('os_type'))

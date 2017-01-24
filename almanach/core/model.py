@@ -61,9 +61,11 @@ class Entity(object):
 class Instance(Entity):
     TYPE = 'instance'
 
-    def __init__(self, entity_id, project_id, start, end, flavor, last_event, name, image_meta=None, metadata=None):
+    def __init__(self, entity_id, project_id, start, end, flavor, last_event, name,
+                 image_id=None, image_meta=None, metadata=None):
         super(Instance, self).__init__(entity_id, project_id, start, end, last_event, name, self.TYPE)
         self.flavor = flavor
+        self.image_id = image_id
         self.metadata = metadata or dict()
         self.image_meta = image_meta or dict()
 
@@ -74,12 +76,14 @@ class Instance(Entity):
     def __eq__(self, other):
         return (super(Instance, self).__eq__(other) and
                 other.flavor == self.flavor and
+                other.image_id == self.image_id and
                 other.image_meta == self.image_meta and
                 other.metadata == self.metadata)
 
     def as_dict(self):
         d = super(Instance, self).as_dict()
         d['flavor'] = self.flavor
+        d['image_id'] = self.image_id
         d['metadata'] = self.metadata
         d['image_meta'] = self.image_meta
 
@@ -97,6 +101,7 @@ class Instance(Entity):
             last_event=d.get('last_event'),
             name=d.get('name'),
             flavor=d.get('flavor'),
+            image_id=d.get('image_id'),
             image_meta=d.get('os') or d.get('image_meta'),
             metadata=Instance._unserialize_metadata(d),
         )

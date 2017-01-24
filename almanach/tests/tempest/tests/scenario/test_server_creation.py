@@ -21,7 +21,7 @@ from almanach.tests.tempest.tests.scenario import base
 class TestServerCreationScenario(base.BaseAlmanachScenarioTest):
 
     def test_create_server(self):
-        server, flavor = self.create_test_server(wait_until='ACTIVE')
+        server, flavor, image_id = self.create_test_server(wait_until='ACTIVE')
 
         self.addCleanup(waiters.wait_for_server_termination,
                         self.os.servers_client, server['id'])
@@ -35,5 +35,6 @@ class TestServerCreationScenario(base.BaseAlmanachScenarioTest):
         self.assertEqual('instance', entities[0]['entity_type'])
         self.assertEqual(server['name'], entities[0]['name'])
         self.assertEqual(flavor['name'], entities[0]['flavor'])
+        self.assertEqual(image_id, entities[0]['image_id'])
         self.assertIsNotNone(entities[0]['start'])
         self.assertIsNone(entities[0]['end'])

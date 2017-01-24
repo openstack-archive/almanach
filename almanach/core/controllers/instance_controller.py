@@ -27,14 +27,15 @@ class InstanceController(base_controller.BaseController):
         self.config = config
         self.database_adapter = database_adapter
 
-    def create_instance(self, instance_id, tenant_id, create_date, name, flavor, image_meta=None, metadata=None):
+    def create_instance(self, instance_id, tenant_id, create_date, name, flavor, image_id,
+                        image_meta=None, metadata=None):
         create_date = self._validate_and_parse_date(create_date)
         image_meta = self._filter_image_meta(image_meta)
-        LOG.info("Instance %s created (tenant %s; flavor %s; image_meta %s) on %s",
-                 instance_id, tenant_id, flavor, image_meta, create_date)
+        LOG.info("Instance %s created (tenant: %s; flavor: %s; image_id: %s; image_meta: %s) on %s",
+                 instance_id, tenant_id, flavor, image_id, image_meta, create_date)
 
         if self._fresher_entity_exists(instance_id, create_date):
-            LOG.warning("instance %s already exists with a more recent entry", instance_id)
+            LOG.warning("Instance %s already exists with a more recent entry", instance_id)
             return
 
         entity = model.Instance(
@@ -45,6 +46,7 @@ class InstanceController(base_controller.BaseController):
             end=None,
             name=name,
             flavor=flavor,
+            image_id=image_id,
             image_meta=image_meta,
             metadata=self._filter_metadata(metadata))
 
@@ -75,15 +77,16 @@ class InstanceController(base_controller.BaseController):
             LOG.error("Trying to resize an instance with id '%s' not in the database yet.", instance_id)
             raise e
 
-    def rebuild_instance(self, instance_id, rebuild_date, image_meta):
+    def rebuild_instance(self, instance_id, rebuild_date, image_id, image_meta):
         rebuild_date = self._validate_and_parse_date(rebuild_date)
         instance = self.database_adapter.get_active_entity(instance_id)
         image_meta = self._filter_image_meta(image_meta)
-        LOG.info("Instance %s rebuilt for tenant %s with %s on %s",
-                 instance_id, instance.project_id, image_meta, rebuild_date)
+        LOG.info("Instance %s rebuilt for tenant %s (image_id: %s; image_meta: %s) on %s",
+                 instance_id, instance.project_id, image_id, image_meta, rebuild_date)
 
-        if instance.image_meta != image_meta:
+        if instance.image_id != image_id or instance.image_meta != image_meta:
             self.database_adapter.close_active_entity(instance_id, rebuild_date)
+            instance.image_id = image_id or instance.image_id
             instance.image_meta = image_meta
             instance.start = rebuild_date
             instance.end = None

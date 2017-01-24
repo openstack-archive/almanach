@@ -61,7 +61,7 @@ class TestVolumeAttachmentScenario(base.BaseAlmanachScenarioTest):
 
     def _attach_volume_to_server(self):
         self._volume = self.create_test_volume()
-        self._server, _ = self.create_test_server(wait_until='ACTIVE')
+        self._server, _, _ = self.create_test_server(wait_until='ACTIVE')
 
         self.volumes_client.attach_volume(self._volume['id'],
                                           instance_uuid=self._server['id'],

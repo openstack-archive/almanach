@@ -43,6 +43,7 @@ class InstanceHandler(base_handler.BaseHandler):
             create_date=notification.payload.get("created_at"),
             name=notification.payload.get("hostname"),
             flavor=notification.payload.get("instance_type"),
+            image_id=notification.payload.get("image_meta", {}).get("base_image_ref"),
             image_meta=notification.payload.get("image_meta"),
             metadata=notification.payload.get("metadata"),
         )
@@ -72,5 +73,6 @@ class InstanceHandler(base_handler.BaseHandler):
         self.controller.rebuild_instance(
             instance_id=instance_id,
             rebuild_date=date,
+            image_id=notification.payload.get("image_meta", {}).get("base_image_ref"),
             image_meta=notification.payload.get("image_meta")
         )

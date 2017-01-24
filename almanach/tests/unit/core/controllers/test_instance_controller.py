@@ -44,6 +44,7 @@ class TestInstanceController(base.BaseTestCase):
                                         fake_instance.start,
                                         fake_instance.flavor,
                                         fake_instance.name,
+                                        fake_instance.image_id,
                                         fake_instance.image_meta,
                                         fake_instance.metadata)
 
@@ -112,22 +113,41 @@ class TestInstanceController(base.BaseTestCase):
             "project_id", "start", "end", model.Instance.TYPE
         )
 
-    def test_instance_rebuilded(self):
-        i = a(instance())
-        self.database_adapter.get_active_entity.side_effect = [i, i]
-        calls = [mock.call("an_instance_id"), mock.call("an_instance_id")]
+    def test_instance_rebuilt_without_modification(self):
+        fake_instance = a(instance().with_image('some_image_id').with_image_meta(dict()))
+        self.database_adapter.get_active_entity.return_value = fake_instance
 
-        self.controller.rebuild_instance(
-            "an_instance_id",
-            "2015-10-21T16:25:00.000000Z",
-            dict(distro="some_distro", version="some_version", os_type="some_type")
-        )
-        self.controller.rebuild_instance(
-            "an_instance_id",
-            "2015-10-21T16:25:00.000000Z",
-            dict(distro=i.image_meta['distro'], version=i.image_meta['version'], os_type=i.image_meta['os_type'])
-        )
+        self.controller.rebuild_instance("an_instance_id",
+                                         "2015-10-21T16:25:00.000000Z",
+                                         "some_image_id",
+                                         dict())
 
-        self.database_adapter.get_active_entity.assert_has_calls(calls)
+        self.database_adapter.get_active_entity.assert_called_once_with("an_instance_id")
+        self.database_adapter.close_active_entity.assert_not_called()
+        self.database_adapter.insert_entity.assert_not_called()
+
+    def test_instance_rebuilt_with_different_image_id(self):
+        fake_instance = a(instance().with_image('some_image_id').with_image_meta(dict()))
+        self.database_adapter.get_active_entity.return_value = fake_instance
+
+        self.controller.rebuild_instance("an_instance_id",
+                                         "2015-10-21T16:25:00.000000Z",
+                                         "another_image_id",
+                                         dict())
+
+        self.database_adapter.get_active_entity.assert_called_once_with("an_instance_id")
+        self.database_adapter.close_active_entity.assert_called_once()
+        self.database_adapter.insert_entity.assert_called_once()
+
+    def test_instance_rebuilt_with_different_image_meta(self):
+        fake_instance = a(instance().with_image('some_image_id').with_image_meta(dict()))
+        self.database_adapter.get_active_entity.return_value = fake_instance
+
+        self.controller.rebuild_instance("an_instance_id",
+                                         "2015-10-21T16:25:00.000000Z",
+                                         "some_image_id",
+                                         dict(os_type='something else'))
+
+        self.database_adapter.get_active_entity.assert_called_once_with("an_instance_id")
         self.database_adapter.close_active_entity.assert_called_once()
         self.database_adapter.insert_entity.assert_called_once()

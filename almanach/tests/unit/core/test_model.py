@@ -31,6 +31,7 @@ class TestModel(base.BaseTestCase):
             start=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
             end=None,
             flavor='flavor_id',
+            image_id='image_id',
             image_meta=dict(os_type='linux', distro='Ubuntu', version='16.04'),
             last_event=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
             name='hostname',
@@ -43,6 +44,37 @@ class TestModel(base.BaseTestCase):
         self.assertEqual('instance', entry['entity_type'])
         self.assertEqual('hostname', entry['name'])
         self.assertEqual('flavor_id', entry['flavor'])
+        self.assertEqual('image_id', entry['image_id'])
+        self.assertEqual('linux', entry['os']['os_type'])
+        self.assertEqual('Ubuntu', entry['os']['distro'])
+        self.assertEqual('16.04', entry['os']['version'])
+        self.assertEqual('linux', entry['image_meta']['os_type'])
+        self.assertEqual('Ubuntu', entry['image_meta']['distro'])
+        self.assertEqual('16.04', entry['image_meta']['version'])
+        self.assertEqual(datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc), entry['last_event'])
+        self.assertEqual(datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc), entry['start'])
+        self.assertIsNone(entry['end'])
+
+    def test_instance_serialize_with_missing_image_id(self):
+        instance = model.Instance(
+            entity_id='instance_id',
+            project_id='project_id',
+            start=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
+            end=None,
+            flavor='flavor_id',
+            image_meta=dict(os_type='linux', distro='Ubuntu', version='16.04'),
+            last_event=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
+            name='hostname',
+            metadata={'some_key': 'some.value', 'another^key': 'another.value'},
+        )
+
+        entry = instance.as_dict()
+        self.assertEqual('instance_id', entry['entity_id'])
+        self.assertEqual('project_id', entry['project_id'])
+        self.assertEqual('instance', entry['entity_type'])
+        self.assertEqual('hostname', entry['name'])
+        self.assertEqual('flavor_id', entry['flavor'])
+        self.assertIsNone(entry['image_id'])
         self.assertEqual('linux', entry['os']['os_type'])
         self.assertEqual('Ubuntu', entry['os']['distro'])
         self.assertEqual('16.04', entry['os']['version'])
@@ -54,6 +86,38 @@ class TestModel(base.BaseTestCase):
         self.assertIsNone(entry['end'])
 
     def test_instance_unserialize(self):
+        entry = {
+            'entity_id': 'instance_id',
+            'entity_type': 'instance',
+            'project_id': 'project_id',
+            'start': datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
+            'end': None,
+            'last_event': datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
+            'flavor': 'flavor_id',
+            'image_id': 'image_id',
+            'image_meta': {
+                'os_type': 'linux',
+                'distro': 'Ubuntu',
+                'version': '16.04',
+            },
+            'name': 'hostname'
+        }
+
+        instance = model.get_entity_from_dict(entry)
+        self.assertEqual('instance_id', instance.entity_id)
+        self.assertEqual('project_id', instance.project_id)
+        self.assertEqual('instance', instance.entity_type)
+        self.assertEqual('hostname', instance.name)
+        self.assertEqual('flavor_id', instance.flavor)
+        self.assertEqual('image_id', instance.image_id)
+        self.assertEqual('linux', instance.image_meta['os_type'])
+        self.assertEqual('Ubuntu', instance.image_meta['distro'])
+        self.assertEqual('16.04', instance.image_meta['version'])
+        self.assertEqual(datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc), instance.last_event)
+        self.assertEqual(datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc), instance.start)
+        self.assertIsNone(instance.end)
+
+    def test_instance_unserialize_with_missing_image_id(self):
         entry = {
             'entity_id': 'instance_id',
             'entity_type': 'instance',
@@ -76,6 +140,7 @@ class TestModel(base.BaseTestCase):
         self.assertEqual('instance', instance.entity_type)
         self.assertEqual('hostname', instance.name)
         self.assertEqual('flavor_id', instance.flavor)
+        self.assertIsNone(instance.image_id)
         self.assertEqual('linux', instance.image_meta['os_type'])
         self.assertEqual('Ubuntu', instance.image_meta['distro'])
         self.assertEqual('16.04', instance.image_meta['version'])
@@ -212,10 +277,25 @@ class TestModel(base.BaseTestCase):
             metadata=dict(),
         )
 
+        # different image
+        instance6 = model.Instance(
+            entity_id='instance_id',
+            project_id='project_id',
+            start=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
+            end=None,
+            flavor='flavor_id',
+            image_id='image_id',
+            image_meta=dict(os_type='linux', distro='Ubuntu', version='16.04'),
+            last_event=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
+            name='hostname',
+            metadata={'some_key': 'some.value', 'another^key': 'another.value'},
+        )
+
         self.assertTrue(instance1 == instance2)
         self.assertTrue(instance1 != instance3)
         self.assertTrue(instance1 != instance4)
         self.assertTrue(instance1 != instance5)
+        self.assertTrue(instance1 != instance6)
 
     def test_volume_serialize(self):
         volume = model.Volume(

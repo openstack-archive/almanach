@@ -133,6 +133,10 @@ def create_instance(project_id):
         create_date=body['created_at'],
         name=body['name'],
         flavor=body['flavor'],
+
+        # NOTE(fguillot): The image_id is optional for the API v1 to stay backward compatible.
+        # That will be supported by the future API v2
+        image_id=body.get('image_id'),
         image_meta=dict(distro=body['os_distro'],
                         version=body['os_version'],
                         os_type=body['os_type'])
@@ -225,6 +229,10 @@ def rebuild_instance(instance_id):
     instance_ctl.rebuild_instance(
         instance_id=instance_id,
         rebuild_date=body['rebuild_date'],
+
+        # NOTE(fguillot): The image_id is optional for the API v1 to stay backward compatible.
+        # That will be supported by the future API v2
+        image_id=body.get('image_id'),
         image_meta=dict(distro=body['distro'],
                         version=body['version'],
                         os_type=body['os_type'])

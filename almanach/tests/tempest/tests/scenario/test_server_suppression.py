@@ -18,7 +18,7 @@ from almanach.tests.tempest.tests.scenario import base
 class TestServerSuppressionScenario(base.BaseAlmanachScenarioTest):
 
     def test_delete_server(self):
-        server, flavor = self.create_test_server(wait_until='ACTIVE')
+        server, flavor, _ = self.create_test_server(wait_until='ACTIVE')
         self.delete_test_server(server)
         self.wait_for_notification(self._check_entity_is_closed, server)
 

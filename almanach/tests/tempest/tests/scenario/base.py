@@ -77,19 +77,23 @@ class BaseAlmanachScenarioTest(manager.ScenarioTest):
 
         return self.volumes_client.show_volume(volume['id'])['volume']
 
-    def create_test_server(self, wait_until=None):
+    def create_test_server(self, wait_until=None, image_id=None):
         flavors = self.flavors_client.list_flavors()['flavors']
-        images = self.image_client.list_images()['images']
         tenant_network = self.get_tenant_network()
+
+        if not image_id:
+            images = self.image_client.list_images()['images']
+            image_id = images[0]['id']
+
         body, servers = compute.create_test_server(
             self.os,
             wait_until=wait_until,
-            image_id=images[0]['id'],
+            image_id=image_id,
             flavor=flavors[0]['id'],
             tenant_network=tenant_network)
 
         server = self.os.servers_client.show_server(body['id'])['server']
-        return server, flavors[0]
+        return server, flavors[0], image_id
 
     def delete_test_server(self, server):
         self.os.servers_client.delete_server(server['id'])

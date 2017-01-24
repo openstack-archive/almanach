@@ -64,14 +64,6 @@ class EntityBuilder(Builder):
         self.dict_object["end"] = None
         return self
 
-    def with_flavor(self, flavor):
-        self.dict_object["flavor"] = flavor
-        return self
-
-    def with_metadata(self, metadata):
-        self.dict_object['metadata'] = metadata
-        return self
-
     def build_from(self, other):
         self.dict_object = copy(other.__dict__)
         return self
@@ -79,6 +71,26 @@ class EntityBuilder(Builder):
     def with_all_dates_in_string(self):
         self.dict_object['start'] = self.dict_object['start'].strftime("%Y-%m-%dT%H:%M:%S.%fZ")
         self.dict_object['last_event'] = self.dict_object['last_event'].strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        return self
+
+
+class InstanceBuilder(EntityBuilder):
+
+    def with_flavor(self, flavor):
+        self.dict_object["flavor"] = flavor
+        return self
+
+    def with_image(self, image_id):
+        self.dict_object["image_id"] = image_id
+        return self
+
+    def with_image_meta(self, image_meta):
+        self.dict_object["image_meta"] = image_meta
+        self.dict_object["os"] = image_meta
+        return self
+
+    def with_metadata(self, metadata):
+        self.dict_object['metadata'] = metadata
         return self
 
 
@@ -116,7 +128,7 @@ class VolumeTypeBuilder(Builder):
 
 
 def instance():
-    return EntityBuilder({
+    return InstanceBuilder({
         "entity_id": str(uuid4()),
         "project_id": str(uuid4()),
         "start": datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),

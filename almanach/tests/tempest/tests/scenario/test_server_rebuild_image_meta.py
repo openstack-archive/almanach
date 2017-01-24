@@ -18,10 +18,10 @@ from tempest.lib.common.utils import test_utils
 from almanach.tests.tempest.tests.scenario import base
 
 
-class TestServerResizeScenario(base.BaseAlmanachScenarioTest):
+class TestServerRebuildImageMetaScenario(base.BaseAlmanachScenarioTest):
 
-    def test_resize_server(self):
-        server, initial_flavor, resized_flavor = self._resize_server()
+    def test_rebuild_server(self):
+        server, flavor, image_id = self._rebuild_server()
         self.wait_for_notification(self._check_that_a_new_entity_is_created,
                                    server)
 
@@ -31,36 +31,32 @@ class TestServerResizeScenario(base.BaseAlmanachScenarioTest):
         self.assertEqual(server['id'], entities[0]['entity_id'])
         self.assertEqual('instance', entities[0]['entity_type'])
         self.assertEqual(server['name'], entities[0]['name'])
-        self.assertEqual(initial_flavor['name'], entities[0]['flavor'])
+        self.assertEqual(flavor['name'], entities[0]['flavor'])
         self.assertIsNotNone(entities[0]['start'])
         self.assertIsNotNone(entities[0]['end'])
         self.assertEqual(dict(), entities[0]['os'])
         self.assertEqual(dict(), entities[0]['image_meta'])
+        self.assertEqual(image_id, entities[0]['image_id'])
 
         self.assertEqual(server['id'], entities[1]['entity_id'])
         self.assertEqual('instance', entities[1]['entity_type'])
         self.assertEqual(server['name'], entities[1]['name'])
-        self.assertEqual(resized_flavor['name'], entities[1]['flavor'])
+        self.assertEqual(flavor['name'], entities[1]['flavor'])
         self.assertIsNotNone(entities[1]['start'])
         self.assertIsNone(entities[1]['end'])
-        self.assertEqual(dict(), entities[0]['os'])
-        self.assertEqual(dict(), entities[0]['image_meta'])
+        self.assertEqual('linux', entities[1]['image_meta']['distro'])
+        self.assertEqual('linux', entities[1]['os']['distro'])
+        self.assertEqual(image_id, entities[0]['image_id'])
 
     def _check_that_a_new_entity_is_created(self, server):
         entities = self.get_tenant_entities(server['tenant_id'])
         return len(entities) == 2
 
-    def _resize_server(self):
-        flavors = self.flavors_client.list_flavors()['flavors']
-        resized_flavor = flavors[1]
-        server, initial_flavor, _ = self.create_test_server(wait_until='ACTIVE')
-        self.os.servers_client.resize_server(server['id'], resized_flavor['id'])
+    def _rebuild_server(self):
+        server, flavor, image_id = self.create_test_server(wait_until='ACTIVE')
+        image = self._prepare_image()
 
-        waiters.wait_for_server_status(self.os.servers_client, server['id'],
-                                       status='VERIFY_RESIZE')
-
-        self.os.servers_client.confirm_resize_server(server['id'])
-
+        self.os.servers_client.rebuild_server(server['id'], image['id'])
         waiters.wait_for_server_status(self.os.servers_client, server['id'],
                                        status='ACTIVE')
 
@@ -69,4 +65,9 @@ class TestServerResizeScenario(base.BaseAlmanachScenarioTest):
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.os.servers_client.delete_server, server['id'])
 
-        return server, initial_flavor, resized_flavor
+        return server, flavor, image_id
+
+    def _prepare_image(self):
+        images = self.image_client.list_images()['images']
+        self.os_adm.compute_images_client.set_image_metadata(images[2]['id'], {'distro': 'linux'})
+        return images[2]
