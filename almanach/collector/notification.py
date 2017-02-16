@@ -19,6 +19,18 @@ from oslo_log import log as logging
 LOG = logging.getLogger(__name__)
 
 
+class NotificationFilter(object):
+
+    def __init__(self):
+        self.filters = []
+
+    def add(self, notification_filter):
+        self.filters.append(notification_filter)
+
+    def ignore_notification(self, notification):
+        return any([f.ignore_notification(notification) for f in self.filters])
+
+
 class NotificationMessage(object):
     RETRY_COUNTER = 'retry_count'
 

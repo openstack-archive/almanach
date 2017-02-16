@@ -14,7 +14,12 @@
 
 import mock
 
+from almanach.collector.handlers import instance_handler
+from almanach.collector.handlers import volume_handler
+from almanach.collector.handlers import volume_type_handler
+from almanach.collector import notification
 from almanach.collector import service
+
 from almanach.tests.unit import base
 
 
@@ -29,6 +34,22 @@ class TestServiceFactory(base.BaseTestCase):
         self.assertIsInstance(self.factory.get_service(),
                               service.CollectorService)
 
-        self.core_factory.get_instance_controller.assert_called_once()
-        self.core_factory.get_volume_controller.assert_called_once()
-        self.core_factory.get_volume_type_controller.assert_called_once()
+        self.core_factory.get_instance_controller.assert_called_once_with()
+        self.core_factory.get_volume_controller.assert_called_once_with()
+        self.core_factory.get_volume_type_controller.assert_called_once_with()
+
+    def test_get_instance_handler(self):
+        self.assertIsInstance(self.factory.get_instance_handler(),
+                              instance_handler.InstanceHandler)
+
+    def test_get_volume_handler(self):
+        self.assertIsInstance(self.factory.get_volume_handler(),
+                              volume_handler.VolumeHandler)
+
+    def test_get_volume_type_handler(self):
+        self.assertIsInstance(self.factory.get_volume_type_handler(),
+                              volume_type_handler.VolumeTypeHandler)
+
+    def test_get_on_delete_filters(self):
+        self.assertIsInstance(self.factory.get_on_delete_filters(),
+                              notification.NotificationFilter)
