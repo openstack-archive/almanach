@@ -21,8 +21,6 @@ from almanach.collector import service as collector_service
 from almanach.core import factory as core_factory
 from almanach.core import opts
 
-LOG = logging.getLogger(__name__)
-
 
 def main():
     opts.CONF(sys.argv[1:], project=opts.DOMAIN)
