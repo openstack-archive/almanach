@@ -22,9 +22,10 @@ LOG = logging.getLogger(__name__)
 
 class InstanceHandler(base_handler.BaseHandler):
 
-    def __init__(self, controller):
+    def __init__(self, controller, on_delete_filter):
         super(InstanceHandler, self).__init__()
         self.controller = controller
+        self.on_delete_filter = on_delete_filter
 
     def handle_events(self, notification):
         if notification.event_type == "compute.instance.create.end":
@@ -54,10 +55,7 @@ class InstanceHandler(base_handler.BaseHandler):
         try:
             self.controller.delete_instance(instance_id, date)
         except exception.EntityNotFoundException as e:
-            if notification.payload.get('state') == 'error':
-                LOG.info('Instance deletion event ignored because instance %s was badly created',
-                         instance_id)
-            else:
+            if not self.on_delete_filter.ignore_notification(notification):
                 raise e
 
     def _on_instance_resized(self, notification):
