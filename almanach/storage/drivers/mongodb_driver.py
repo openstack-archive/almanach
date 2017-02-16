@@ -12,15 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from oslo_log import log
 import pymongo
 
 from almanach.core import exception
 from almanach.core import model
 from almanach.core.model import get_entity_from_dict
 from almanach.storage.drivers import base_driver
-
-LOG = log.getLogger(__name__)
 
 
 class MongoDbDriver(base_driver.BaseDriver):
