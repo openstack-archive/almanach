@@ -15,6 +15,8 @@
 from oslo_log import log as logging
 from oslo_service import service
 
+from almanach.collector.filters import delete_instance_before_completion_filter
+from almanach.collector.filters import errored_instance_filter
 from almanach.collector.handlers import instance_handler
 from almanach.collector.handlers import volume_handler
 from almanach.collector.handlers import volume_type_handler
@@ -57,18 +59,26 @@ class ServiceFactory(object):
         messaging_factory = messaging.MessagingFactory(self.config)
 
         notification_handler = notification.NotificationHandler(self.config, messaging_factory)
-        notification_handler.add_event_handler(self._get_instance_handler())
-        notification_handler.add_event_handler(self._get_volume_handler())
-        notification_handler.add_event_handler(self._get_volume_type_handler())
+        notification_handler.add_event_handler(self.get_instance_handler())
+        notification_handler.add_event_handler(self.get_volume_handler())
+        notification_handler.add_event_handler(self.get_volume_type_handler())
 
         listeners = messaging_factory.get_listeners(notification_handler)
         return CollectorService(listeners)
 
-    def _get_instance_handler(self):
-        return instance_handler.InstanceHandler(self.core_factory.get_instance_controller())
+    def get_instance_handler(self):
+        return instance_handler.InstanceHandler(
+                self.core_factory.get_instance_controller(),
+                self.get_on_delete_filters())
 
-    def _get_volume_handler(self):
+    def get_volume_handler(self):
         return volume_handler.VolumeHandler(self.core_factory.get_volume_controller())
 
-    def _get_volume_type_handler(self):
+    def get_volume_type_handler(self):
         return volume_type_handler.VolumeTypeHandler(self.core_factory.get_volume_type_controller())
+
+    def get_on_delete_filters(self):
+        filters = notification.NotificationFilter()
+        filters.add(errored_instance_filter.ErroredInstanceFilter())
+        filters.add(delete_instance_before_completion_filter.DeleteInstanceBeforeCompletionFilter(self.config))
+        return filters

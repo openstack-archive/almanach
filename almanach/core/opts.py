@@ -88,6 +88,9 @@ auth_opts = [
 ]
 
 entity_opts = [
+    cfg.IntOpt('instance_existence_threshold',
+               default=900,
+               help='Instance existence threshold'),
     cfg.IntOpt('volume_existence_threshold',
                default=60,
                help='Volume existence threshold'),
