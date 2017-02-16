@@ -18,10 +18,10 @@ from almanach.collector import notification
 from almanach.tests.unit import base
 
 
-class TestNotification(base.BaseTestCase):
+class TestNotificationHandler(base.BaseTestCase):
 
     def setUp(self):
-        super(TestNotification, self).setUp()
+        super(TestNotificationHandler, self).setUp()
 
         self.config_fixture.config(retry_delay=0, group='collector')
         self.config_fixture.config(max_retries=3, group='collector')

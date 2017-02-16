@@ -46,10 +46,13 @@ collector_opts = [
                default='almanach',
                help='AMQP topic used for OpenStack notifications'),
     cfg.IntOpt('max_retries',
+               default=5,
+               help='Number of retries before to send message to critical queue'),
+    cfg.IntOpt('min_retries',
                default=3,
-               help='Maximal number of message retries'),
+               help='Number of retries before to use filters to discard notifications'),
     cfg.IntOpt('retry_delay',
-               default=10,
+               default=25,
                help='Delay in seconds between retries'),
 ]
 
@@ -87,6 +90,9 @@ auth_opts = [
 ]
 
 entity_opts = [
+    cfg.IntOpt('instance_existence_threshold',
+               default=900,
+               help='Instance existence threshold'),
     cfg.IntOpt('volume_existence_threshold',
                default=60,
                help='Volume existence threshold'),
