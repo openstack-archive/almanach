@@ -25,7 +25,9 @@ class TestInstanceHandler(base.BaseTestCase):
     def setUp(self):
         super(TestInstanceHandler, self).setUp()
         self.controller = mock.Mock()
-        self.instance_handler = instance_handler.InstanceHandler(self.controller)
+        self.on_delete_filter = mock.Mock()
+        self.on_delete_filter.ignore_notification.return_value = False
+        self.instance_handler = instance_handler.InstanceHandler(self.controller, self.on_delete_filter)
 
     def test_instance_created(self):
         notification = builder.InstanceNotificationBuilder()\
@@ -77,6 +79,8 @@ class TestInstanceHandler(base.BaseTestCase):
         )
 
     def test_instance_in_error_deleted(self):
+        self.on_delete_filter.ignore_notification.return_value = True
+
         notification = builder.InstanceNotificationBuilder() \
             .with_event_type('compute.instance.delete.end') \
             .with_payload_value('terminated_at', 'a_date') \
