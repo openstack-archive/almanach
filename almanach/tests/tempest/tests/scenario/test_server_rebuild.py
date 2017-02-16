@@ -71,5 +71,6 @@ class TestServerRebuildScenario(base.BaseAlmanachScenarioTest):
     # if the image is changed (we receive the image_name in the notification).
     def _prepare_image(self):
         images = self.image_client.list_images()['images']
-        self.os_adm.compute_images_client.set_image_metadata(images[1]['id'], {'distro': 'linux'})
-        return images[1]
+        for image in images:
+            self.os_adm.compute_images_client.set_image_metadata(image['id'], {'distro': 'linux'})
+        return images[0]
