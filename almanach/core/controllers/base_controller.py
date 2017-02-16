@@ -16,12 +16,9 @@ import abc
 from dateutil import parser as date_parser
 import six
 
-from oslo_log import log
 import pytz
 
 from almanach.core import exception
-
-LOG = log.getLogger(__name__)
 
 
 @six.add_metaclass(abc.ABCMeta)

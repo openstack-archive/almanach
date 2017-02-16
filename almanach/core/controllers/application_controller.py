@@ -12,12 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from oslo_log import log
 from pkg_resources import get_distribution
 
 from almanach.core.controllers import base_controller
-
-LOG = log.getLogger(__name__)
 
 
 class ApplicationController(base_controller.BaseController):
