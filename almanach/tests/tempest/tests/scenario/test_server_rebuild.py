@@ -20,6 +20,10 @@ from almanach.tests.tempest.tests.scenario import base
 
 class TestServerRebuildScenario(base.BaseAlmanachScenarioTest):
 
+    def tearDown(self):
+        super(TestServerRebuildScenario, self).tearDown()
+        self._remove_image_metadata()
+
     def test_rebuild_server(self):
         server, flavor = self._rebuild_server()
         self.wait_for_notification(self._check_that_a_new_entity_is_created,
@@ -65,12 +69,11 @@ class TestServerRebuildScenario(base.BaseAlmanachScenarioTest):
 
         return server, flavor
 
-    # TODO(fguillot): Unfortunately, Almanach do not store the image in the instance entity at
-    # the moment. The creation of a new entity is triggered by the modification of a custom
-    # image metadata: distro or version. In the future, Almanach should probably create a new entity
-    # if the image is changed (we receive the image_name in the notification).
     def _prepare_image(self):
         images = self.image_client.list_images()['images']
-        for image in images:
-            self.os_adm.compute_images_client.set_image_metadata(image['id'], {'distro': 'linux'})
+        self.os_adm.compute_images_client.set_image_metadata(images[0]['id'], {'distro': 'linux'})
         return images[0]
+
+    def _remove_image_metadata(self):
+        images = self.image_client.list_images()['images']
+        self.os_adm.compute_images_client.delete_image_metadata_item(images[0]['id'], 'distro')
