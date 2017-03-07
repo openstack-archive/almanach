@@ -15,8 +15,8 @@
 from uuid import uuid4
 
 from oslo_serialization import jsonutils as json
-from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib.common.utils import data_utils
 import tempest.test
 
 from almanach.tests.tempest import clients
