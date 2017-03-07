@@ -16,9 +16,9 @@ import time
 
 from oslo_serialization import jsonutils as json
 from tempest.common import compute
-from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions
 from tempest.scenario import manager
 
