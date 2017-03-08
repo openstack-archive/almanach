@@ -67,10 +67,10 @@ class TestVolumeAttachmentScenario(base.BaseAlmanachScenarioTest):
                                           instance_uuid=self._server['id'],
                                           mountpoint='/dev/vdc')
 
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       self._volume['id'], 'in-use')
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                self._volume['id'], 'in-use')
 
     def _detach_volume_from_server(self):
         self.volumes_client.detach_volume(self._volume['id'])
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       self._volume['id'], 'available')
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                self._volume['id'], 'available')

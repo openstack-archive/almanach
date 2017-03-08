@@ -42,8 +42,8 @@ class TestVolumeResizeScenario(base.BaseAlmanachScenarioTest):
         volume = self.create_test_volume(size=1)
         self.volumes_client.extend_volume(volume['id'], new_size=2)
 
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       volume['id'], 'available')
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
 
         self.addCleanup(self.volumes_client.wait_for_resource_deletion,
                         volume['id'])

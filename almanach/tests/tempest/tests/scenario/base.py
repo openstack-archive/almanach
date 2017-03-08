@@ -72,8 +72,8 @@ class BaseAlmanachScenarioTest(manager.ScenarioTest):
         }
 
         volume = self.volumes_client.create_volume(**kwargs)['volume']
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       volume['id'], 'available')
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
 
         return self.volumes_client.show_volume(volume['id'])['volume']
 
