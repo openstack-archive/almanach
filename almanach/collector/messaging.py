@@ -41,7 +41,7 @@ class MessagingFactory(object):
     def get_notifier(self):
         transport = self._get_transport(self.config.collector.transport_url[0])
         return oslo_messaging.Notifier(transport, publisher_id='almanach.collector',
-                                       topic=self.config.collector.topic, driver='messagingv2')
+                                       topics=[self.config.collector.topic], driver='messagingv2')
 
     def _get_transport(self, url):
         return oslo_messaging.get_notification_transport(self.config, url=url)
