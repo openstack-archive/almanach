@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from uuid import uuid4
 
 from oslo_serialization import jsonutils as json
+from oslo_utils import uuidutils
 from tempest import config
 from tempest.lib.common.utils import data_utils
 import tempest.test
@@ -50,7 +50,7 @@ class BaseAlmanachTest(tempest.test.BaseTestCase):
 
     @staticmethod
     def get_server_creation_payload():
-        server = {'id': str(uuid4()),
+        server = {'id': uuidutils.generate_uuid(),
                   'created_at': '2016-01-01T18:30:00Z',
                   'name': 'api_test_instance_create',
                   'flavor': 'api_flavor',
@@ -61,7 +61,7 @@ class BaseAlmanachTest(tempest.test.BaseTestCase):
 
     @staticmethod
     def get_volume_creation_payload(volume_type_name):
-        return {'volume_id': str(uuid4()),
+        return {'volume_id': uuidutils.generate_uuid(),
                 'attached_to': [],
                 'volume_name': 'a-test-volume',
                 'volume_type': volume_type_name,
@@ -69,14 +69,14 @@ class BaseAlmanachTest(tempest.test.BaseTestCase):
                 'size': 100}
 
     def create_volume_type(self):
-        volume_type = {'type_id': str(uuid4()),
+        volume_type = {'type_id': uuidutils.generate_uuid(),
                        'type_name': data_utils.rand_name('scenario-volume-type')}
         volume_type_body = json.dumps(volume_type)
         return volume_type, self.almanach_client.create_volume_type(volume_type_body)
 
     def create_volume(self):
         volume_type, _ = self.create_volume_type()
-        tenant_id = str(uuid4())
+        tenant_id = uuidutils.generate_uuid()
         volume = self.get_volume_creation_payload(volume_type['type_id'])
         resp, response_body = self.almanach_client.create_volume(tenant_id, json.dumps(volume))
         return resp, tenant_id, volume
