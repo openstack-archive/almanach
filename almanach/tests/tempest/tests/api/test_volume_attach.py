@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from uuid import uuid4
 
 from oslo_serialization import jsonutils as json
+from oslo_utils import uuidutils
 
 from almanach.tests.tempest.tests.api import base
 
@@ -29,7 +29,7 @@ class TestVolumeAttach(base.BaseAlmanachTest):
         resp, tenant_id, volume = self.create_volume()
         self.assertEqual(resp.status, 201)
 
-        attached_to_id = str(uuid4())
+        attached_to_id = uuidutils.generate_uuid() 
         attach_data = {'date': '2016-01-01T18:40:00Z', 'attachments': [attached_to_id]}
         resp, _ = self.almanach_client.attach_volume(volume['volume_id'], json.dumps(attach_data))
         self.assertEqual(resp.status, 200)

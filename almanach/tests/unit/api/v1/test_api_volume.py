@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from uuid import uuid4
 
 from almanach.core import exception
 from almanach.tests.unit.api.v1 import base_api
-
+from oslo_utils import uuidutils
 
 class TestApiVolume(base_api.BaseApi):
 
@@ -180,7 +179,7 @@ class TestApiVolume(base_api.BaseApi):
 
     def test_successful_volume_attach(self):
         data = dict(date="UPDATED_AT",
-                    attachments=[str(uuid4())])
+                    attachments=[dutils.generate_uuid()])
 
         code, result = self.api_put('/volume/VOLUME_ID/attach', data=data, headers={'X-Auth-Token': 'some token value'})
 
@@ -210,7 +209,7 @@ class TestApiVolume(base_api.BaseApi):
     def test_volume_attach_bad_date_format_returns_bad_request_code(self):
         self.volume_ctl.attach_volume.side_effect = exception.DateFormatException
         data = dict(date="A_BAD_DATE",
-                    attachments=[str(uuid4())])
+                    attachments=[uuidutils.generate_uuid()])
 
         code, result = self.api_put('/volume/VOLUME_ID/attach', data=data, headers={'X-Auth-Token': 'some token value'})
 
@@ -228,7 +227,7 @@ class TestApiVolume(base_api.BaseApi):
 
     def test_successful_volume_detach(self):
         data = dict(date="UPDATED_AT",
-                    attachments=[str(uuid4())])
+                    attachments=[uuidutils.generate_uuid()])
 
         code, result = self.api_put('/volume/VOLUME_ID/detach', data=data, headers={'X-Auth-Token': 'some token value'})
 
@@ -254,7 +253,7 @@ class TestApiVolume(base_api.BaseApi):
     def test_volume_detach_bad_date_format_returns_bad_request_code(self):
         self.volume_ctl.detach_volume.side_effect = exception.DateFormatException
         data = dict(date="A_BAD_DATE",
-                    attachments=[str(uuid4())])
+                    attachments=[uuidutils.generate_uuid()])
 
         code, result = self.api_put('/volume/VOLUME_ID/detach', data=data, headers={'X-Auth-Token': 'some token value'})
 

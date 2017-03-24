@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from uuid import uuid4
 
 from oslo_serialization import jsonutils as json
+from oslo_utils import uuidutils
 
 from almanach.tests.tempest.tests.api import base
 
@@ -29,7 +29,7 @@ class TestServerDeletion(base.BaseAlmanachTest):
         super(TestServerDeletion, cls).resource_setup()
 
     def test_instance_delete(self):
-        tenant_id = str(uuid4())
+        tenant_id = uuidutils.generate_uuid() 
         server = self.get_server_creation_payload()
         self.create_server_through_api(tenant_id, server)
 

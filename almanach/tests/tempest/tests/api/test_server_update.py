@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from uuid import uuid4
 
 from oslo_serialization import jsonutils as json
+from oslo_utils import uuidutils
 
 from almanach.tests.tempest.tests.api import base
 
@@ -30,7 +30,7 @@ class TestServerUpdate(base.BaseAlmanachTest):
 
     def test_instance_update(self):
         server = self.get_server_creation_payload()
-        self.create_server_through_api(str(uuid4()), server)
+        self.create_server_through_api(uuidutils.generate_uuid(), server)
 
         update_field = json.dumps({'start_date': '2016-04-14T18:30:00.00Z',
                                    'flavor': 'NewFlavor'})

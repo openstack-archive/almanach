@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from uuid import uuid4
 
 from oslo_serialization import jsonutils as json
+from oslo_utils import uuidutils
 from tempest.lib import exceptions
 
 from almanach.tests.tempest.tests.api import base
@@ -25,7 +25,7 @@ class TestServerCreation(base.BaseAlmanachTest):
 
     def setUp(self):
         super(base.BaseAlmanachTest, self).setUp()
-        self.tenant_id = str(uuid4())
+        self.tenant_id = uuidutils.generate_uuid() 
 
     @classmethod
     def resource_setup(cls):

@@ -14,7 +14,7 @@
 
 from copy import copy
 from datetime import datetime
-from uuid import uuid4
+from oslo_utils import uuidutils
 
 import pytz
 
@@ -117,8 +117,8 @@ class VolumeTypeBuilder(Builder):
 
 def instance():
     return EntityBuilder({
-        "entity_id": str(uuid4()),
-        "project_id": str(uuid4()),
+        "entity_id": uuidutils.generate_uuid(),
+        "project_id": uuidutils.generate_uuid(),
         "start": datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
         "end": None,
         "last_event": datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
@@ -139,8 +139,8 @@ def instance():
 
 def volume():
     return VolumeBuilder({
-        "entity_id": str(uuid4()),
-        "project_id": str(uuid4()),
+        "entity_id": uuidutils.generate_uuid(),
+        "project_id": uuidutils.generate_uuid(),
         "start": datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
         "end": None,
         "last_event": datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
@@ -154,7 +154,7 @@ def volume():
 
 def volume_type():
     return VolumeTypeBuilder({
-        "volume_type_id": str(uuid4()),
+        "volume_type_id": uuidutils.generate_uuid(),
         "volume_type_name": "a_type_name"
     })
 
