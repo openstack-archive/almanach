@@ -28,14 +28,15 @@ LOG = logging.getLogger(__name__)
 
 class CollectorService(service.ServiceBase):
 
-    def __init__(self, listeners):
+    def __init__(self, listeners, thread_pool_size):
         super(CollectorService, self).__init__()
         self.listeners = listeners
+        self.thread_pool_size = thread_pool_size
 
     def start(self):
         LOG.info('Starting collector listeners...')
         for listener in self.listeners:
-            listener.start()
+            listener.start(override_pool_size=self.thread_pool_size)
 
     def wait(self):
         LOG.info('Waiting...')
@@ -64,7 +65,7 @@ class ServiceFactory(object):
         notification_handler.add_event_handler(self.get_volume_type_handler())
 
         listeners = messaging_factory.get_listeners(notification_handler)
-        return CollectorService(listeners)
+        return CollectorService(listeners, self.config.collector.thread_pool_size)
 
     def get_instance_handler(self):
         return instance_handler.InstanceHandler(

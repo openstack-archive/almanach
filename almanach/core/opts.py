@@ -54,6 +54,9 @@ collector_opts = [
     cfg.IntOpt('retry_delay',
                default=25,
                help='Delay in seconds between retries'),
+    cfg.IntOpt('thread_pool_size',
+               default=1,
+               help='Size of executor thread pool'),
 ]
 
 keystone_opts = [
