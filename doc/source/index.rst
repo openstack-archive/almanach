@@ -247,6 +247,12 @@ Almanach will process those events:
 API documentation
 -----------------
 
-.. autoflask:: almanach.api.main:app
-    :undoc-static:
-    :include-empty-docstring:
+:code:`GET /volume_types`
+
+    List volume types.
+
+        - Status Codes: **200 OK** – Volume types exist
+
+    Example output:
+
+    .. literalinclude:: api_examples/output/volume_types.json
