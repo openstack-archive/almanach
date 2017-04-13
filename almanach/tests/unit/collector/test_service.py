@@ -14,42 +14,36 @@
 
 import mock
 
-from almanach.collector.handlers import instance_handler
-from almanach.collector.handlers import volume_handler
-from almanach.collector.handlers import volume_type_handler
-from almanach.collector import notification
+import oslo_messaging
+
 from almanach.collector import service
 
 from almanach.tests.unit import base
 
 
-class TestServiceFactory(base.BaseTestCase):
+class TestService(base.BaseTestCase):
 
     def setUp(self):
-        super(TestServiceFactory, self).setUp()
-        self.core_factory = mock.Mock()
-        self.factory = service.ServiceFactory(self.config, self.core_factory)
+        super(TestService, self).setUp()
+        self.listener = mock.Mock()
+        self.listeners = [self.listener]
+        self.service = service.CollectorService(self.listeners, self.config.collector.thread_pool_size)
 
-    def test_get_service(self):
-        self.assertIsInstance(self.factory.get_service(),
-                              service.CollectorService)
+    def test_start_when_listener_started_successfully(self):
+        self.service.start()
+        self.listeners[0].start.assert_called_once_with(override_pool_size=self.config.collector.thread_pool_size)
+        self.assertTrue(self.service.started)
 
-        self.core_factory.get_instance_controller.assert_called_once()
-        self.core_factory.get_volume_controller.assert_called_once()
-        self.core_factory.get_volume_type_controller.assert_called_once()
+    def test_start_when_listener_failed_to_start(self):
+        self.listener.start.side_effect = oslo_messaging.exceptions.MessagingException('Some Error')
+        self.assertRaises(oslo_messaging.exceptions.MessagingException, self.service.start)
+        self.assertFalse(self.service.started)
 
-    def test_get_instance_handler(self):
-        self.assertIsInstance(self.factory.get_instance_handler(),
-                              instance_handler.InstanceHandler)
+    def test_stop_when_service_started_successfully(self):
+        self.service.started = True
+        self.service.stop()
+        self.listener.stop.assert_called_once()
 
-    def test_get_volume_handler(self):
-        self.assertIsInstance(self.factory.get_volume_handler(),
-                              volume_handler.VolumeHandler)
-
-    def test_get_volume_type_handler(self):
-        self.assertIsInstance(self.factory.get_volume_type_handler(),
-                              volume_type_handler.VolumeTypeHandler)
-
-    def test_get_on_delete_filters(self):
-        self.assertIsInstance(self.factory.get_on_delete_filters(),
-                              notification.NotificationFilter)
+    def test_stop_when_service_failed_to_start(self):
+        self.service.stop()
+        self.listener.stop.assert_not_called()

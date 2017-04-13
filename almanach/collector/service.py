@@ -32,19 +32,24 @@ class CollectorService(service.ServiceBase):
         super(CollectorService, self).__init__()
         self.listeners = listeners
         self.thread_pool_size = thread_pool_size
+        self.started = False
 
     def start(self):
         LOG.info('Starting collector listeners...')
         for listener in self.listeners:
             listener.start(override_pool_size=self.thread_pool_size)
+        self.started = True
 
     def wait(self):
         LOG.info('Waiting...')
 
     def stop(self):
-        LOG.info('Graceful shutdown of the collector service...')
-        for listener in self.listeners:
-            listener.stop()
+        if self.started:
+            LOG.info('Graceful shutdown of the collector service...')
+            for listener in self.listeners:
+                listener.stop()
+        else:
+            LOG.info('Shutdown collector (not started successfully)')
 
     def reset(self):
         pass
