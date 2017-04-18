@@ -382,7 +382,7 @@ API documentation
               - Type
               - Description
             * - project_id
-              - body
+              - path
               - uuid
               - The Tenant Uuid
             * - id
@@ -596,7 +596,7 @@ API documentation
               - Type
               - Description
             * - project_id
-              - body
+              - path
               - uuid
               - The Tenant Uuid
             * - volume_id
