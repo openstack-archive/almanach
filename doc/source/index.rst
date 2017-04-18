@@ -247,6 +247,709 @@ Almanach will process those events:
 API documentation
 -----------------
 
-.. autoflask:: almanach.api.main:app
-    :undoc-static:
-    :include-empty-docstring:
+:code:`GET /volume_types`
+
+    List volume types.
+
+    Status Codes:
+
+    - **200 OK** Volume types exist
+
+    Example output:
+
+        .. literalinclude:: api_examples/output/volume_types.json
+            :language: json
+
+:code:`GET /volume_type/<volume_type_id>`
+
+    Get a volume type.
+
+    Status Codes:
+
+    - **200 OK** Volume type exist
+    - **400 Bad Request** If request data has an invalid or missing field
+    - **404 Not Found** If the volume type does not exist
+
+    Request:
+
+       .. list-table::
+              :widths: 22 8 15 55
+              :header-rows: 1
+
+              * - Name
+                - In
+                - Type
+                - Description
+              * - volume_type_id
+                - path
+                - uuid
+                - The Volume Type Uuid
+
+
+    Example output:
+
+        .. literalinclude:: api_examples/output/volume_type.json
+            :language: json
+
+:code:`POST /volume_type`
+
+    Create a volume type.
+
+    Status Codes:
+
+    - **201 Created** Volume type successfully created
+    - **400 Bad Request** If request data has an invalid or missing field
+
+    Request:
+
+       .. list-table::
+            :widths: 22 8 15 55
+            :header-rows: 1
+
+            * - Name
+              - In
+              - Type
+              - Description
+            * - type_id
+              - body
+              - uuid
+              - The Volume Type Uuid
+            * - type_name
+              - body
+              - string
+              - The Volume Type Name
+
+    Example input:
+
+        .. literalinclude:: api_examples/input/create_volume_type-body.json
+            :language: json
+
+:code:`DELETE /volume_type/<volume_type_id>`
+
+    Delete a volume type.
+
+    Status Codes:
+
+    - **202 Accepted** Volume type successfully deleted
+    - **404 Not Found** If the volume type does not exist
+
+    Request:
+
+       .. list-table::
+            :widths: 22 8 15 55
+            :header-rows: 1
+
+            * - Name
+              - In
+              - Type
+              - Description
+            * - volume_type_id
+              - path
+              - uuid
+              - The Volume Type Uuid
+
+:code:`GET /info`
+
+    Display information about the current version and entity counts.
+
+    Status Codes:
+
+    - **200 OK** Service is available
+
+    Example output:
+
+        .. literalinclude:: api_examples/output/info.json
+            :language: json
+
+:code:`POST /project/<project_id>/instance`
+
+    Create an instance.
+
+    Status Codes:
+
+    - **201 Created** Instance successfully created
+    - **400 Bad Request** If request data has an invalid or missing field
+    - **404 Not Found** If tenant does not exist
+
+    Request:
+
+       .. list-table::
+            :widths: 22 8 15 55
+            :header-rows: 1
+
+            * - Name
+              - In
+              - Type
+              - Description
+            * - project_id
+              - body
+              - uuid
+              - The Tenant Uuid
+            * - id
+              - body
+              - uuid
+              - The instance Uuid
+            * - created_at
+              - body
+              - datetime
+              - Y-m-d H:M:S.f
+            * - flavor
+              - body
+              - uuid
+              - The flavor Uuid
+            * - os_type
+              - body
+              - string
+              - The OS type
+            * - os_distro
+              - body
+              - string
+              - The OS distro
+            * - os_version
+              - body
+              - string
+              - The OS version
+            * - name
+              - body
+              - string
+              - The instance name
+
+    Example input:
+
+        .. literalinclude:: api_examples/input/create_instance-body.json
+            :language: json
+
+:code:`DELETE /instance/<instance_id>`
+
+    Delete an instance.
+
+    Status Codes:
+
+    - **202 Accepted** Instance successfully deleted
+    - **400 Bad Request** If request data has an invalid or missing field
+    - **404 Not Found** If the instance does not exist
+
+    Request:
+
+       .. list-table::
+            :widths: 22 8 15 55
+            :header-rows: 1
+
+            * - Name
+              - In
+              - Type
+              - Description
+            * - instance_id
+              - path
+              - uuid
+              - The instance Uuid
+            * - date
+              - body
+              - datetime
+              - Y-m-d H:M:S.f
+
+    Example input:
+
+        .. literalinclude:: api_examples/input/delete_instance-body.json
+            :language: json
+
+:code:`PUT /instance/<instance_id>/resize`
+
+    Re-size an instance.
+
+    Status Codes:
+
+    - **202 Accepted** Instance successfully re-sized
+    - **400 Bad Request** If request data has an invalid or missing field
+    - **404 Not Found** If the instance does not exist
+
+    Request:
+
+       .. list-table::
+            :widths: 22 8 15 55
+            :header-rows: 1
+
+            * - Name
+              - In
+              - Type
+              - Description
+            * - instance_id
+              - path
+              - uuid
+              - The instance Uuid
+            * - date
+              - body
+              - datetime
+              - Y-m-d H:M:S.f
+            * - flavor
+              - body
+              - uuid
+              - The flavor Uuid
+
+    Example input:
+
+        .. literalinclude:: api_examples/input/resize_instance-body.json
+            :language: json
+
+:code:`PUT /instance/<instance_id>/rebuild`
+
+    Rebuild an instance.
+
+    Status Codes:
+
+    - **202 Accepted** Instance successfully rebuilt
+    - **400 Bad Request** If request data has an invalid or missing field
+    - **404 Not Found** If the instance does not exist
+
+    Request:
+
+       .. list-table::
+            :widths: 22 8 15 55
+            :header-rows: 1
+
+            * - Name
+              - In
+              - Type
+              - Description
+            * - instance_id
+              - path
+              - uuid
+              - The instance Uuid
+            * - rebuild_date
+              - body
+              - datetime
+              - Y-m-d H:M:S.f
+            * - os_type
+              - body
+              - string
+              - The OS type
+            * - os_distro
+              - body
+              - string
+              - The OS distro
+            * - os_version
+              - body
+              - string
+              - The OS version
+
+    Example input:
+
+        .. literalinclude:: api_examples/input/rebuild_instance-body.json
+            :language: json
+
+:code:`GET /project/<project_id>/instances`
+
+    List instances for a tenant.
+
+    Status Codes:
+
+    - **200 OK** Instances exist
+    - **400 Bad Request** If request data has an invalid or missing field
+    - **404 Not Found** If the tenant does not exist
+
+    Request:
+
+       .. list-table::
+            :widths: 22 8 15 55
+            :header-rows: 1
+
+            * - Name
+              - In
+              - Type
+              - Description
+            * - project_id
+              - path
+              - uuid
+              - The Tenant Uuid
+            * - start
+              - path
+              - datetime
+              - Y-m-d H:M:S.f
+            * - end
+              - path
+              - datetime
+              - Y-m-d H:M:S.f
+
+    Example output:
+
+        .. literalinclude:: api_examples/output/instances.json
+            :language: json
+
+:code:`POST /project/<project_id>/volume`
+
+    Create a volume.
+
+    Status Codes:
+
+    - **201 Created** Volume successfully created
+    - **400 Bad Request** If request data has an invalid or missing field
+    - **404 Not Found** If tenant does not exist
+
+    Request:
+
+       .. list-table::
+            :widths: 22 8 15 55
+            :header-rows: 1
+
+            * - Name
+              - In
+              - Type
+              - Description
+            * - project_id
+              - body
+              - uuid
+              - The Tenant Uuid
+            * - volume_id
+              - body
+              - uuid
+              - The volume Uuid
+            * - start
+              - body
+              - datetime
+              - Y-m-d H:M:S.f
+            * - volume_type
+              - body
+              - uuid
+              - The volume type Uuid
+            * - size
+              - body
+              - string
+              - The volume size
+            * - volume_name
+              - body
+              - string
+              - The volume name
+            * - attached_to
+              - body
+              - uuid
+              - The instance uuid the volume is attached to
+
+    Example input:
+
+        .. literalinclude:: api_examples/input/create_volume-body.json
+            :language: json
+
+:code:`DELETE /volume/<volume_id>`
+
+    Delete a volume.
+
+    Status Codes:
+
+    - **202 Accepted** Volume successfully deleted
+    - **400 Bad Request** If request data has an invalid or missing field
+    - **404 Not Found** If the volume does not exist
+
+    Request:
+
+       .. list-table::
+            :widths: 22 8 15 55
+            :header-rows: 1
+
+            * - Name
+              - In
+              - Type
+              - Description
+            * - volume_id
+              - path
+              - uuid
+              - The volume Uuid
+            * - date
+              - body
+              - datetime
+              - Y-m-d H:M:S.f
+
+    Example input:
+
+        .. literalinclude:: api_examples/input/delete_volume-body.json
+            :language: json
+
+:code:`PUT /volume/<volume_id>/resize`
+
+    Re-size a volume.
+
+    Status Codes:
+
+    - **202 Accepted** Volume successfully re-sized
+    - **400 Bad Request** If request data has an invalid or missing field
+    - **404 Not Found** If the volume does not exist
+
+    Request:
+
+       .. list-table::
+            :widths: 22 8 15 55
+            :header-rows: 1
+
+            * - Name
+              - In
+              - Type
+              - Description
+            * - volume_id
+              - path
+              - uuid
+              - The volume Uuid
+            * - date
+              - body
+              - datetime
+              - Y-m-d H:M:S.f
+            * - size
+              - body
+              - string
+              - The volume size
+
+    Example input:
+
+        .. literalinclude:: api_examples/input/resize_volume-body.json
+            :language: json
+
+:code:`PUT /volume/<volume_id>/attach`
+
+    Update the attachments for a volume.
+
+    Status Codes:
+
+    - **202 Accepted** Volume successfully attached
+    - **400 Bad Request** If request data has an invalid or missing field
+    - **404 Not Found** If the volume does not exist
+
+    Request:
+
+       .. list-table::
+            :widths: 22 8 15 55
+            :header-rows: 1
+
+            * - Name
+              - In
+              - Type
+              - Description
+            * - volume_id
+              - path
+              - uuid
+              - The volume Uuid
+            * - date
+              - body
+              - datetime
+              - Y-m-d H:M:S.f
+            * - attachments
+              - body
+              - dict
+              - The volume attachments
+
+    Example input:
+
+        .. literalinclude:: api_examples/input/attach_volume-body.json
+            :language: json
+
+:code:`PUT /volume/<volume_id>/detach`
+
+    Detach a volume.
+
+    Status Codes:
+
+    - **202 Accepted** Volume successfully detached
+    - **400 Bad Request** If request data has an invalid or missing field
+    - **404 Not Found** If the volume does not exist
+
+    Request:
+
+       .. list-table::
+            :widths: 22 8 15 55
+            :header-rows: 1
+
+            * - Name
+              - In
+              - Type
+              - Description
+            * - volume_id
+              - path
+              - uuid
+              - The volume Uuid
+            * - date
+              - body
+              - datetime
+              - Y-m-d H:M:S.f
+            * - attachments
+              - body
+              - dict
+              - The volume attachments
+
+    Example input:
+
+        .. literalinclude:: api_examples/input/detach_volume-body.json
+            :language: json
+
+:code:`GET /project/<project_id>/volumes`
+
+    List volumes for a tenant.
+
+    Status Codes:
+
+    - **200 OK** Volumes exist
+    - **400 Bad Request** If request data has an invalid or missing field
+    - **404 Not Found** If the tenant does not exist
+
+    Request:
+
+       .. list-table::
+            :widths: 22 8 15 55
+            :header-rows: 1
+
+            * - Name
+              - In
+              - Type
+              - Description
+            * - project_id
+              - path
+              - uuid
+              - The Tenant Uuid
+            * - start
+              - path
+              - datetime
+              - Y-m-d H:M:S.f
+            * - end
+              - path
+              - datetime
+              - Y-m-d H:M:S.f
+
+    Example output:
+
+        .. literalinclude:: api_examples/output/volumes.json
+            :language: json
+
+:code:`GET /project/<project_id>/entities`
+
+    List entities for a tenant.
+
+    Status Codes:
+
+    - **200 OK** Entities exist
+    - **400 Bad Request** If request data has an invalid or missing field
+    - **404 Not Found** If the tenant does not exist
+
+    Request:
+
+       .. list-table::
+            :widths: 22 8 15 55
+            :header-rows: 1
+
+            * - Name
+              - In
+              - Type
+              - Description
+            * - project_id
+              - path
+              - uuid
+              - The Tenant Uuid
+            * - start
+              - path
+              - datetime
+              - Y-m-d H:M:S.f
+            * - end
+              - path
+              - datetime
+              - Y-m-d H:M:S.f
+
+    Example output:
+
+        .. literalinclude:: api_examples/output/entities.json
+            :language: json
+
+:code:`PUT /entity/instance/<instance_id>`
+
+    Update an instance.
+
+    Status Codes:
+
+    - **202 Accepted** Instance successfully updated
+    - **400 Bad Request** If request data has an invalid or missing field
+    - **404 Not Found** If the instance does not exist
+
+    Request:
+
+       .. list-table::
+            :widths: 22 8 15 55
+            :header-rows: 1
+
+            * - Name
+              - In
+              - Type
+              - Description
+            * - instance_id
+              - path
+              - uuid
+              - The instance Uuid
+            * - start
+              - body
+              - datetime
+              - Y-m-d H:M:S.f
+            * - end
+              - body
+              - datetime
+              - Y-m-d H:M:S.f
+
+    Example input:
+
+        .. literalinclude:: api_examples/input/update_instance_entity-body.json
+            :language: json
+
+    Example output:
+
+        .. literalinclude:: api_examples/output/update_instance_entity.json
+            :language: json
+
+:code:`HEAD /entity/<entity_id>`
+
+    Verify that an entity exists.
+
+    Status Codes:
+
+    - **200 OK** Entity exists
+    - **404 Not Found** If the entity does not exist
+
+    Request:
+
+       .. list-table::
+            :widths: 22 8 15 55
+            :header-rows: 1
+
+            * - Name
+              - In
+              - Type
+              - Description
+            * - entity_id
+              - path
+              - uuid
+              - The Entity Uuid
+
+    Example output:
+
+        .. literalinclude:: api_examples/output/entity.json
+            :language: json
+
+:code:`GET /entity/<entity_id>`
+
+    Get an entity.
+
+    Status Codes:
+
+    - **200 OK** If the entity exists
+    - **404 Not Found** If the entity does not exist
+
+    Request:
+
+       .. list-table::
+            :widths: 22 8 15 55
+            :header-rows: 1
+
+            * - Name
+              - In
+              - Type
+              - Description
+            * - entity_id
+              - path
+              - uuid
+              - The Entity Uuid
+
+    Example output:
+
+        .. literalinclude:: api_examples/output/entity.json
+            :language: json
