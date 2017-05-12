@@ -29,7 +29,7 @@ class TestApiVolume(base_api.BaseApi):
                     attached_to=["INSTANCE_ID"])
 
         code, result = self.api_post(
-            '/project/PROJECT_ID/volume',
+            '/v1/project/PROJECT_ID/volume',
             data=data,
             headers={'X-Auth-Token': 'some token value'}
         )
@@ -48,7 +48,7 @@ class TestApiVolume(base_api.BaseApi):
                     attached_to=[])
 
         code, result = self.api_post(
-            '/project/PROJECT_ID/volume',
+            '/v1/project/PROJECT_ID/volume',
             data=data,
             headers={'X-Auth-Token': 'some token value'}
         )
@@ -70,7 +70,7 @@ class TestApiVolume(base_api.BaseApi):
                     attached_to=["INSTANCE_ID"])
 
         code, result = self.api_post(
-            '/project/PROJECT_ID/volume',
+            '/v1/project/PROJECT_ID/volume',
             data=data,
             headers={'X-Auth-Token': 'some token value'}
         )
@@ -89,7 +89,9 @@ class TestApiVolume(base_api.BaseApi):
     def test_successful_volume_delete(self):
         data = dict(date="DELETE_DATE")
 
-        code, result = self.api_delete('/volume/VOLUME_ID', data=data, headers={'X-Auth-Token': 'some token value'})
+        code, result = self.api_delete('/v1/volume/VOLUME_ID',
+                                       data=data,
+                                       headers={'X-Auth-Token': 'some token value'})
 
         self.volume_ctl.delete_volume.assert_called_once_with(
             volume_id="VOLUME_ID",
@@ -98,7 +100,9 @@ class TestApiVolume(base_api.BaseApi):
         self.assertEqual(code, 202)
 
     def test_volume_delete_missing_a_param_returns_bad_request_code(self):
-        code, result = self.api_delete('/volume/VOLUME_ID', data=dict(), headers={'X-Auth-Token': 'some token value'})
+        code, result = self.api_delete('/v1/volume/VOLUME_ID',
+                                       data=dict(),
+                                       headers={'X-Auth-Token': 'some token value'})
 
         self.assertIn(
             "The 'date' param is mandatory for the request you have made.",
@@ -108,7 +112,8 @@ class TestApiVolume(base_api.BaseApi):
         self.assertEqual(code, 400)
 
     def test_volume_delete_no_data_bad_request_code(self):
-        code, result = self.api_delete('/volume/VOLUME_ID', headers={'X-Auth-Token': 'some token value'})
+        code, result = self.api_delete('/v1/volume/VOLUME_ID',
+                                       headers={'X-Auth-Token': 'some token value'})
 
         self.assertIn(
             "Invalid parameter or payload",
@@ -121,7 +126,9 @@ class TestApiVolume(base_api.BaseApi):
         self.volume_ctl.delete_volume.side_effect = exception.DateFormatException
         data = dict(date="A_BAD_DATE")
 
-        code, result = self.api_delete('/volume/VOLUME_ID', data=data, headers={'X-Auth-Token': 'some token value'})
+        code, result = self.api_delete('/v1/volume/VOLUME_ID',
+                                       data=data,
+                                       headers={'X-Auth-Token': 'some token value'})
 
         self.assertIn(
             "The provided date has an invalid format. "
@@ -138,7 +145,9 @@ class TestApiVolume(base_api.BaseApi):
         data = dict(date="UPDATED_AT",
                     size="NEW_SIZE")
 
-        code, result = self.api_put('/volume/VOLUME_ID/resize', data=data, headers={'X-Auth-Token': 'some token value'})
+        code, result = self.api_put('/v1/volume/VOLUME_ID/resize',
+                                    data=data,
+                                    headers={'X-Auth-Token': 'some token value'})
 
         self.volume_ctl.resize_volume.assert_called_once_with(
             volume_id="VOLUME_ID",
@@ -150,7 +159,9 @@ class TestApiVolume(base_api.BaseApi):
     def test_volume_resize_missing_a_param_returns_bad_request_code(self):
         data = dict(date="A_DATE")
 
-        code, result = self.api_put('/volume/VOLUME_ID/resize', data=data, headers={'X-Auth-Token': 'some token value'})
+        code, result = self.api_put('/v1/volume/VOLUME_ID/resize',
+                                    data=data,
+                                    headers={'X-Auth-Token': 'some token value'})
 
         self.assertIn(
             "The 'size' param is mandatory for the request you have made.",
@@ -164,7 +175,9 @@ class TestApiVolume(base_api.BaseApi):
         data = dict(date="BAD_DATE",
                     size="NEW_SIZE")
 
-        code, result = self.api_put('/volume/VOLUME_ID/resize', data=data, headers={'X-Auth-Token': 'some token value'})
+        code, result = self.api_put('/v1/volume/VOLUME_ID/resize',
+                                    data=data,
+                                    headers={'X-Auth-Token': 'some token value'})
 
         self.assertIn(
             "The provided date has an invalid format. "
@@ -182,7 +195,9 @@ class TestApiVolume(base_api.BaseApi):
         data = dict(date="UPDATED_AT",
                     attachments=[uuidutils.generate_uuid()])
 
-        code, result = self.api_put('/volume/VOLUME_ID/attach', data=data, headers={'X-Auth-Token': 'some token value'})
+        code, result = self.api_put('/v1/volume/VOLUME_ID/attach',
+                                    data=data,
+                                    headers={'X-Auth-Token': 'some token value'})
 
         self.volume_ctl.attach_volume.assert_called_once_with(
             volume_id="VOLUME_ID",
@@ -195,7 +210,7 @@ class TestApiVolume(base_api.BaseApi):
         data = dict(date="A_DATE")
 
         code, result = self.api_put(
-            '/volume/VOLUME_ID/attach',
+            '/v1/volume/VOLUME_ID/attach',
             data=data,
             headers={'X-Auth-Token': 'some token value'}
         )
@@ -212,7 +227,9 @@ class TestApiVolume(base_api.BaseApi):
         data = dict(date="A_BAD_DATE",
                     attachments=[uuidutils.generate_uuid()])
 
-        code, result = self.api_put('/volume/VOLUME_ID/attach', data=data, headers={'X-Auth-Token': 'some token value'})
+        code, result = self.api_put('/v1/volume/VOLUME_ID/attach',
+                                    data=data,
+                                    headers={'X-Auth-Token': 'some token value'})
 
         self.assertIn(
             "The provided date has an invalid format. "
@@ -230,7 +247,9 @@ class TestApiVolume(base_api.BaseApi):
         data = dict(date="UPDATED_AT",
                     attachments=[uuidutils.generate_uuid()])
 
-        code, result = self.api_put('/volume/VOLUME_ID/detach', data=data, headers={'X-Auth-Token': 'some token value'})
+        code, result = self.api_put('/v1/volume/VOLUME_ID/detach',
+                                    data=data,
+                                    headers={'X-Auth-Token': 'some token value'})
 
         self.volume_ctl.detach_volume.assert_called_once_with(
             volume_id="VOLUME_ID",
@@ -242,7 +261,9 @@ class TestApiVolume(base_api.BaseApi):
     def test_volume_detach_missing_a_param_returns_bad_request_code(self):
         data = dict(date="A_DATE")
 
-        code, result = self.api_put('/volume/VOLUME_ID/detach', data=data, headers={'X-Auth-Token': 'some token value'})
+        code, result = self.api_put('/v1/volume/VOLUME_ID/detach',
+                                    data=data,
+                                    headers={'X-Auth-Token': 'some token value'})
 
         self.assertIn(
             "The 'attachments' param is mandatory for the request you have made.",
@@ -256,7 +277,9 @@ class TestApiVolume(base_api.BaseApi):
         data = dict(date="A_BAD_DATE",
                     attachments=[uuidutils.generate_uuid()])
 
-        code, result = self.api_put('/volume/VOLUME_ID/detach', data=data, headers={'X-Auth-Token': 'some token value'})
+        code, result = self.api_put('/v1/volume/VOLUME_ID/detach',
+                                    data=data,
+                                    headers={'X-Auth-Token': 'some token value'})
 
         self.assertIn(
             "The provided date has an invalid format. "

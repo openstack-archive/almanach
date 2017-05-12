@@ -25,7 +25,7 @@ class TestApiVolumeType(base_api.BaseApi):
             a(volume_type().with_volume_type_name('some_volume_type_name'))
         ]
 
-        code, result = self.api_get('/volume_types', headers={'X-Auth-Token': 'some token value'})
+        code, result = self.api_get('/v1/volume_types', headers={'X-Auth-Token': 'some token value'})
 
         self.volume_type_ctl.list_volume_types.assert_called_once()
         self.assertEqual(code, 200)
@@ -39,7 +39,7 @@ class TestApiVolumeType(base_api.BaseApi):
             type_name="A_VOLUME_TYPE_NAME"
         )
 
-        code, result = self.api_post('/volume_type', data=data, headers={'X-Auth-Token': 'some token value'})
+        code, result = self.api_post('/v1/volume_type', data=data, headers={'X-Auth-Token': 'some token value'})
 
         self.volume_type_ctl.create_volume_type.assert_called_once_with(
             volume_type_id=data['type_id'],
@@ -50,14 +50,14 @@ class TestApiVolumeType(base_api.BaseApi):
     def test_volume_type_create_missing_a_param_returns_bad_request_code(self):
         data = dict(type_name="A_VOLUME_TYPE_NAME")
 
-        code, result = self.api_post('/volume_type', data=data, headers={'X-Auth-Token': 'some token value'})
+        code, result = self.api_post('/v1/volume_type', data=data, headers={'X-Auth-Token': 'some token value'})
 
         self.volume_type_ctl.create_volume_type.assert_not_called()
         self.assertEqual(result["error"], "The 'type_id' param is mandatory for the request you have made.")
         self.assertEqual(code, 400)
 
     def test_volume_type_delete_with_authentication(self):
-        code, result = self.api_delete('/volume_type/A_VOLUME_TYPE_ID', headers={'X-Auth-Token': 'some token value'})
+        code, result = self.api_delete('/v1/volume_type/A_VOLUME_TYPE_ID', headers={'X-Auth-Token': 'some token value'})
 
         self.volume_type_ctl.delete_volume_type.assert_called_once_with('A_VOLUME_TYPE_ID')
         self.assertEqual(code, 202)
@@ -65,7 +65,7 @@ class TestApiVolumeType(base_api.BaseApi):
     def test_volume_type_delete_not_in_database(self):
         self.volume_type_ctl.delete_volume_type.side_effect = exception.AlmanachException("An exception occurred")
 
-        code, result = self.api_delete('/volume_type/A_VOLUME_TYPE_ID', headers={'X-Auth-Token': 'some token value'})
+        code, result = self.api_delete('/v1/volume_type/A_VOLUME_TYPE_ID', headers={'X-Auth-Token': 'some token value'})
 
         self.volume_type_ctl.delete_volume_type.assert_called_once_with('A_VOLUME_TYPE_ID')
         self.assertIn("An exception occurred", result["error"])
