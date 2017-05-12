@@ -24,7 +24,7 @@ from werkzeug import wrappers
 from almanach.core import exception
 
 LOG = log.getLogger(__name__)
-api = flask.Blueprint("api", __name__)
+api = flask.Blueprint('v1', __name__)
 instance_ctl = None
 volume_ctl = None
 volume_type_ctl = None
@@ -85,12 +85,14 @@ def authenticated(api_call):
     return decorator
 
 
+@api.route("/v1/info", methods=["GET"])
 @api.route("/info", methods=["GET"])
 @to_json
 def get_info():
     return app_ctl.get_application_info()
 
 
+@api.route("/v1/project/<project_id>/instance", methods=["POST"])
 @api.route("/project/<project_id>/instance", methods=["POST"])
 @authenticated
 @to_json
@@ -112,6 +114,7 @@ def create_instance(project_id):
     return flask.Response(status=201)
 
 
+@api.route("/v1/instance/<instance_id>", methods=["DELETE"])
 @api.route("/instance/<instance_id>", methods=["DELETE"])
 @authenticated
 @to_json
@@ -126,6 +129,7 @@ def delete_instance(instance_id):
     return flask.Response(status=202)
 
 
+@api.route("/v1/instance/<instance_id>/resize", methods=["PUT"])
 @api.route("/instance/<instance_id>/resize", methods=["PUT"])
 @authenticated
 @to_json
@@ -141,6 +145,7 @@ def resize_instance(instance_id):
     return flask.Response(status=200)
 
 
+@api.route("/v1/instance/<instance_id>/rebuild", methods=["PUT"])
 @api.route("/instance/<instance_id>/rebuild", methods=["PUT"])
 @authenticated
 @to_json
@@ -158,6 +163,7 @@ def rebuild_instance(instance_id):
     return flask.Response(status=200)
 
 
+@api.route("/v1/project/<project_id>/instances", methods=["GET"])
 @api.route("/project/<project_id>/instances", methods=["GET"])
 @authenticated
 @to_json
@@ -167,6 +173,7 @@ def list_instances(project_id):
     return instance_ctl.list_instances(project_id, start, end)
 
 
+@api.route("/v1/project/<project_id>/volume", methods=["POST"])
 @api.route("/project/<project_id>/volume", methods=["POST"])
 @authenticated
 @to_json
@@ -186,6 +193,7 @@ def create_volume(project_id):
     return flask.Response(status=201)
 
 
+@api.route("/v1/volume/<volume_id>", methods=["DELETE"])
 @api.route("/volume/<volume_id>", methods=["DELETE"])
 @authenticated
 @to_json
@@ -200,6 +208,7 @@ def delete_volume(volume_id):
     return flask.Response(status=202)
 
 
+@api.route("/v1/volume/<volume_id>/resize", methods=["PUT"])
 @api.route("/volume/<volume_id>/resize", methods=["PUT"])
 @authenticated
 @to_json
@@ -215,6 +224,7 @@ def resize_volume(volume_id):
     return flask.Response(status=200)
 
 
+@api.route("/v1/volume/<volume_id>/attach", methods=["PUT"])
 @api.route("/volume/<volume_id>/attach", methods=["PUT"])
 @authenticated
 @to_json
@@ -230,6 +240,7 @@ def attach_volume(volume_id):
     return flask.Response(status=200)
 
 
+@api.route("/v1/volume/<volume_id>/detach", methods=["PUT"])
 @api.route("/volume/<volume_id>/detach", methods=["PUT"])
 @authenticated
 @to_json
@@ -245,6 +256,7 @@ def detach_volume(volume_id):
     return flask.Response(status=200)
 
 
+@api.route("/v1/project/<project_id>/volumes", methods=["GET"])
 @api.route("/project/<project_id>/volumes", methods=["GET"])
 @authenticated
 @to_json
@@ -254,6 +266,7 @@ def list_volumes(project_id):
     return volume_ctl.list_volumes(project_id, start, end)
 
 
+@api.route("/v1/project/<project_id>/entities", methods=["GET"])
 @api.route("/project/<project_id>/entities", methods=["GET"])
 @authenticated
 @to_json
@@ -263,6 +276,7 @@ def list_entity(project_id):
     return entity_ctl.list_entities(project_id, start, end)
 
 
+@api.route("/v1/entity/instance/<instance_id>", methods=["PUT"])
 @api.route("/entity/instance/<instance_id>", methods=["PUT"])
 @authenticated
 @to_json
@@ -277,6 +291,7 @@ def update_instance_entity(instance_id):
     return result
 
 
+@api.route("/v1/entity/<entity_id>", methods=["HEAD"])
 @api.route("/entity/<entity_id>", methods=["HEAD"])
 @authenticated
 def entity_exists(entity_id):
@@ -287,6 +302,7 @@ def entity_exists(entity_id):
     return response
 
 
+@api.route("/v1/entity/<entity_id>", methods=["GET"])
 @api.route("/entity/<entity_id>", methods=["GET"])
 @authenticated
 @to_json
@@ -294,6 +310,7 @@ def get_entity(entity_id):
     return entity_ctl.get_all_entities_by_id(entity_id)
 
 
+@api.route("/v1/volume_types", methods=["GET"])
 @api.route("/volume_types", methods=["GET"])
 @authenticated
 @to_json
@@ -302,6 +319,7 @@ def list_volume_types():
     return volume_type_ctl.list_volume_types()
 
 
+@api.route("/v1/volume_type/<volume_type_id>", methods=["GET"])
 @api.route("/volume_type/<volume_type_id>", methods=["GET"])
 @authenticated
 @to_json
@@ -310,6 +328,7 @@ def get_volume_type(volume_type_id):
     return volume_type_ctl.get_volume_type(volume_type_id)
 
 
+@api.route("/v1/volume_type", methods=["POST"])
 @api.route("/volume_type", methods=["POST"])
 @authenticated
 @to_json
@@ -323,6 +342,7 @@ def create_volume_type():
     return flask.Response(status=201)
 
 
+@api.route("/v1/volume_type/<volume_type_id>", methods=["DELETE"])
 @api.route("/volume_type/<volume_type_id>", methods=["DELETE"])
 @authenticated
 @to_json

@@ -18,10 +18,16 @@ from almanach.tests.unit.api.v1 import base_api
 class TestApiInfo(base_api.BaseApi):
 
     def test_info(self):
+        self.assert_info_call('/v1/info')
+
+    def test_info_with_lgacy_url(self):
+        self.assert_info_call('/info')
+
+    def assert_info_call(self, url):
         info = {'info': {'version': '1.0'}, 'database': {'all_entities': 10, 'active_entities': 2}}
         self.app_ctl.get_application_info.return_value = info
 
-        code, result = self.api_get('/info')
+        code, result = self.api_get(url)
 
         self.app_ctl.get_application_info.assert_called_once()
         self.assertEqual(code, 200)

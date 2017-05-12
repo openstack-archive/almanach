@@ -244,10 +244,10 @@ Almanach will process those events:
 - :code:`volume.exists`
 - :code:`volume_type.create`
 
-API documentation
------------------
+API v1 Documentation
+--------------------
 
-:code:`GET /volume_types`
+:code:`GET /v1/volume_types`
 
     List volume types.
 
@@ -260,7 +260,7 @@ API documentation
         .. literalinclude:: api_examples/output/volume_types.json
             :language: json
 
-:code:`GET /volume_type/<volume_type_id>`
+:code:`GET /v1/volume_type/<volume_type_id>`
 
     Get a volume type.
 
@@ -291,7 +291,7 @@ API documentation
         .. literalinclude:: api_examples/output/volume_type.json
             :language: json
 
-:code:`POST /volume_type`
+:code:`POST /v1/volume_type`
 
     Create a volume type.
 
@@ -324,7 +324,7 @@ API documentation
         .. literalinclude:: api_examples/input/create_volume_type-body.json
             :language: json
 
-:code:`DELETE /volume_type/<volume_type_id>`
+:code:`DELETE /v1/volume_type/<volume_type_id>`
 
     Delete a volume type.
 
@@ -348,7 +348,7 @@ API documentation
               - uuid
               - The Volume Type Uuid
 
-:code:`GET /info`
+:code:`GET /v1/info`
 
     Display information about the current version and entity counts.
 
@@ -361,7 +361,7 @@ API documentation
         .. literalinclude:: api_examples/output/info.json
             :language: json
 
-:code:`POST /project/<project_id>/instance`
+:code:`POST /v1/project/<project_id>/instance`
 
     Create an instance.
 
@@ -419,7 +419,7 @@ API documentation
         .. literalinclude:: api_examples/input/create_instance-body.json
             :language: json
 
-:code:`DELETE /instance/<instance_id>`
+:code:`DELETE /v1/instance/<instance_id>`
 
     Delete an instance.
 
@@ -453,7 +453,7 @@ API documentation
         .. literalinclude:: api_examples/input/delete_instance-body.json
             :language: json
 
-:code:`PUT /instance/<instance_id>/resize`
+:code:`PUT /v1/instance/<instance_id>/resize`
 
     Re-size an instance.
 
@@ -491,7 +491,7 @@ API documentation
         .. literalinclude:: api_examples/input/resize_instance-body.json
             :language: json
 
-:code:`PUT /instance/<instance_id>/rebuild`
+:code:`PUT /v1/instance/<instance_id>/rebuild`
 
     Rebuild an instance.
 
@@ -537,7 +537,7 @@ API documentation
         .. literalinclude:: api_examples/input/rebuild_instance-body.json
             :language: json
 
-:code:`GET /project/<project_id>/instances`
+:code:`GET /v1/project/<project_id>/instances`
 
     List instances for a tenant.
 
@@ -575,7 +575,7 @@ API documentation
         .. literalinclude:: api_examples/output/instances.json
             :language: json
 
-:code:`POST /project/<project_id>/volume`
+:code:`POST /v1/project/<project_id>/volume`
 
     Create a volume.
 
@@ -629,7 +629,7 @@ API documentation
         .. literalinclude:: api_examples/input/create_volume-body.json
             :language: json
 
-:code:`DELETE /volume/<volume_id>`
+:code:`DELETE /v1/volume/<volume_id>`
 
     Delete a volume.
 
@@ -663,7 +663,7 @@ API documentation
         .. literalinclude:: api_examples/input/delete_volume-body.json
             :language: json
 
-:code:`PUT /volume/<volume_id>/resize`
+:code:`PUT /v1/volume/<volume_id>/resize`
 
     Re-size a volume.
 
@@ -701,7 +701,7 @@ API documentation
         .. literalinclude:: api_examples/input/resize_volume-body.json
             :language: json
 
-:code:`PUT /volume/<volume_id>/attach`
+:code:`PUT /v1/volume/<volume_id>/attach`
 
     Update the attachments for a volume.
 
@@ -739,7 +739,7 @@ API documentation
         .. literalinclude:: api_examples/input/attach_volume-body.json
             :language: json
 
-:code:`PUT /volume/<volume_id>/detach`
+:code:`PUT /v1/volume/<volume_id>/detach`
 
     Detach a volume.
 
@@ -777,7 +777,7 @@ API documentation
         .. literalinclude:: api_examples/input/detach_volume-body.json
             :language: json
 
-:code:`GET /project/<project_id>/volumes`
+:code:`GET /v1/project/<project_id>/volumes`
 
     List volumes for a tenant.
 
@@ -815,7 +815,7 @@ API documentation
         .. literalinclude:: api_examples/output/volumes.json
             :language: json
 
-:code:`GET /project/<project_id>/entities`
+:code:`GET /v1/project/<project_id>/entities`
 
     List entities for a tenant.
 
@@ -853,7 +853,7 @@ API documentation
         .. literalinclude:: api_examples/output/entities.json
             :language: json
 
-:code:`PUT /entity/instance/<instance_id>`
+:code:`PUT /v1/entity/instance/<instance_id>`
 
     Update an instance.
 
@@ -896,7 +896,7 @@ API documentation
         .. literalinclude:: api_examples/output/update_instance_entity.json
             :language: json
 
-:code:`HEAD /entity/<entity_id>`
+:code:`HEAD /v1/entity/<entity_id>`
 
     Verify that an entity exists.
 
@@ -925,7 +925,7 @@ API documentation
         .. literalinclude:: api_examples/output/entity.json
             :language: json
 
-:code:`GET /entity/<entity_id>`
+:code:`GET /v1/entity/<entity_id>`
 
     Get an entity.
 
