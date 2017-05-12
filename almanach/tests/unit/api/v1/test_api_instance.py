@@ -22,7 +22,7 @@ class TestApiInstance(base_api.BaseApi):
 
     def test_get_instances(self):
         self.instance_ctl.list_instances.return_value = [a(instance().with_id('123'))]
-        code, result = self.api_get('/project/TENANT_ID/instances',
+        code, result = self.api_get('/v1/project/TENANT_ID/instances',
                                     query_string={
                                         'start': '2014-01-01 00:00:00.0000',
                                         'end': '2014-02-01 00:00:00.0000'
@@ -47,11 +47,9 @@ class TestApiInstance(base_api.BaseApi):
                     os_distro="A_DISTRIBUTION",
                     os_version="AN_OS_VERSION")
 
-        code, result = self.api_post(
-            '/project/PROJECT_ID/instance',
-            data=data,
-            headers={'X-Auth-Token': 'some token value'}
-        )
+        code, result = self.api_post('/v1/project/PROJECT_ID/instance',
+                                     data=data,
+                                     headers={'X-Auth-Token': 'some token value'})
 
         self.instance_ctl.create_instance.assert_called_once_with(
             tenant_id="PROJECT_ID",
@@ -73,11 +71,9 @@ class TestApiInstance(base_api.BaseApi):
                     os_type="AN_OS_TYPE",
                     os_version="AN_OS_VERSION")
 
-        code, result = self.api_post(
-            '/project/PROJECT_ID/instance',
-            data=data,
-            headers={'X-Auth-Token': 'some token value'}
-        )
+        code, result = self.api_post('/v1/project/PROJECT_ID/instance',
+                                     data=data,
+                                     headers={'X-Auth-Token': 'some token value'})
 
         self.instance_ctl.create_instance.assert_not_called()
         self.assertEqual(result["error"], "The 'os_distro' param is mandatory for the request you have made.")
@@ -93,11 +89,9 @@ class TestApiInstance(base_api.BaseApi):
                     os_distro="A_DISTRIBUTION",
                     os_version="AN_OS_VERSION")
 
-        code, result = self.api_post(
-            '/project/PROJECT_ID/instance',
-            data=data,
-            headers={'X-Auth-Token': 'some token value'}
-        )
+        code, result = self.api_post('/v1/project/PROJECT_ID/instance',
+                                     data=data,
+                                     headers={'X-Auth-Token': 'some token value'})
 
         self.instance_ctl.create_instance.assert_called_once_with(
             tenant_id="PROJECT_ID",
@@ -122,7 +116,7 @@ class TestApiInstance(base_api.BaseApi):
                     flavor="A_FLAVOR")
 
         code, result = self.api_put(
-            '/instance/INSTANCE_ID/resize',
+            '/v1/instance/INSTANCE_ID/resize',
             data=data,
             headers={'X-Auth-Token': 'some token value'}
         )
@@ -137,7 +131,9 @@ class TestApiInstance(base_api.BaseApi):
     def test_successfull_instance_delete(self):
         data = dict(date="DELETE_DATE")
 
-        code, result = self.api_delete('/instance/INSTANCE_ID', data=data, headers={'X-Auth-Token': 'some token value'})
+        code, result = self.api_delete('/v1/instance/INSTANCE_ID',
+                                       data=data,
+                                       headers={'X-Auth-Token': 'some token value'})
 
         self.instance_ctl.delete_instance.assert_called_once_with(
             instance_id="INSTANCE_ID",
@@ -147,7 +143,7 @@ class TestApiInstance(base_api.BaseApi):
 
     def test_instance_delete_missing_a_param_returns_bad_request_code(self):
         code, result = self.api_delete(
-            '/instance/INSTANCE_ID',
+            '/v1/instance/INSTANCE_ID',
             data=dict(),
             headers={'X-Auth-Token': 'some token value'}
         )
@@ -160,7 +156,7 @@ class TestApiInstance(base_api.BaseApi):
         self.assertEqual(code, 400)
 
     def test_instance_delete_no_data_bad_request_code(self):
-        code, result = self.api_delete('/instance/INSTANCE_ID', headers={'X-Auth-Token': 'some token value'})
+        code, result = self.api_delete('/v1/instance/INSTANCE_ID', headers={'X-Auth-Token': 'some token value'})
 
         self.instance_ctl.delete_instance.assert_not_called()
         self.assertIn(
@@ -173,7 +169,9 @@ class TestApiInstance(base_api.BaseApi):
         data = dict(date="A_BAD_DATE")
         self.instance_ctl.delete_instance.side_effect = exception.DateFormatException
 
-        code, result = self.api_delete('/instance/INSTANCE_ID', data=data, headers={'X-Auth-Token': 'some token value'})
+        code, result = self.api_delete('/v1/instance/INSTANCE_ID',
+                                       data=data,
+                                       headers={'X-Auth-Token': 'some token value'})
 
         self.instance_ctl.delete_instance.assert_called_once_with(
             instance_id="INSTANCE_ID",
@@ -189,7 +187,7 @@ class TestApiInstance(base_api.BaseApi):
     def test_instance_resize_missing_a_param_returns_bad_request_code(self):
         data = dict(date="UPDATED_AT")
         code, result = self.api_put(
-            '/instance/INSTANCE_ID/resize',
+            '/v1/instance/INSTANCE_ID/resize',
             data=data,
             headers={'X-Auth-Token': 'some token value'}
         )
@@ -206,7 +204,7 @@ class TestApiInstance(base_api.BaseApi):
         data = dict(date="A_BAD_DATE",
                     flavor="A_FLAVOR")
         code, result = self.api_put(
-            '/instance/INSTANCE_ID/resize',
+            '/v1/instance/INSTANCE_ID/resize',
             data=data,
             headers={'X-Auth-Token': 'some token value'}
         )
@@ -231,11 +229,9 @@ class TestApiInstance(base_api.BaseApi):
             'os_type': 'AN_OS_TYPE',
             'rebuild_date': 'UPDATE_DATE',
         }
-        code, result = self.api_put(
-            '/instance/INSTANCE_ID/rebuild',
-            data=data,
-            headers={'X-Auth-Token': 'some token value'}
-        )
+        code, result = self.api_put('/v1/instance/INSTANCE_ID/rebuild',
+                                    data=data,
+                                    headers={'X-Auth-Token': 'some token value'})
 
         self.instance_ctl.rebuild_instance.assert_called_once_with(
             instance_id=instance_id,
@@ -251,11 +247,9 @@ class TestApiInstance(base_api.BaseApi):
             'distro': 'A_DISTRIBUTION',
             'rebuild_date': 'UPDATE_DATE',
         }
-        code, result = self.api_put(
-            '/instance/INSTANCE_ID/rebuild',
-            data=data,
-            headers={'X-Auth-Token': 'some token value'}
-        )
+        code, result = self.api_put('/v1/instance/INSTANCE_ID/rebuild',
+                                    data=data,
+                                    headers={'X-Auth-Token': 'some token value'})
 
         self.instance_ctl.rebuild_instance.assert_not_called()
         self.assertIn(
@@ -273,11 +267,9 @@ class TestApiInstance(base_api.BaseApi):
             'os_type': 'AN_OS_TYPE',
             'rebuild_date': 'A_BAD_UPDATE_DATE',
         }
-        code, result = self.api_put(
-            '/instance/INSTANCE_ID/rebuild',
-            data=data,
-            headers={'X-Auth-Token': 'some token value'}
-        )
+        code, result = self.api_put('/v1/instance/INSTANCE_ID/rebuild',
+                                    data=data,
+                                    headers={'X-Auth-Token': 'some token value'})
 
         self.instance_ctl.rebuild_instance.assert_called_once_with(
             instance_id=instance_id,

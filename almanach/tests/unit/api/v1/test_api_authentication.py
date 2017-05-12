@@ -26,7 +26,7 @@ class TestApiAuthentication(base_api.BaseApi):
         self.auth_adapter.validate.side_effect = exception.AuthenticationFailureException('Unauthorized')
         query_string = {'start': '2014-01-01 00:00:00.0000', 'end': '2014-02-01 00:00:00.0000'}
 
-        code, result = self.api_get(url='/project/TENANT_ID/entities',
+        code, result = self.api_get(url='/v1/project/TENANT_ID/entities',
                                     query_string=query_string,
                                     headers={'X-Auth-Token': 'wrong token'})
 

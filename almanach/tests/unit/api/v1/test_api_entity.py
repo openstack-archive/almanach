@@ -35,7 +35,7 @@ class TestApiEntity(base_api.BaseApi):
         end = '2016-03-03 00:00:00.000000'
 
         code, result = self.api_put(
-            '/entity/instance/INSTANCE_ID',
+            '/v1/entity/instance/INSTANCE_ID',
             headers={'X-Auth-Token': 'some token value'},
             query_string={
                 'start': start,
@@ -63,7 +63,7 @@ class TestApiEntity(base_api.BaseApi):
         self.entity_ctl.update_active_instance_entity.return_value = an_instance
 
         code, result = self.api_put(
-            '/entity/instance/INSTANCE_ID',
+            '/v1/entity/instance/INSTANCE_ID',
             headers={'X-Auth-Token': 'some token value'},
             data=data,
         )
@@ -87,11 +87,9 @@ class TestApiEntity(base_api.BaseApi):
             'flavor': 'A_FLAVOR',
         }
 
-        code, result = self.api_put(
-                '/entity/instance/INSTANCE_ID',
-                data=data,
-                headers={'X-Auth-Token': 'some token value'}
-        )
+        code, result = self.api_put('/v1/entity/instance/INSTANCE_ID',
+                                    data=data,
+                                    headers={'X-Auth-Token': 'some token value'})
 
         self.entity_ctl.update_active_instance_entity.assert_called_once_with(instance_id=instance_id, **data)
         self.assertIn("error", result)
@@ -115,11 +113,9 @@ class TestApiEntity(base_api.BaseApi):
             'flavor': 'A_FLAVOR',
         }
 
-        code, result = self.api_put(
-            '/entity/instance/INSTANCE_ID',
-            data=data,
-            headers={'X-Auth-Token': 'some token value'}
-        )
+        code, result = self.api_put('/v1/entity/instance/INSTANCE_ID',
+                                    data=data,
+                                    headers={'X-Auth-Token': 'some token value'})
 
         self.entity_ctl.update_active_instance_entity.assert_called_once_with(instance_id=instance_id, **data)
         self.assertIn("error", result)
@@ -130,7 +126,8 @@ class TestApiEntity(base_api.BaseApi):
         self.entity_ctl.entity_exists.return_value = True
         entity_id = "entity_id"
 
-        code, result = self.api_head('/entity/{id}'.format(id=entity_id), headers={'X-Auth-Token': 'some token value'})
+        code, result = self.api_head('/v1/entity/{id}'.format(id=entity_id),
+                                     headers={'X-Auth-Token': 'some token value'})
 
         self.entity_ctl.entity_exists.assert_called_once_with(entity_id=entity_id)
         self.assertEqual(code, 200)
@@ -139,7 +136,8 @@ class TestApiEntity(base_api.BaseApi):
         self.entity_ctl.entity_exists.return_value = False
         entity_id = "entity_id"
 
-        code, result = self.api_head('/entity/{id}'.format(id=entity_id), headers={'X-Auth-Token': 'some token value'})
+        code, result = self.api_head('/v1/entity/{id}'.format(id=entity_id),
+                                     headers={'X-Auth-Token': 'some token value'})
 
         self.entity_ctl.entity_exists.assert_called_once_with(entity_id=entity_id)
         self.assertEqual(code, 404)
