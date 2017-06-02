@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime
+
 from oslo_serialization import jsonutils as json
-from oslo_utils import timeutils
 
 from almanach.tests.tempest.tests.api import base
 
@@ -28,7 +29,7 @@ class TestVolumeDeletion(base.BaseAlmanachTest):
         resp, tenant_id, volume = self.create_volume()
         self.assertEqual(resp.status, 201)
 
-        delete_body = {'date': timeutils.isotime()}
+        delete_body = {'date': datetime.datetime.isoformat()}
         resp, _ = self.almanach_client.delete_volume(volume['volume_id'], json.dumps(delete_body))
         self.assertEqual(resp.status, 202)
 
