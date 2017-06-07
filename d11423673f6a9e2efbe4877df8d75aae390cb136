@@ -1,0 +1,13 @@
+Code-Review+2: Frédéric Guillot <fguillot@internap.com>
+Workflow+1: Maxime Belanger <mbelanger@internap.com>
+Workflow+1: Paul Millette <pmillette@internap.com>
+Code-Review+1: Nguyen Phuong An <AnNP@vn.fujitsu.com>
+Code-Review+1: Tuan Luong-Anh <tuanla@vn.fujitsu.com>
+Code-Review+1: Ngo Quoc Cuong <cuongnq@vn.fujitsu.com>
+Code-Review+1: Paul Millette <pmillette@internap.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Wed, 07 Jun 2017 14:11:43 +0000
+Reviewed-on: https://review.openstack.org/470157
+Project: openstack/almanach
+Branch: refs/heads/master
