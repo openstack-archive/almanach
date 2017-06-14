@@ -179,7 +179,7 @@ class TestEntityController(base.BaseTestCase):
         entity_id = "some_entity_id"
         self.database_adapter.count_entity_entries.return_value = 1
 
-        self.assertEqual(True, self.controller.entity_exists(entity_id))
+        self.assertTrue(self.controller.entity_exists(entity_id))
 
         self.database_adapter.count_entity_entries.expect_called_once_with(entity_id=entity_id)
 
