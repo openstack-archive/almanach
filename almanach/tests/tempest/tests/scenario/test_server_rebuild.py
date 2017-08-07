@@ -71,9 +71,9 @@ class TestServerRebuildScenario(base.BaseAlmanachScenarioTest):
 
     def _prepare_image(self):
         images = self.image_client.list_images()['images']
-        self.os_adm.compute_images_client.set_image_metadata(images[0]['id'], {'distro': 'linux'})
+        self.os_admin.compute_images_client.set_image_metadata(images[0]['id'], {'distro': 'linux'})
         return images[0]
 
     def _remove_image_metadata(self):
         images = self.image_client.list_images()['images']
-        self.os_adm.compute_images_client.delete_image_metadata_item(images[0]['id'], 'distro')
+        self.os_admin.compute_images_client.delete_image_metadata_item(images[0]['id'], 'distro')

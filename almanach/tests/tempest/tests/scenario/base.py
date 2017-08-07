@@ -49,7 +49,7 @@ class BaseAlmanachScenarioTest(manager.ScenarioTest):
         return response_body
 
     def create_test_volume_type(self):
-        client = self.os_adm.volume_types_v2_client
+        client = self.os_admin.volume_types_v2_client
         randomized_name = data_utils.rand_name('scenario-volume-type')
 
         volume_type = client.create_volume_type(name=randomized_name)['volume_type']
