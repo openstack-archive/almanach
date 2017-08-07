@@ -30,6 +30,7 @@ class TestModel(base.BaseTestCase):
             project_id='project_id',
             start=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
             end=None,
+            processed=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
             flavor='flavor_id',
             image_meta=dict(os_type='linux', distro='Ubuntu', version='16.04'),
             last_event=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
@@ -61,6 +62,7 @@ class TestModel(base.BaseTestCase):
             'start': datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
             'end': None,
             'last_event': datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
+            'processed': datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
             'flavor': 'flavor_id',
             'image_meta': {
                 'os_type': 'linux',
@@ -79,6 +81,7 @@ class TestModel(base.BaseTestCase):
         self.assertEqual('linux', instance.image_meta['os_type'])
         self.assertEqual('Ubuntu', instance.image_meta['distro'])
         self.assertEqual('16.04', instance.image_meta['version'])
+        self.assertEqual(datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc), instance.processed)
         self.assertEqual(datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc), instance.last_event)
         self.assertEqual(datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc), instance.start)
         self.assertIsNone(instance.end)
@@ -91,6 +94,7 @@ class TestModel(base.BaseTestCase):
             'start': datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
             'end': None,
             'last_event': datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
+            'processed': datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
             'flavor': 'flavor_id',
             'os': {
                 'os_type': 'linux',
@@ -110,6 +114,7 @@ class TestModel(base.BaseTestCase):
         self.assertEqual('Ubuntu', instance.image_meta['distro'])
         self.assertEqual('16.04', instance.image_meta['version'])
         self.assertEqual(datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc), instance.last_event)
+        self.assertEqual(datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc), instance.processed)
         self.assertEqual(datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc), instance.start)
         self.assertIsNone(instance.end)
 
@@ -154,6 +159,7 @@ class TestModel(base.BaseTestCase):
             project_id='project_id',
             start=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
             end=None,
+            processed=None,
             flavor='flavor_id',
             image_meta=dict(os_type='linux', distro='Ubuntu', version='16.04'),
             last_event=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
@@ -166,6 +172,7 @@ class TestModel(base.BaseTestCase):
             project_id='project_id',
             start=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
             end=None,
+            processed=None,
             flavor='flavor_id',
             image_meta=dict(os_type='linux', distro='Ubuntu', version='16.04'),
             last_event=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
@@ -179,6 +186,7 @@ class TestModel(base.BaseTestCase):
             project_id='project_id',
             start=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
             end=None,
+            processed=None,
             flavor='flavor_id',
             image_meta=dict(os_type='linux', distro='Centos', version='7'),
             last_event=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
@@ -192,6 +200,7 @@ class TestModel(base.BaseTestCase):
             project_id='project_id',
             start=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
             end=None,
+            processed=None,
             flavor='another_flavor',
             image_meta=dict(os_type='linux', distro='Ubuntu', version='16.04'),
             last_event=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
@@ -205,6 +214,7 @@ class TestModel(base.BaseTestCase):
             project_id='project_id',
             start=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
             end=None,
+            processed=None,
             flavor='flavor_id',
             image_meta=dict(os_type='linux', distro='Ubuntu', version='16.04'),
             last_event=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
@@ -223,6 +233,7 @@ class TestModel(base.BaseTestCase):
             project_id='project_id',
             start=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
             end=None,
+            processed=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
             last_event=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
             name='volume_name',
             volume_type='volume_type_id',
@@ -272,6 +283,7 @@ class TestModel(base.BaseTestCase):
             project_id='project_id',
             start=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
             end=None,
+            processed=None,
             last_event=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
             name='volume_name',
             volume_type='volume_type_id',
@@ -284,6 +296,7 @@ class TestModel(base.BaseTestCase):
             project_id='project_id',
             start=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
             end=None,
+            processed=None,
             last_event=datetime(2014, 1, 1, 0, 0, 0, 0, pytz.utc),
             name='volume_name',
             volume_type='volume_type_id',

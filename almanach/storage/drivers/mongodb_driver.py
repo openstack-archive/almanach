@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import pymongo
 
 from almanach.core import exception
@@ -21,7 +20,6 @@ from almanach.storage.drivers import base_driver
 
 
 class MongoDbDriver(base_driver.BaseDriver):
-
     def __init__(self, config, db=None):
         super(MongoDbDriver, self).__init__(config)
         self.db = db
@@ -78,9 +76,6 @@ class MongoDbDriver(base_driver.BaseDriver):
             ]
         }, {"_id": 0})
         return [get_entity_from_dict(entity) for entity in entities]
-
-    def close_active_entity(self, entity_id, end):
-        self.db.entity.update({"entity_id": entity_id, "end": None}, {"$set": {"end": end, "last_event": end}})
 
     def insert_entity(self, entity):
         self.db.entity.insert(entity.as_dict())
