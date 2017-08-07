@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import abc
+
 import six
 
 from almanach.core import exception
@@ -20,8 +21,7 @@ from almanach.core import exception
 
 @six.add_metaclass(abc.ABCMeta)
 class Entity(object):
-
-    def __init__(self, entity_id, project_id, start, end, last_event, name, entity_type):
+    def __init__(self, entity_id, project_id, start, end, last_event, name, entity_type, processed):
         self.entity_id = entity_id
         self.project_id = project_id
         self.start = start
@@ -29,6 +29,7 @@ class Entity(object):
         self.last_event = last_event
         self.name = name
         self.entity_type = entity_type
+        self.processed = processed
 
     def as_dict(self):
         return dict(
@@ -39,6 +40,7 @@ class Entity(object):
             last_event=self.last_event,
             name=self.name,
             entity_type=self.entity_type,
+            processed=self.processed,
         )
 
     @staticmethod
@@ -61,8 +63,9 @@ class Entity(object):
 class Instance(Entity):
     TYPE = 'instance'
 
-    def __init__(self, entity_id, project_id, start, end, flavor, last_event, name, image_meta=None, metadata=None):
-        super(Instance, self).__init__(entity_id, project_id, start, end, last_event, name, self.TYPE)
+    def __init__(self, entity_id, project_id, start, end, flavor, last_event, name, processed, image_meta=None,
+                 metadata=None):
+        super(Instance, self).__init__(entity_id, project_id, start, end, last_event, name, self.TYPE, processed)
         self.flavor = flavor
         self.metadata = metadata or dict()
         self.image_meta = image_meta or dict()
@@ -96,6 +99,7 @@ class Instance(Entity):
             end=d.get('end'),
             last_event=d.get('last_event'),
             name=d.get('name'),
+            processed=d.get('processed'),
             flavor=d.get('flavor'),
             image_meta=d.get('os') or d.get('image_meta'),
             metadata=Instance._unserialize_metadata(d),
@@ -125,8 +129,9 @@ class Instance(Entity):
 class Volume(Entity):
     TYPE = 'volume'
 
-    def __init__(self, entity_id, project_id, start, end, volume_type, size, last_event, name, attached_to=None):
-        super(Volume, self).__init__(entity_id, project_id, start, end, last_event, name, self.TYPE)
+    def __init__(self, entity_id, project_id, start, end, volume_type, size, last_event, name, processed,
+                 attached_to=None):
+        super(Volume, self).__init__(entity_id, project_id, start, end, last_event, name, self.TYPE, processed)
         self.volume_type = volume_type
         self.size = size
         self.attached_to = attached_to or []
@@ -153,6 +158,7 @@ class Volume(Entity):
             end=d.get('end'),
             last_event=d.get('last_event'),
             name=d.get('name'),
+            processed=d.get('processed'),
             volume_type=d.get('volume_type'),
             size=d.get('size'),
             attached_to=d.get('attached_to'),
@@ -160,7 +166,6 @@ class Volume(Entity):
 
 
 class VolumeType(object):
-
     def __init__(self, volume_type_id, volume_type_name):
         self.volume_type_id = volume_type_id
         self.volume_type_name = volume_type_name
@@ -187,4 +192,4 @@ def get_entity_from_dict(d):
     elif entity_type == Volume.TYPE:
         return Volume.from_dict(d)
     raise exception.EntityTypeNotSupportedException(
-            'Unsupported entity type: "{}"'.format(entity_type))
+        'Unsupported entity type: "{}"'.format(entity_type))
