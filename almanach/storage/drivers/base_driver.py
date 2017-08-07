@@ -67,10 +67,6 @@ class BaseDriver(object):
         pass
 
     @abc.abstractmethod
-    def close_active_entity(self, entity_id, end):
-        pass
-
-    @abc.abstractmethod
     def update_active_entity(self, entity):
         pass
 

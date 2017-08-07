@@ -300,15 +300,6 @@ class TestMongoDbDriver(base.BaseTestCase):
         self.assertEqual(1, len(entities))
         self.assertEqual("instance with end date", entities[0].name)
 
-    def test_close_active_entity(self):
-        fake_entity = a(instance())
-        end_date = datetime(2015, 10, 21, 16, 29, 0)
-
-        self.db.entity.insert(fake_entity.as_dict())
-        self.adapter.close_active_entity(fake_entity.entity_id, end_date)
-
-        self.assertEqual(self.db.entity.find_one({"entity_id": fake_entity.entity_id})["end"], end_date)
-
     def test_update_closed_entity(self):
         fake_entity = a(instance().with_end(2016, 3, 2, 0, 0, 0))
 
