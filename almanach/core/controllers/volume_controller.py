@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from oslo_log import log
 
@@ -41,7 +41,7 @@ class VolumeController(base_controller.BaseController):
         volume_type_name = self._get_volume_type_name(volume_type)
 
         entity = model.Volume(volume_id, project_id, start, None, volume_type_name, size, start, volume_name,
-                              attached_to)
+                              datetime.utcnow(), attached_to)
         self.database_adapter.insert_entity(entity)
 
     def detach_volume(self, volume_id, date, attachments):
@@ -68,6 +68,8 @@ class VolumeController(base_controller.BaseController):
             if volume and volume.name != volume_name:
                 LOG.info("volume %s renamed from %s to %s", volume_id, volume.name, volume_name)
                 volume.name = volume_name
+                volume.processed = datetime.utcnow()
+
                 self.database_adapter.update_active_entity(volume)
         except exception.EntityNotFoundException:
             LOG.error("Trying to update a volume with id '%s' not in the database yet.", volume_id)
@@ -78,13 +80,15 @@ class VolumeController(base_controller.BaseController):
             volume = self.database_adapter.get_active_entity(volume_id)
             LOG.info("volume %s updated in project %s to size %s on %s",
                      volume_id, volume.project_id, size, update_date)
-
-            self.database_adapter.close_active_entity(volume_id, update_date)
+            volume.end = volume.last_event = update_date
+            volume.processed = datetime.utcnow()
+            self.database_adapter.update_active_entity(volume)
 
             volume.size = size
             volume.start = update_date
             volume.end = None
             volume.last_event = update_date
+            volume.processed = datetime.utcnow()
             self.database_adapter.insert_entity(volume)
         except exception.EntityNotFoundException as e:
             LOG.error("Trying to update a volume with id '%s' not in the database yet.", volume_id)
@@ -94,12 +98,15 @@ class VolumeController(base_controller.BaseController):
         delete_date = self._localize_date(self._validate_and_parse_date(delete_date))
         LOG.info("volume %s deleted on %s", volume_id, delete_date)
         try:
+            volume = self.database_adapter.get_active_entity(volume_id)
             if self.database_adapter.count_entity_entries(volume_id) > 1:
-                volume = self.database_adapter.get_active_entity(volume_id)
                 if delete_date - volume.start < self.volume_existence_threshold:
                     self.database_adapter.delete_active_entity(volume_id)
                     return
-            self.database_adapter.close_active_entity(volume_id, delete_date)
+
+            volume.end = volume.last_event = delete_date
+            volume.processed = datetime.utcnow()
+            self.database_adapter.update_active_entity(volume)
         except exception.EntityNotFoundException as e:
             LOG.error("Trying to delete a volume with id '%s' not in the database yet.", volume_id)
             raise e
@@ -110,27 +117,32 @@ class VolumeController(base_controller.BaseController):
         volume.last_event = date
         existing_attachments = volume.attached_to
         volume.attached_to = attachments
+        volume.processed = datetime.utcnow()
 
         if existing_attachments or self._is_within_threshold(date, volume):
             self.database_adapter.update_active_entity(volume)
         else:
-            self._close_volume(volume_id, volume, date)
+            self._close_volume(volume, date)
 
     def _volume_detach_instance(self, volume_id, date, attachments):
         volume = self.database_adapter.get_active_entity(volume_id)
         date = self._localize_date(date)
         volume.last_event = date
         volume.attached_to = attachments
+        volume.processed = datetime.utcnow()
 
         if attachments or self._is_within_threshold(date, volume):
             self.database_adapter.update_active_entity(volume)
         else:
-            self._close_volume(volume_id, volume, date)
+            self._close_volume(volume, date)
 
-    def _close_volume(self, volume_id, volume, date):
-        self.database_adapter.close_active_entity(volume_id, date)
+    def _close_volume(self, volume, date):
+        volume.end = date
+        self.database_adapter.update_active_entity(volume)
+
         volume.start = date
         volume.end = None
+        volume.processed = datetime.utcnow()
         self.database_adapter.insert_entity(volume)
 
     def _is_within_threshold(self, date, volume):

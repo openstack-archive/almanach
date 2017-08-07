@@ -50,7 +50,7 @@ class TestVolumeController(base.BaseTestCase):
 
         self.database_adapter.count_entity_entries.assert_called_once_with(fake_volume.entity_id)
         self.database_adapter.get_active_entity.assert_called_once_with(fake_volume.entity_id)
-        self.database_adapter.close_active_entity.assert_called_once_with(fake_volume.entity_id, expected_date)
+        self.database_adapter.update_active_entity.assert_called_once_with(fake_volume)
 
     def test_volume_deleted_within_volume_existance_threshold(self):
         fake_volume = a(volume())
@@ -70,6 +70,7 @@ class TestVolumeController(base.BaseTestCase):
     def test_volume_deleted_within_volume_existance_threshold_but_with_only_one_entry(self):
         fake_volume = a(volume())
         self.database_adapter.count_entity_entries.return_value = 1
+        self.database_adapter.get_active_entity.return_value = fake_volume
 
         date = datetime(fake_volume.start.year, fake_volume.start.month, fake_volume.start.day, fake_volume.start.hour,
                         fake_volume.start.minute, fake_volume.start.second, fake_volume.start.microsecond)
@@ -79,7 +80,7 @@ class TestVolumeController(base.BaseTestCase):
         self.controller.delete_volume(fake_volume.entity_id, date.strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
 
         self.database_adapter.count_entity_entries.assert_called_once_with(fake_volume.entity_id)
-        self.database_adapter.close_active_entity.assert_called_once_with(fake_volume.entity_id, expected_date)
+        self.database_adapter.update_active_entity.assert_called_once_with(fake_volume)
 
     def test_list_volumes(self):
         self.database_adapter.get_all_entities_by_project.return_value = ["volume2", "volume3"]
@@ -176,7 +177,7 @@ class TestVolumeController(base.BaseTestCase):
 
         self.database_adapter.get_active_entity.assert_called_once_with(some_volume.entity_id)
 
-    def test_volume_updated(self):
+    def test_volume_resize(self):
         fake_volume = a(volume())
         dates_str = "2015-10-21T16:25:00.000000Z"
         fake_volume.size = "new_size"
@@ -188,7 +189,7 @@ class TestVolumeController(base.BaseTestCase):
         self.controller.resize_volume(fake_volume.entity_id, "new_size", dates_str)
 
         self.database_adapter.get_active_entity.assert_called_once_with(fake_volume.entity_id)
-        self.database_adapter.close_active_entity.assert_called_once_with(fake_volume.entity_id, parse(dates_str))
+        self.database_adapter.update_active_entity.assert_called_once_with(fake_volume)
         self.database_adapter.insert_entity.assert_called_once_with(fake_volume)
 
     def test_volume_attach_with_no_existing_attachment(self):
@@ -250,7 +251,7 @@ class TestVolumeController(base.BaseTestCase):
         )
 
         self.database_adapter.get_active_entity.assert_called_once_with(fake_volume.entity_id)
-        self.database_adapter.close_active_entity.assert_called_once_with(fake_volume.entity_id, expected_date)
+        self.database_adapter.update_active_entity.assert_called_once_with(fake_volume)
         self.database_adapter.insert_entity.assert_called_once_with(new_volume)
 
     def test_volume_detach_with_two_attachments(self):
@@ -299,7 +300,7 @@ class TestVolumeController(base.BaseTestCase):
 
         self.assertEqual(fake_volume.attached_to, [])
         self.database_adapter.get_active_entity.assert_called_once_with(fake_volume.entity_id)
-        self.database_adapter.close_active_entity.assert_called_once_with(fake_volume.entity_id, expected_date)
+        self.database_adapter.update_active_entity.assert_called_once_with(fake_volume)
         self.database_adapter.insert_entity.assert_called_once_with(new_volume)
 
     def test_rename_volume(self):
