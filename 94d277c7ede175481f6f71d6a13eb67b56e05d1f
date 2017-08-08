@@ -1,0 +1,9 @@
+Code-Review+1: Pascal Boutin <pboutin@internap.com>
+Code-Review+2: Paul Millette <pmillette@internap.com>
+Workflow+1: Paul Millette <pmillette@internap.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Tue, 08 Aug 2017 21:52:46 +0000
+Reviewed-on: https://review.openstack.org/491617
+Project: openstack/almanach
+Branch: refs/heads/master
