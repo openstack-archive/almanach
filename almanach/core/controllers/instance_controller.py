@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from datetime import datetime
 
 from oslo_log import log
 
@@ -22,7 +23,6 @@ LOG = log.getLogger(__name__)
 
 
 class InstanceController(base_controller.BaseController):
-
     def __init__(self, config, database_adapter):
         self.config = config
         self.database_adapter = database_adapter
@@ -44,6 +44,7 @@ class InstanceController(base_controller.BaseController):
             start=create_date,
             end=None,
             name=name,
+            processed=datetime.utcnow(),
             flavor=flavor,
             image_meta=image_meta,
             metadata=self._filter_metadata(metadata))
@@ -53,11 +54,15 @@ class InstanceController(base_controller.BaseController):
     def delete_instance(self, instance_id, delete_date):
         if not self.database_adapter.has_active_entity(instance_id):
             raise exception.EntityNotFoundException(
-                    "InstanceId: {0} Not Found".format(instance_id))
+                "InstanceId: {0} Not Found".format(instance_id))
 
         delete_date = self._validate_and_parse_date(delete_date)
         LOG.info("Instance %s deleted on %s", instance_id, delete_date)
-        self.database_adapter.close_active_entity(instance_id, delete_date)
+        instance = self.database_adapter.get_active_entity(instance_id)
+        instance.end = instance.last_event = delete_date
+        instance.processed = datetime.utcnow()
+
+        self.database_adapter.update_active_entity(instance)
 
     def resize_instance(self, instance_id, flavor, resize_date):
         resize_date = self._validate_and_parse_date(resize_date)
@@ -65,11 +70,15 @@ class InstanceController(base_controller.BaseController):
         try:
             instance = self.database_adapter.get_active_entity(instance_id)
             if flavor != instance.flavor:
-                self.database_adapter.close_active_entity(instance_id, resize_date)
+                instance.end = instance.last_event = resize_date
+                instance.processed = datetime.utcnow()
+                self.database_adapter.update_active_entity(instance)
+
                 instance.flavor = flavor
                 instance.start = resize_date
                 instance.end = None
                 instance.last_event = resize_date
+                instance.processed = datetime.utcnow()
                 self.database_adapter.insert_entity(instance)
         except exception.EntityNotFoundException as e:
             LOG.error("Trying to resize an instance with id '%s' not in the database yet.", instance_id)
@@ -83,11 +92,16 @@ class InstanceController(base_controller.BaseController):
                  instance_id, instance.project_id, image_meta, rebuild_date)
 
         if instance.image_meta != image_meta:
-            self.database_adapter.close_active_entity(instance_id, rebuild_date)
+            instance.end = instance.last_event = rebuild_date
+            instance.processed = datetime.utcnow()
+            self.database_adapter.update_active_entity(instance)
+
             instance.image_meta = image_meta
             instance.start = rebuild_date
             instance.end = None
             instance.last_event = rebuild_date
+            instance.processed = datetime.utcnow()
+
             self.database_adapter.insert_entity(instance)
 
     def list_instances(self, project_id, start, end):

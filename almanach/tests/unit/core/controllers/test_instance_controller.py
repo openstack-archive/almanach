@@ -50,21 +50,6 @@ class TestInstanceController(base.BaseTestCase):
         self.database_adapter.get_active_entity.assert_called_once_with(fake_instance.entity_id)
         self.database_adapter.insert_entity.assert_called_once()
 
-    def test_resize_instance(self):
-        fake_instance = a(instance())
-        self.database_adapter.get_active_entity.return_value = fake_instance
-
-        dates_str = "2015-10-21T16:25:00.000000Z"
-        fake_instance.start = parse(dates_str)
-        fake_instance.end = None
-        fake_instance.last_event = parse(dates_str)
-
-        self.controller.resize_instance(fake_instance.entity_id, "newly_flavor", dates_str)
-
-        self.database_adapter.get_active_entity.assert_called_once_with(fake_instance.entity_id)
-        self.database_adapter.close_active_entity.assert_called_once_with(fake_instance.entity_id, parse(dates_str))
-        self.database_adapter.insert_entity.assert_called_once_with(fake_instance)
-
     def test_instance_created_but_its_an_old_event(self):
         fake_instance = a(instance()
                           .with_last_event(pytz.utc.localize(datetime(2015, 10, 21, 16, 29, 0))))
@@ -87,12 +72,17 @@ class TestInstanceController(base.BaseTestCase):
         self.database_adapter.insert_entity.assert_called_once()
 
     def test_instance_deleted(self):
+        fake_instance = a(instance())
         self.database_adapter.has_active_entity.return_value = True
+        self.database_adapter.get_active_entity.return_value = fake_instance
 
         self.controller.delete_instance("id1", "2015-10-21T16:25:00.000000Z")
 
         self.database_adapter.has_active_entity.assert_called_once_with("id1")
-        self.database_adapter.close_active_entity.assert_called_once_with("id1", parse("2015-10-21T16:25:00.000000Z"))
+        self.database_adapter.get_active_entity.assert_called_once_with("id1")
+
+        self.database_adapter.update_active_entity.assert_called_once_with(fake_instance)
+        self.assertEqual(fake_instance.end, parse("2015-10-21T16:25:00.000000Z"))
 
     def test_instance_deleted_when_entity_not_found(self):
         self.database_adapter.has_active_entity.return_value = False
@@ -103,14 +93,20 @@ class TestInstanceController(base.BaseTestCase):
 
         self.database_adapter.has_active_entity.assert_called_once_with("id1")
 
-    def test_list_instances(self):
-        self.database_adapter.get_all_entities_by_project.return_value = ["instance1", "instance2"]
+    def test_instance_resized(self):
+        fake_instance = a(instance())
+        self.database_adapter.get_active_entity.return_value = fake_instance
 
-        self.assertEqual(self.controller.list_instances("project_id", "start", "end"), ["instance1", "instance2"])
+        dates_str = "2015-10-21T16:25:00.000000Z"
+        fake_instance.start = parse(dates_str)
+        fake_instance.end = None
+        fake_instance.last_event = parse(dates_str)
 
-        self.database_adapter.get_all_entities_by_project.assert_called_once_with(
-            "project_id", "start", "end", model.Instance.TYPE
-        )
+        self.controller.resize_instance(fake_instance.entity_id, "newly_flavor", dates_str)
+
+        self.database_adapter.get_active_entity.assert_called_once_with(fake_instance.entity_id)
+        self.database_adapter.update_active_entity.assert_called_once_with(fake_instance)
+        self.database_adapter.insert_entity.assert_called_once_with(fake_instance)
 
     def test_instance_rebuilded(self):
         i = a(instance())
@@ -129,5 +125,14 @@ class TestInstanceController(base.BaseTestCase):
         )
 
         self.database_adapter.get_active_entity.assert_has_calls(calls)
-        self.database_adapter.close_active_entity.assert_called_once()
+        self.database_adapter.update_active_entity.assert_called_once_with(i)
         self.database_adapter.insert_entity.assert_called_once()
+
+    def test_list_instances(self):
+        self.database_adapter.get_all_entities_by_project.return_value = ["instance1", "instance2"]
+
+        self.assertEqual(self.controller.list_instances("project_id", "start", "end"), ["instance1", "instance2"])
+
+        self.database_adapter.get_all_entities_by_project.assert_called_once_with(
+            "project_id", "start", "end", model.Instance.TYPE
+        )

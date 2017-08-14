@@ -16,9 +16,11 @@ from almanach.tests.tempest.tests.scenario import base
 
 
 class TestVolumeCreationScenario(base.BaseAlmanachScenarioTest):
-
     def test_create_volume(self):
         volume = self.create_volume()
+
+        self.wait_for_notification(self._check_that_a_new_entity_is_created,
+                                   volume)
 
         entities = self.get_tenant_entities(volume['os-vol-tenant-attr:tenant_id'])
         self.assertEqual(1, len(entities))
@@ -26,3 +28,7 @@ class TestVolumeCreationScenario(base.BaseAlmanachScenarioTest):
         self.assertEqual(volume['volume_type'], entities[0]['volume_type'])
         self.assertIsNotNone(entities[0]['start'])
         self.assertIsNone(entities[0]['end'])
+
+    def _check_that_a_new_entity_is_created(self, volume):
+        entities = self.get_tenant_entities(volume['os-vol-tenant-attr:tenant_id'])
+        return len(entities) == 1
