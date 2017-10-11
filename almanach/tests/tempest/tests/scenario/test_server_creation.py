@@ -24,9 +24,10 @@ class TestServerCreationScenario(base.BaseAlmanachScenarioTest):
         server, flavor = self.create_test_server(wait_until='ACTIVE')
 
         self.addCleanup(waiters.wait_for_server_termination,
-                        self.os.servers_client, server['id'])
+                        self.os_primary.servers_client, server['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.os.servers_client.delete_server, server['id'])
+                        self.os_primary.servers_client.delete_server,
+                        server['id'])
 
         entities = self.get_tenant_entities(server['tenant_id'])
 

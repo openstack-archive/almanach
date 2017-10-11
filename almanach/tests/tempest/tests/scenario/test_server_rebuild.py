@@ -58,14 +58,17 @@ class TestServerRebuildScenario(base.BaseAlmanachScenarioTest):
         server, flavor = self.create_test_server(wait_until='ACTIVE')
         image = self._prepare_image()
 
-        self.os.servers_client.rebuild_server(server['id'], image['id'])
-        waiters.wait_for_server_status(self.os.servers_client, server['id'],
+        self.os_primary.servers_client.rebuild_server(server['id'],
+                                                      image['id'])
+        waiters.wait_for_server_status(self.os_primary.servers_client,
+                                       server['id'],
                                        status='ACTIVE')
 
         self.addCleanup(waiters.wait_for_server_termination,
-                        self.os.servers_client, server['id'])
+                        self.os_primary.servers_client, server['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.os.servers_client.delete_server, server['id'])
+                        self.os_primary.servers_client.delete_server,
+                        server['id'])
 
         return server, flavor
 
