@@ -25,9 +25,10 @@ class TestVolumeAttachmentScenario(base.BaseAlmanachScenarioTest):
     def tearDown(self):
         super(TestVolumeAttachmentScenario, self).tearDown()
         self.addCleanup(waiters.wait_for_server_termination,
-                        self.os.servers_client, self._server['id'])
+                        self.os_primary.servers_client, self._server['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.os.servers_client.delete_server, self._server['id'])
+                        self.os_primary.servers_client.delete_server,
+                        self._server['id'])
         self.addCleanup(self.volumes_client.wait_for_resource_deletion,
                         self._volume['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
