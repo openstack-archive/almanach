@@ -37,8 +37,8 @@ class BaseAlmanachScenarioTest(manager.ScenarioTest):
         super(BaseAlmanachScenarioTest, cls).setup_clients()
         cred_provider = cls._get_credentials_provider()
         credentials = cred_provider.get_creds_by_roles(['admin']).credentials
-        cls.os = clients.Manager(credentials=credentials)
-        cls.almanach_client = cls.os.almanach_client
+        cls.os_primary = clients.Manager(credentials=credentials)
+        cls.almanach_client = cls.os_primary.almanach_client
 
     def get_tenant_entities(self, tenant_id):
         resp, response_body = self.almanach_client.get_tenant_entities(tenant_id)
@@ -88,12 +88,14 @@ class BaseAlmanachScenarioTest(manager.ScenarioTest):
             flavor=flavors[0]['id'],
             tenant_network=tenant_network)
 
-        server = self.os.servers_client.show_server(body['id'])['server']
+        server = self.os_primary.servers_client.show_server(body['id'])[
+            'server']
         return server, flavors[0]
 
     def delete_test_server(self, server):
-        self.os.servers_client.delete_server(server['id'])
-        waiters.wait_for_server_termination(self.os.servers_client, server['id'], True)
+        self.os_primary.servers_client.delete_server(server['id'])
+        waiters.wait_for_server_termination(self.os_primary.servers_client,
+                                            server['id'], True)
 
     def wait_for_notification(self, callback, *args):
         start_time = int(time.time())

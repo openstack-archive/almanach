@@ -40,8 +40,8 @@ class BaseAlmanachTest(tempest.test.BaseTestCase):
         super(BaseAlmanachTest, cls).setup_clients()
         cred_provider = cls._get_credentials_provider()
         credentials = cred_provider.get_creds_by_roles(['admin']).credentials
-        cls.os = clients.Manager(credentials=credentials)
-        cls.almanach_client = cls.os.almanach_client
+        cls.os_primary = clients.Manager(credentials=credentials)
+        cls.almanach_client = cls.os_primary.almanach_client
 
     @classmethod
     def create_server_through_api(cls, tenant_id, server):

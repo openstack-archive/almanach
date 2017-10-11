@@ -54,19 +54,23 @@ class TestServerResizeScenario(base.BaseAlmanachScenarioTest):
         flavors = self.flavors_client.list_flavors()['flavors']
         resized_flavor = flavors[1]
         server, initial_flavor = self.create_test_server(wait_until='ACTIVE')
-        self.os.servers_client.resize_server(server['id'], resized_flavor['id'])
+        self.os_primary.servers_client.resize_server(server['id'],
+                                                     resized_flavor['id'])
 
-        waiters.wait_for_server_status(self.os.servers_client, server['id'],
+        waiters.wait_for_server_status(self.os_primary.servers_client,
+                                       server['id'],
                                        status='VERIFY_RESIZE')
 
-        self.os.servers_client.confirm_resize_server(server['id'])
+        self.os_primary.servers_client.confirm_resize_server(server['id'])
 
-        waiters.wait_for_server_status(self.os.servers_client, server['id'],
+        waiters.wait_for_server_status(self.os_primary.servers_client,
+                                       server['id'],
                                        status='ACTIVE')
 
         self.addCleanup(waiters.wait_for_server_termination,
-                        self.os.servers_client, server['id'])
+                        self.os_primary.servers_client, server['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.os.servers_client.delete_server, server['id'])
+                        self.os_primary.servers_client.delete_server,
+                        server['id'])
 
         return server, initial_flavor, resized_flavor
