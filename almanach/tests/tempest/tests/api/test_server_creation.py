@@ -13,9 +13,9 @@
 # limitations under the License.
 
 
-from oslo_serialization import jsonutils as json
 from oslo_utils import uuidutils
 from tempest.lib import exceptions
+import ujson
 
 from almanach.tests.tempest.tests.api import base
 
@@ -39,7 +39,7 @@ class TestServerCreation(base.BaseAlmanachTest):
 
         _, response_body = self.almanach_client.get_tenant_entities(self.tenant_id)
 
-        response_body = json.loads(response_body)
+        response_body = ujson.loads(response_body)
         self.assertIsInstance(response_body, list)
         self.assertEqual(1, len(response_body))
 

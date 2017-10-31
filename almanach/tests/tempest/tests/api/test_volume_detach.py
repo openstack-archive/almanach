@@ -13,8 +13,8 @@
 # limitations under the License.
 
 
-from oslo_serialization import jsonutils as json
 from oslo_utils import uuidutils
+import ujson
 
 from almanach.tests.tempest.tests.api import base
 
@@ -32,16 +32,16 @@ class TestVolumeDetach(base.BaseAlmanachTest):
         attached_to_id = uuidutils.generate_uuid()
         date = '2016-01-01 18:30:00+00:00'
         attach_data = {'date': '2016-01-01T18:30:00Z', 'attachments': [attached_to_id]}
-        resp, _ = self.almanach_client.attach_volume(volume['volume_id'], json.dumps(attach_data))
+        resp, _ = self.almanach_client.attach_volume(volume['volume_id'], ujson.dumps(attach_data))
         self.assertEqual(resp.status, 200)
         detach_data = {'date': '2016-01-01T18:40:00Z',
                        'attachments': []}
 
-        resp, _ = self.almanach_client.detach_volume(volume['volume_id'], json.dumps(detach_data))
+        resp, _ = self.almanach_client.detach_volume(volume['volume_id'], ujson.dumps(detach_data))
         self.assertEqual(resp.status, 200)
 
         resp, response_body = self.almanach_client.get_tenant_entities(tenant_id)
-        response_body = json.loads(response_body)
+        response_body = ujson.loads(response_body)
 
         self.assertEqual(resp.status, 200)
         self.assertIsInstance(response_body, list)

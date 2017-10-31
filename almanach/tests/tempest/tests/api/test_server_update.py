@@ -13,7 +13,8 @@
 # limitations under the License.
 
 
-from oslo_serialization import jsonutils as json
+import ujson
+
 from oslo_utils import uuidutils
 
 from almanach.tests.tempest.tests.api import base
@@ -32,11 +33,11 @@ class TestServerUpdate(base.BaseAlmanachTest):
         server = self.get_server_creation_payload()
         self.create_server_through_api(uuidutils.generate_uuid(), server)
 
-        update_field = json.dumps({'start_date': '2016-04-14T18:30:00.00Z',
+        update_field = ujson.dumps({'start_date': '2016-04-14T18:30:00.00Z',
                                    'flavor': 'NewFlavor'})
         resp, response_body = self.almanach_client.update_server(server['id'], update_field)
 
-        updated_server = json.loads(response_body)
+        updated_server = ujson.loads(response_body)
 
         self.assertEqual(server['id'], updated_server['entity_id'])
         self.assertEqual('2016-04-14 18:30:00+00:00', updated_server['start'])

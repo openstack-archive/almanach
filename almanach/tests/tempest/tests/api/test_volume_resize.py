@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from oslo_serialization import jsonutils as json
+import ujson
 
 from almanach.tests.tempest.tests.api import base
 
@@ -29,11 +29,11 @@ class TestVolumeResize(base.BaseAlmanachTest):
 
         resize_data = {'date': '2016-01-01T18:40:00Z',
                        'size': 150}
-        resp, _ = self.almanach_client.resize_volume(volume['volume_id'], json.dumps(resize_data))
+        resp, _ = self.almanach_client.resize_volume(volume['volume_id'], ujson.dumps(resize_data))
         self.assertEqual(resp.status, 200)
 
         resp, response_body = self.almanach_client.get_tenant_entities(tenant_id)
-        response_body = json.loads(response_body)
+        response_body = ujson.loads(response_body)
 
         self.assertEqual(resp.status, 200)
         self.assertIsInstance(response_body, list)

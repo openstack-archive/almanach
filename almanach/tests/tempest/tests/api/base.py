@@ -13,11 +13,11 @@
 # limitations under the License.
 
 
-from oslo_serialization import jsonutils as json
 from oslo_utils import uuidutils
 from tempest import config
 from tempest.lib.common.utils import data_utils
 import tempest.test
+import ujson
 
 from almanach.tests.tempest import clients
 
@@ -45,7 +45,7 @@ class BaseAlmanachTest(tempest.test.BaseTestCase):
 
     @classmethod
     def create_server_through_api(cls, tenant_id, server):
-        resp, _ = cls.almanach_client.create_server(tenant_id, json.dumps(server))
+        resp, _ = cls.almanach_client.create_server(tenant_id, ujson.dumps(server))
         return resp
 
     @staticmethod
@@ -71,12 +71,12 @@ class BaseAlmanachTest(tempest.test.BaseTestCase):
     def create_volume_type(self):
         volume_type = {'type_id': uuidutils.generate_uuid(),
                        'type_name': data_utils.rand_name('scenario-volume-type')}
-        volume_type_body = json.dumps(volume_type)
+        volume_type_body = ujson.dumps(volume_type)
         return volume_type, self.almanach_client.create_volume_type(volume_type_body)
 
     def create_volume(self):
         volume_type, _ = self.create_volume_type()
         tenant_id = uuidutils.generate_uuid()
         volume = self.get_volume_creation_payload(volume_type['type_id'])
-        resp, response_body = self.almanach_client.create_volume(tenant_id, json.dumps(volume))
+        resp, response_body = self.almanach_client.create_volume(tenant_id, ujson.dumps(volume))
         return resp, tenant_id, volume

@@ -13,8 +13,8 @@
 # limitations under the License.
 
 import datetime
-from oslo_serialization import jsonutils as json
 from oslo_utils import timeutils
+import ujson
 
 from almanach.tests.tempest.tests.api import base
 
@@ -30,11 +30,11 @@ class TestVolumeDeletion(base.BaseAlmanachTest):
         self.assertEqual(resp.status, 201)
 
         delete_body = {'date': datetime.datetime.isoformat(timeutils.utcnow())}
-        resp, _ = self.almanach_client.delete_volume(volume['volume_id'], json.dumps(delete_body))
+        resp, _ = self.almanach_client.delete_volume(volume['volume_id'], ujson.dumps(delete_body))
         self.assertEqual(resp.status, 202)
 
         resp, response_body = self.almanach_client.get_tenant_entities(tenant_id)
-        response_body = json.loads(response_body)
+        response_body = ujson.loads(response_body)
 
         self.assertEqual(resp.status, 200)
         self.assertIsInstance(response_body, list)

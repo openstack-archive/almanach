@@ -16,7 +16,7 @@ from datetime import datetime
 from mock import mock
 
 import flask
-from oslo_serialization import jsonutils as json
+import ujson
 
 from almanach.api.v1 import routes
 from almanach.tests.unit import base
@@ -65,8 +65,8 @@ class BaseApi(base.BaseTestCase):
             if not headers:
                 headers = {}
         headers['Accept'] = accept
-        result = getattr(http_client, method)(url, data=json.dumps(data), query_string=query_string, headers=headers)
-        return_data = json.loads(result.data) \
+        result = getattr(http_client, method)(url, data=ujson.dumps(data), query_string=query_string, headers=headers)
+        return_data = ujson.loads(result.data) \
             if result.headers.get('Content-Type') == 'application/json' \
             else result.data
         return result.status_code, return_data

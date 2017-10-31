@@ -13,8 +13,8 @@
 # limitations under the License.
 
 
-from oslo_serialization import jsonutils as json
 from oslo_utils import uuidutils
+import ujson
 
 from almanach.tests.tempest.tests.api import base
 
@@ -34,10 +34,10 @@ class TestServerDeletion(base.BaseAlmanachTest):
         self.create_server_through_api(tenant_id, server)
 
         self.almanach_client.delete_server(server['id'],
-                                           json.dumps({'date': '2016-01-01T19:50:00Z'}))
+                                           ujson.dumps({'date': '2016-01-01T19:50:00Z'}))
         _, response_body = self.almanach_client.get_tenant_entities(tenant_id)
 
-        response_body = json.loads(response_body)
+        response_body = ujson.loads(response_body)
         self.assertIsInstance(response_body, list)
         self.assertEqual(1, len(response_body))
 
