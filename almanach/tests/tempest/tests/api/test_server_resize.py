@@ -13,8 +13,8 @@
 # limitations under the License.
 
 
-from oslo_serialization import jsonutils as json
 from oslo_utils import uuidutils
+import ujson
 
 from almanach.tests.tempest.tests.api import base
 
@@ -35,13 +35,13 @@ class TestServerResize(base.BaseAlmanachTest):
 
         resize_data = {'date': '2016-01-01T18:40:00Z',
                        'flavor': 'resized_flavor'}
-        serialized_data = json.dumps(resize_data)
+        serialized_data = ujson.dumps(resize_data)
 
         self.almanach_client.resize(server['id'], serialized_data)
 
         resp, response_body = self.almanach_client.get_tenant_entities(tenant_id)
 
-        entities = json.loads(response_body)
+        entities = ujson.loads(response_body)
         self.assertIsInstance(entities, list)
         self.assertEqual(2, len(entities))
 

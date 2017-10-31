@@ -13,8 +13,8 @@
 # limitations under the License.
 
 import time
+import ujson
 
-from oslo_serialization import jsonutils as json
 from tempest.common import compute
 from tempest.common import waiters
 from tempest import config
@@ -44,7 +44,7 @@ class BaseAlmanachScenarioTest(manager.ScenarioTest):
         resp, response_body = self.almanach_client.get_tenant_entities(tenant_id)
         self.assertEqual(resp.status, 200)
 
-        response_body = json.loads(response_body)
+        response_body = ujson.loads(response_body)
         self.assertIsInstance(response_body, list)
         return response_body
 

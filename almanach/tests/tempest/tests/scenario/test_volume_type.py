@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from oslo_serialization import jsonutils as json
+import ujson
 
 from almanach.tests.tempest.tests.scenario import base
 
@@ -25,7 +25,7 @@ class TestVolumeTypeScenario(base.BaseAlmanachScenarioTest):
         resp, response_body = self.almanach_client.get_volume_type(volume_type['id'])
         self.assertEqual(resp.status, 200)
 
-        response_body = json.loads(response_body)
+        response_body = ujson.loads(response_body)
         self.assertIsInstance(response_body, dict)
         self.assertEqual(volume_type['id'], response_body['volume_type_id'])
         self.assertEqual(volume_type['name'], response_body['volume_type_name'])

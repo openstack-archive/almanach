@@ -18,7 +18,7 @@ from functools import wraps
 import flask
 import jsonpickle
 from oslo_log import log
-from oslo_serialization import jsonutils
+import ujson
 from werkzeug import wrappers
 
 from almanach.core import exception
@@ -97,7 +97,7 @@ def get_info():
 @authenticated
 @to_json
 def create_instance(project_id):
-    body = jsonutils.loads(flask.request.data)
+    body = ujson.loads(flask.request.data)
     LOG.info("Creating instance for tenant %s with data %s", project_id, body)
 
     instance_ctl.create_instance(
@@ -119,7 +119,7 @@ def create_instance(project_id):
 @authenticated
 @to_json
 def delete_instance(instance_id):
-    data = jsonutils.loads(flask.request.data)
+    data = ujson.loads(flask.request.data)
     LOG.info("Deleting instance with id %s with data %s", instance_id, data)
     instance_ctl.delete_instance(
         instance_id=instance_id,
@@ -134,7 +134,7 @@ def delete_instance(instance_id):
 @authenticated
 @to_json
 def resize_instance(instance_id):
-    instance = jsonutils.loads(flask.request.data)
+    instance = ujson.loads(flask.request.data)
     LOG.info("Resizing instance with id %s with data %s", instance_id, instance)
     instance_ctl.resize_instance(
         instance_id=instance_id,
@@ -150,7 +150,7 @@ def resize_instance(instance_id):
 @authenticated
 @to_json
 def rebuild_instance(instance_id):
-    body = jsonutils.loads(flask.request.data)
+    body = ujson.loads(flask.request.data)
     LOG.info("Rebuilding instance with id %s with data %s", instance_id, body)
     instance_ctl.rebuild_instance(
         instance_id=instance_id,
@@ -178,7 +178,7 @@ def list_instances(project_id):
 @authenticated
 @to_json
 def create_volume(project_id):
-    volume = jsonutils.loads(flask.request.data)
+    volume = ujson.loads(flask.request.data)
     LOG.info("Creating volume for tenant %s with data %s", project_id, volume)
     volume_ctl.create_volume(
         project_id=project_id,
@@ -198,7 +198,7 @@ def create_volume(project_id):
 @authenticated
 @to_json
 def delete_volume(volume_id):
-    data = jsonutils.loads(flask.request.data)
+    data = ujson.loads(flask.request.data)
     LOG.info("Deleting volume with id %s with data %s", volume_id, data)
     volume_ctl.delete_volume(
         volume_id=volume_id,
@@ -213,7 +213,7 @@ def delete_volume(volume_id):
 @authenticated
 @to_json
 def resize_volume(volume_id):
-    volume = jsonutils.loads(flask.request.data)
+    volume = ujson.loads(flask.request.data)
     LOG.info("Resizing volume with id %s with data %s", volume_id, volume)
     volume_ctl.resize_volume(
         volume_id=volume_id,
@@ -229,7 +229,7 @@ def resize_volume(volume_id):
 @authenticated
 @to_json
 def attach_volume(volume_id):
-    volume = jsonutils.loads(flask.request.data)
+    volume = ujson.loads(flask.request.data)
     LOG.info("Attaching volume with id %s with data %s", volume_id, volume)
     volume_ctl.attach_volume(
         volume_id=volume_id,
@@ -245,7 +245,7 @@ def attach_volume(volume_id):
 @authenticated
 @to_json
 def detach_volume(volume_id):
-    volume = jsonutils.loads(flask.request.data)
+    volume = ujson.loads(flask.request.data)
     LOG.info("Detaching volume with id %s with data %s", volume_id, volume)
     volume_ctl.detach_volume(
         volume_id=volume_id,
@@ -281,7 +281,7 @@ def list_entity(project_id):
 @authenticated
 @to_json
 def update_instance_entity(instance_id):
-    data = jsonutils.loads(flask.request.data)
+    data = ujson.loads(flask.request.data)
     LOG.info("Updating instance entity with id %s with data %s", instance_id, data)
     if 'start' in flask.request.args:
         start, end = get_period()
@@ -333,7 +333,7 @@ def get_volume_type(volume_type_id):
 @authenticated
 @to_json
 def create_volume_type():
-    volume_type = jsonutils.loads(flask.request.data)
+    volume_type = ujson.loads(flask.request.data)
     LOG.info("Creating volume type with data '%s'", volume_type)
     volume_type_ctl.create_volume_type(
         volume_type_id=volume_type['type_id'],
