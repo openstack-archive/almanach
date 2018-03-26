@@ -1,0 +1,9 @@
+Code-Review+2: Marc Aubry <maubry@internap.com>
+Code-Review+2: Félix Bouliane <fbouliane@internap.com>
+Workflow+1: Félix Bouliane <fbouliane@internap.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Mon, 26 Mar 2018 19:33:53 +0000
+Reviewed-on: https://review.openstack.org/555288
+Project: openstack/almanach
+Branch: refs/heads/master
