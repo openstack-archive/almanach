@@ -72,13 +72,12 @@ class NotificationHandler(object):
         try:
             for handler in self.handlers:
                 handler.handle_events(notification)
-        except Exception as e:
-            LOG.warning('Send notification "%s" to error queue', notification.metadata.get('message_id'))
+        except Exception:
+            LOG.exception('Sending notification "%s" to error queue', notification.metadata.get('message_id'))
             LOG.warning('Notification event_type: %s', notification.event_type)
             LOG.warning('Notification context: %s', notification.context)
             LOG.warning('Notification payload: %s', notification.payload)
             LOG.warning('Notification metadata: %s', notification.metadata)
-            LOG.exception(e)
             self._send_notification_to_error_queue(notification)
 
     def error(self, ctxt, publisher_id, event_type, payload, metadata):

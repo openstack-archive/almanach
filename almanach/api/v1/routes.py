@@ -63,10 +63,10 @@ def to_json(api_call):
             LOG.warning(e.message)
             return send_response({"error": e.message}, 404)
         except exception.AlmanachException as e:
-            LOG.exception(e)
+            LOG.exception("Server error, returning 500 ...")
             return send_response({"error": e.message}, 500)
         except Exception as e:
-            LOG.exception(e)
+            LOG.exception("Unknown error, returning 500 ...")
             return send_response({"error": e}, 500)
 
     return decorator

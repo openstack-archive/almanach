@@ -44,8 +44,8 @@ def main():
 
         LOG.info('Listening on %s:%d', config.api.bind_ip, config.api.bind_port)
         app.run(host=config.api.bind_ip, port=config.api.bind_port)
-    except Exception as e:
-        LOG.exception(e)
+    except Exception:
+        LOG.exception("A problem occured during the start of the application")
         sys.exit(100)
 
 if __name__ == '__main__':
